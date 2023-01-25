@@ -14,8 +14,13 @@ namespace EV_Charger_App
         {
             InitializeComponent();
 
+            /*
             DependencyService.Register<MockDataStore>();
             MainPage = new AppShell();
+            */
+
+            MainPage = new AboutPage();
+
         }
 
         protected override void OnStart()
