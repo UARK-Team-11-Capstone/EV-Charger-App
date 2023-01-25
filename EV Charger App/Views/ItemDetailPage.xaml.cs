@@ -1,0 +1,15 @@
+﻿using EV_Charger_App.ViewModels;
+using System.ComponentModel;
+using Xamarin.Forms;
+
+namespace EV_Charger_App.Views
+{
+    public partial class ItemDetailPage : ContentPage
+    {
+        public ItemDetailPage()
+        {
+            InitializeComponent();
+            BindingContext = new ItemDetailViewModel();
+        }
+    }
+}
