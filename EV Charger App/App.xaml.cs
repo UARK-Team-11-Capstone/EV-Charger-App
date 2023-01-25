@@ -9,6 +9,7 @@ namespace EV_Charger_App
     public partial class App : Application
     {
         //Grant was here
+        //Kate was here
         public App()
         {
             InitializeComponent();
