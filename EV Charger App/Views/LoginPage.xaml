@@ -6,9 +6,14 @@
              mc:Ignorable="d"
              x:Class="EV_Charger_App.Views.LoginPage"
              Shell.NavBarIsVisible="False">
+    
     <ContentPage.Content>
-        <StackLayout Padding="10,0,10,0" VerticalOptions="Center">
-            <Button VerticalOptions="Center" Text="Login" Command="{Binding LoginCommand}"/>
+        <StackLayout Padding="10,0,10,0" Margin="0, 20">
+            <Label Text="SIGN IN" HorizontalOptions="Center" TextColor="Black" FontAttributes="Bold" FontSize="Large"/>
+            <Entry x:Name="emailInput" Text="Email" HorizontalOptions="Center" WidthRequest="300"/>
+            <Entry x:Name="passwordInput" Text="Password" IsPassword="True" HorizontalOptions="Center" WidthRequest="300"/>
+            <Label Text="Register" HorizontalOptions="Center" TextColor="Blue" FontSize="Small"/>
+            <Button Text="Login" HorizontalOptions="CenterAndExpand"/>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

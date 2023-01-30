@@ -19,7 +19,7 @@ namespace EV_Charger_App
             MainPage = new AppShell();
             */
 
-            MainPage = new AboutPage();
+            MainPage = new LoginPage();
 
         }
 
