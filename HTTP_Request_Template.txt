@@ -1,0 +1,5 @@
+Base HTTP Request: https://developer.nrel.gov/api/alt-fuel-stations/v1.json?api_key=hFdk47D7j0ulexFWZ3a3IGqQIBJSA46W5srlkAaF
+
+Available in Zip: https://developer.nrel.gov/api/alt-fuel-stations/v1.json?api_key=hFdk47D7j0ulexFWZ3a3IGqQIBJSA46W5srlkAaF&fuel_type=ELEC&zip=72704&status_code=E
+
+Nearest Route: https://developer.nrel.gov/api/alt-fuel-stations/v1/nearby-route.json?api_key=hFdk47D7j0ulexFWZ3a3IGqQIBJSA46W5srlkAaF&fuel_type=ELEC&zip=72704&status_code=E
