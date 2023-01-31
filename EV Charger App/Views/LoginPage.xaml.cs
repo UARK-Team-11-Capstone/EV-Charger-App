@@ -17,5 +17,11 @@ namespace EV_Charger_App.Views
             InitializeComponent();
             this.BindingContext = new LoginViewModel();
         }
+
+        async private void TapGestureRecognizer_Tapped(object sender, EventArgs e)
+        {
+            await Navigation.PushAsync(new AboutPage());
+        }
+
     }
 }

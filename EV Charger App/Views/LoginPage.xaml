@@ -13,8 +13,13 @@
             <Label Text="SIGN IN" HorizontalOptions="Center" TextColor="Black" FontAttributes="Bold" FontSize="Large"/>
             <Entry x:Name="emailInput" Text="Email" HorizontalOptions="Center" WidthRequest="300"/>
             <Entry x:Name="passwordInput" Text="Password" IsPassword="True" HorizontalOptions="Center" WidthRequest="300"/>
-            <Label Text="Register" HorizontalOptions="Center" TextColor="Blue" FontSize="Small"/>
-            <Button Text="Login" HorizontalOptions="CenterAndExpand" HeightRequest="50" WidthRequest="150"/>
+            <Label Text="Register" HorizontalOptions="Center" TextColor="Blue" FontSize="Small">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer
+                        Tapped="TapGestureRecognizer_Tapped"/>
+                </Label.GestureRecognizers>
+            </Label>
+            <Button Text="Login" HorizontalOptions="CenterAndExpand" HeightRequest="50" WidthRequest="150" />
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>
