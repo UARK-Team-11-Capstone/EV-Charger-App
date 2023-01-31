@@ -16532,7 +16532,7 @@ namespace EV_Charger_App.Droid
 			public const int design_snackbar_background = 2131165283;
 			
 			// aapt resource value: 0x7F070064
-			public const int gm_logo = 2131165284;
+			public const int gmlogo = 2131165284;
 			
 			// aapt resource value: 0x7F07006C
 			public const int icon_about = 2131165292;
