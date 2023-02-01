@@ -18,9 +18,15 @@ namespace EV_Charger_App.Views
             this.BindingContext = new LoginViewModel();
         }
 
-        async private void TapGestureRecognizer_Tapped(object sender, EventArgs e)
+        async private void LoginToCreate(object sender, EventArgs e)
         {
-            await Navigation.PushAsync(new AboutPage());
+            await Navigation.PushAsync(new CreateAccountPage());
+        }
+
+        //This is the function called when the login button is clicked
+        async private void SubmitLogin(object sender, EventArgs args)
+        {
+            await Navigation.PushAsync(new LoginPage());
         }
 
     }

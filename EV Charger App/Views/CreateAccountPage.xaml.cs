@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+using EV_Charger_App.ViewModels;
 
 namespace EV_Charger_App.Views
 {
@@ -15,6 +16,15 @@ namespace EV_Charger_App.Views
         public CreateAccountPage()
         {
             InitializeComponent();
+        }
+        async private void CreateToLogin(object sender, EventArgs e)
+        {
+            await Navigation.PushAsync(new LoginPage());
+        }
+
+        async private void SubmitCreate(object sender, EventArgs e)
+        {
+            await Navigation.PushAsync(new LoginPage());
         }
     }
 }

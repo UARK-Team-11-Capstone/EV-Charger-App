@@ -9,12 +9,17 @@
 
     <ContentPage.Content>
         <StackLayout Padding="10,0,10,0" Margin="0,90">
-            <Image Source="gmlogo.png" Aspect="Fill" HeightRequest="200" WidthRequest="200" HorizontalOptions="Center" Margin="0,20"/>
-            <Label Text="Create Account" HorizontalOptions="Center" TextColor="Black" FontAttributes="Bold" FontSize="Large"/>
-            <Entry x:Name="emailInputCreate" Text="Email" HorizontalOptions="Center" WidthRequest="300"/>
-            <Entry x:Name="passwordInputCreate" Text="Password" IsPassword="True" HorizontalOptions="Center" WidthRequest="300"/>
-            <Entry x:Name="confirmPasswordInputCreate" Text="Password" IsPassword="True" HorizontalOptions="Center" WidthRequest="300"/>
-            <Button Text="Create" HorizontalOptions="CenterAndExpand" HeightRequest="50" WidthRequest="150"/>
+            <Label x:Name="CreateAccountLabel" Text="Create Account" HorizontalOptions="Center" TextColor="Black" FontAttributes="Bold" FontSize="Large" Margin="0, 40"/>
+            <Entry x:Name="emailInputCreate" Placeholder="Email" HorizontalOptions="Center" WidthRequest="300"/>
+            <Entry x:Name="passwordInputCreate" Placeholder ="Password" IsPassword="True" HorizontalOptions="Center" WidthRequest="300"/>
+            <Entry x:Name="confirmPasswordInputCreate" Placeholder="Confirm Password" IsPassword="True" HorizontalOptions="Center" WidthRequest="300"/>
+            <Button Clicked="SubmitCreate" Text="Create" CornerRadius="10" HorizontalOptions="CenterAndExpand" HeightRequest="50" WidthRequest="300" Margin="0,20"/>
+            <Label Text="Already have an account? Sign in" HorizontalOptions="Center" TextColor="Blue" FontSize="Small">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer
+                        Tapped="CreateToLogin"/>
+                </Label.GestureRecognizers>
+            </Label>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>
