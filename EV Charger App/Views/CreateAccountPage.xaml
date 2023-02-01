@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Class="EV_Charger_App.Views.CreateAccountPage"
+             Shell.NavBarIsVisible="False">
+
+    <ContentPage.Content>
+        <StackLayout Padding="10,0,10,0" Margin="0,90">
+            <Image Source="gmlogo.png" Aspect="Fill" HeightRequest="200" WidthRequest="200" HorizontalOptions="Center" Margin="0,20"/>
+            <Label Text="Create Account" HorizontalOptions="Center" TextColor="Black" FontAttributes="Bold" FontSize="Large"/>
+            <Entry x:Name="emailInputCreate" Text="Email" HorizontalOptions="Center" WidthRequest="300"/>
+            <Entry x:Name="passwordInputCreate" Text="Password" IsPassword="True" HorizontalOptions="Center" WidthRequest="300"/>
+            <Entry x:Name="confirmPasswordInputCreate" Text="Password" IsPassword="True" HorizontalOptions="Center" WidthRequest="300"/>
+            <Button Text="Create" HorizontalOptions="CenterAndExpand" HeightRequest="50" WidthRequest="150"/>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>
