@@ -26,7 +26,28 @@ namespace EV_Charger_App.Views
         //This is the function called when the login button is clicked
         async private void SubmitLogin(object sender, EventArgs args)
         {
-            await Navigation.PushAsync(new LoginPage());
+            //TODO: Add code to compare inputted credentials with existing credentials in the database
+
+            String email = emailInput.Text;
+            String password = passwordInput.Text;
+
+            //Check if credentials are valid
+            if(CredentialsValid(email, password))
+            {
+                await Navigation.PushAsync(new LoginPage());
+            }
+            else
+            {
+                //Display error message
+                LoginErrorText.Opacity = 1.0;
+            }
+            
+        }
+
+        //Checks if the email and password inputted match an email and password combination in the database
+        bool CredentialsValid(String email, String password)
+        {
+            return false;
         }
 
     }

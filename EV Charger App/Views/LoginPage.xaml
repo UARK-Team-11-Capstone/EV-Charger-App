@@ -20,6 +20,7 @@
                 </Label.GestureRecognizers>
             </Label>
             <Button Clicked="SubmitLogin" Text="Login" CornerRadius="10" HorizontalOptions="CenterAndExpand" HeightRequest="50" WidthRequest="300" />
+            <Label x:Name="LoginErrorText" Text="Email or password incorrect" HorizontalOptions="Center" TextColor="Red" FontSize="Small" Opacity="0.0"/>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

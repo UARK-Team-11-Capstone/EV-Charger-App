@@ -22,8 +22,10 @@ namespace EV_Charger_App.Views
             await Navigation.PushAsync(new LoginPage());
         }
 
+        //This function is called when the create account button is pressed
         async private void SubmitCreate(object sender, EventArgs e)
         {
+            //TODO: Add code to add inputted user credentials to the database
             await Navigation.PushAsync(new LoginPage());
         }
     }
