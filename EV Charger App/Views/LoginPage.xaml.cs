@@ -1,5 +1,4 @@
-﻿using EV_Charger_App.ViewModels;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,7 +14,6 @@ namespace EV_Charger_App.Views
         public LoginPage()
         {
             InitializeComponent();
-            this.BindingContext = new LoginViewModel();
         }
 
         async private void LoginToCreate(object sender, EventArgs e)
@@ -34,7 +32,7 @@ namespace EV_Charger_App.Views
             //Check if credentials are valid
             if(CredentialsValid(email, password))
             {
-                await Navigation.PushAsync(new LoginPage());
+                await Navigation.PushAsync(new MainPage());
             }
             else
             {
@@ -47,7 +45,7 @@ namespace EV_Charger_App.Views
         //Checks if the email and password inputted match an email and password combination in the database
         bool CredentialsValid(String email, String password)
         {
-            return false;
+            return true;
         }
 
     }

@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="EV_Charger_App.MainPage">
+
+    <ContentPage.Content>
+        <StackLayout HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand">
+
+            <Label x:Name="lblInfo" VerticalOptions="StartAndExpand" HorizontalOptions="FillAndExpand" Margin="5"/>
+            <Grid x:Name="gridContainer" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="11*"/>
+                    <RowDefinition Height="1*"/>
+                </Grid.RowDefinitions>
+                <ContentView x:Name="ContentMap" Grid.Row="0" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" />
+                <Grid HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand" Grid.Row="1" BackgroundColor="DarkGray" Padding="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="2*"/>
+                    </Grid.ColumnDefinitions>
+                    <Button x:Name="btnStreet" Text="Street" Grid.Column="0" Margin="2" Clicked="BtnMapType_Clicked" BackgroundColor="#fff" TextColor="#000"/>
+                    <Button x:Name="Statellite" Text="Satellite" Grid.Column="1" Margin="2" Clicked="BtnMapType_Clicked" BackgroundColor="#fff" TextColor="#000"/>
+                    <Button x:Name="btnHybrid" Text="Hybrid" Grid.Column="2" Margin="2" Clicked="BtnMapType_Clicked" BackgroundColor="#fff" TextColor="#000"/>
+                </Grid>
+
+            </Grid>
+        </StackLayout>
+    </ContentPage.Content>
+
+</ContentPage>

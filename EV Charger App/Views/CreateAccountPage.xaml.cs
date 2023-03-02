@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
-using EV_Charger_App.ViewModels;
 
 namespace EV_Charger_App.Views
 {
