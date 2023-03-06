@@ -3,17 +3,22 @@ using Xamarin.Essentials;
 using Xamarin.Forms;
 using Xamarin.Forms.GoogleMaps;
 using System.Linq;
+using EV_Charger_App.ViewModels;
 
 namespace EV_Charger_App
 {
     public partial class MainPage : ContentPage
     {
+        MainPageViewModel mainPageViewModel;
         Xamarin.Forms.GoogleMaps.Map map;
         public MainPage()
         {
             InitializeComponent();
+            
+            BindingContext = mainPageViewModel = new MainPageViewModel();
+            
             NavigationPage.SetHasNavigationBar(this, true);
-            LoadMap(19.0605421, 72.8618913);
+            LoadMap(36.09171012916079, -94.20143973570228);
             
         }
 
@@ -21,10 +26,10 @@ namespace EV_Charger_App
         {
             try
             {
-
                 var placemarks = await Geocoding.GetPlacemarksAsync(latitude, longitude);
 
                 var placemark = placemarks?.FirstOrDefault();
+
 
                 map = new Xamarin.Forms.GoogleMaps.Map()
                 {
@@ -35,16 +40,7 @@ namespace EV_Charger_App
                     IsEnabled = true
                 };
 
-                var pin = new Pin()
-                {
-                    Position = new Xamarin.Forms.GoogleMaps.Position(latitude, longitude),
-                    Type = PinType.Place,
-                    Label = placemark.Locality + "",
-                    Address = placemark.CountryName
-
-                };
-
-                map.Pins.Add(pin);
+            
                 Position position = new Position();
 
                 MapSpan mapSpan = new MapSpan(position, latitude, longitude);
@@ -58,14 +54,39 @@ namespace EV_Charger_App
                     BackgroundColor = Color.Transparent,
                     Orientation = StackOrientation.Vertical
                 };
+                
+                // Load the nearby chargers on startup
+                var chargers = mainPageViewModel.LoadChargers();
+                Console.WriteLine("Grab charger list");
+                if (chargers != null)
+                {
+                    Console.WriteLine("Chargers not NULL");
+                    foreach (var charger in chargers)
+                    {
+                        var chargerPin = new Pin()
+                        {
+                            Type = PinType.Place,
+                            Label = "Charger",
+                            Icon = (Device.RuntimePlatform == Device.Android) ? BitmapDescriptorFactory.FromBundle("Battery-Icon.png") : BitmapDescriptorFactory.FromView(new Image() { Source = "Battery-Icon.png", WidthRequest = 30, HeightRequest = 30 }),
+                            Position = new Position(Convert.ToDouble(charger.Latitude), Convert.ToDouble(charger.Latitude)),
+
+                        };
+                        Console.WriteLine("Add Pin to Map");
+                        map.Pins.Add(chargerPin);
+                    }
+
+                }
 
                 stackLayout.Children.Add(map);
+
 
                 ContentMap.Content = stackLayout;
                 ContentMap.IsVisible = true;
                 layoutContainer.IsVisible = true;
                 lblInfo.Text = "";
                 lblInfo.IsVisible = false;
+
+                
             }
             catch (Exception ex)
             {
@@ -76,34 +97,5 @@ namespace EV_Charger_App
             }
         }
 
-        private void BtnNormal_Clicked(object sender, EventArgs e)
-        {
-
-        }
-
-        private void BtnMapType_Clicked(object sender, EventArgs e)
-        {
-            try
-            {
-                String mapType = ((Button)sender).Text.ToString().ToLower();
-                switch (mapType)
-                {
-                    case "hybrid":
-                        map.MapType = MapType.Hybrid;
-                        break;
-                    case "satellite":
-                        map.MapType = MapType.Satellite;
-                        break;
-                    case "street":
-                        map.MapType = MapType.Street;
-                        break;
-                }
-
-            }
-            catch (Exception ex)
-            {
-
-            }
-        }
     }
 }
