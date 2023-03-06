@@ -13,8 +13,8 @@ namespace EV_Charger_App
         {
             InitializeComponent();
             NavigationPage.SetHasNavigationBar(this, true);
-            this.Title = "Xamarin Forms Google Maps";
             LoadMap(19.0605421, 72.8618913);
+            
         }
 
         public async void LoadMap(double latitude, double longitude)
@@ -63,7 +63,7 @@ namespace EV_Charger_App
 
                 ContentMap.Content = stackLayout;
                 ContentMap.IsVisible = true;
-                gridContainer.IsVisible = true;
+                layoutContainer.IsVisible = true;
                 lblInfo.Text = "";
                 lblInfo.IsVisible = false;
             }
@@ -72,7 +72,7 @@ namespace EV_Charger_App
                 lblInfo.Text = ex.Message.ToString();
                 ContentMap.IsVisible = false;
                 lblInfo.IsVisible = true;
-                gridContainer.IsVisible = false;
+                layoutContainer.IsVisible = false;
             }
         }
 

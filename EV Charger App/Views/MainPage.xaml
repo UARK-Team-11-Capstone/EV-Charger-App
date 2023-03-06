@@ -4,27 +4,10 @@
              x:Class="EV_Charger_App.MainPage">
 
     <ContentPage.Content>
-        <StackLayout HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand">
-
-            <Label x:Name="lblInfo" VerticalOptions="StartAndExpand" HorizontalOptions="FillAndExpand" Margin="5"/>
-            <Grid x:Name="gridContainer" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="11*"/>
-                    <RowDefinition Height="1*"/>
-                </Grid.RowDefinitions>
-                <ContentView x:Name="ContentMap" Grid.Row="0" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" />
-                <Grid HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand" Grid.Row="1" BackgroundColor="DarkGray" Padding="2">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="2*"/>
-                        <ColumnDefinition Width="2*"/>
-                        <ColumnDefinition Width="2*"/>
-                    </Grid.ColumnDefinitions>
-                    <Button x:Name="btnStreet" Text="Street" Grid.Column="0" Margin="2" Clicked="BtnMapType_Clicked" BackgroundColor="#fff" TextColor="#000"/>
-                    <Button x:Name="Statellite" Text="Satellite" Grid.Column="1" Margin="2" Clicked="BtnMapType_Clicked" BackgroundColor="#fff" TextColor="#000"/>
-                    <Button x:Name="btnHybrid" Text="Hybrid" Grid.Column="2" Margin="2" Clicked="BtnMapType_Clicked" BackgroundColor="#fff" TextColor="#000"/>
-                </Grid>
-
-            </Grid>
+        <StackLayout x:Name="layoutContainer">
+            <Label x:Name="lblInfo"  Margin="5"/>
+            <ContentView x:Name="ContentMap" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand"/>
+            <Entry x:Name="searchBar" Placeholder="SEARCH" HorizontalOptions="FillAndExpand" Margin="0, 0, 0, 0" Background="transparent"></Entry>
         </StackLayout>
     </ContentPage.Content>
 
