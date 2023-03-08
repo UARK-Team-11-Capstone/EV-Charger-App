@@ -25,6 +25,7 @@ namespace EV_Charger_App.ViewModels
             List<ChargerLocations> chargerLocations = new List<ChargerLocations>()
             {
                 new ChargerLocations{Latitude = "36.09165811091142", Longitude = "-94.20148265104417"}
+
             };
             return chargerLocations;
         }

@@ -4,6 +4,8 @@ using Xamarin.Forms;
 using Xamarin.Forms.GoogleMaps;
 using System.Linq;
 using EV_Charger_App.ViewModels;
+using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 
 namespace EV_Charger_App
 {
@@ -26,11 +28,7 @@ namespace EV_Charger_App
         {
             try
             {
-                var placemarks = await Geocoding.GetPlacemarksAsync(latitude, longitude);
-
-                var placemark = placemarks?.FirstOrDefault();
-
-
+                // Create map
                 map = new Xamarin.Forms.GoogleMaps.Map()
                 {
                     Margin = new Thickness(2, 2, 2, 2),
@@ -40,13 +38,10 @@ namespace EV_Charger_App
                     IsEnabled = true
                 };
 
-            
-                Position position = new Position();
+                // Call the track location function
+                TrackLocation();
 
-                MapSpan mapSpan = new MapSpan(position, latitude, longitude);
-                map.MoveToRegion(MapSpan.FromCenterAndRadius(new Position(latitude, longitude),
-                Distance.FromMiles(1)));
-
+                // Adjust XAML settings for the layout of the stack
                 StackLayout stackLayout = new StackLayout()
                 {
                     HorizontalOptions = LayoutOptions.FillAndExpand,
@@ -54,31 +49,27 @@ namespace EV_Charger_App
                     BackgroundColor = Color.Transparent,
                     Orientation = StackOrientation.Vertical
                 };
-                
+
                 // Load the nearby chargers on startup
                 var chargers = mainPageViewModel.LoadChargers();
-                Console.WriteLine("Grab charger list");
                 if (chargers != null)
                 {
-                    Console.WriteLine("Chargers not NULL");
                     foreach (var charger in chargers)
                     {
                         var chargerPin = new Pin()
                         {
                             Type = PinType.Place,
                             Label = "Charger",
-                            Icon = (Device.RuntimePlatform == Device.Android) ? BitmapDescriptorFactory.FromBundle("Battery-Icon.png") : BitmapDescriptorFactory.FromView(new Image() { Source = "Battery-Icon.png", WidthRequest = 30, HeightRequest = 30 }),
-                            Position = new Position(Convert.ToDouble(charger.Latitude), Convert.ToDouble(charger.Latitude)),
+                            Icon = (Device.RuntimePlatform == Device.Android) ? BitmapDescriptorFactory.FromBundle("Battery-Icon.png") : BitmapDescriptorFactory.FromView(new Image() { Source = "Battery-Icon.png", WidthRequest = 10, HeightRequest = 10 }),
+                            Position = new Position(Convert.ToDouble(charger.Latitude), Convert.ToDouble(charger.Longitude)),
 
                         };
-                        Console.WriteLine("Add Pin to Map");
                         map.Pins.Add(chargerPin);
                     }
-
                 }
 
+                // Add map to screen stack
                 stackLayout.Children.Add(map);
-
 
                 ContentMap.Content = stackLayout;
                 ContentMap.IsVisible = true;
@@ -86,7 +77,6 @@ namespace EV_Charger_App
                 lblInfo.Text = "";
                 lblInfo.IsVisible = false;
 
-                
             }
             catch (Exception ex)
             {
@@ -94,6 +84,29 @@ namespace EV_Charger_App
                 ContentMap.IsVisible = false;
                 lblInfo.IsVisible = true;
                 layoutContainer.IsVisible = false;
+            }
+        }
+
+        async void TrackLocation()
+        {
+            while(true)
+            {
+                // Retrieve the current location of the user
+                var loc = await Geolocation.GetLocationAsync(new GeolocationRequest(GeolocationAccuracy.Default, TimeSpan.FromMinutes(1)));
+                // Move to current location of user with radius of one mile
+                map.MoveToRegion(MapSpan.FromCenterAndRadius(new Position(loc.Latitude, loc.Longitude),
+                Distance.FromMiles(1)));
+
+                var locationPin = new Pin()
+                {
+                    Type = PinType.Place,
+                    Label = "",
+                    //Icon = BitmapDescriptorFactory.FromView(new Image() { Source = "Location-Dot.png", Scale = .25}),
+                    Position = new Position(Convert.ToDouble(loc.Latitude), Convert.ToDouble(loc.Longitude)),
+                };
+                map.Pins.Add(locationPin);
+                await Task.Delay(1000);
+
             }
         }
 
