@@ -4,18 +4,28 @@
              x:Class="EV_Charger_App.Views.UserSettings"
              Title="Settings">
 
-    <StackLayout  Margin="20">
-        <Label Text="Your Profile" />
+    <StackLayout Margin="20">
+        <Label Text="Your Profile" FontAttributes="Bold" FontSize="Large" />
+
         <Label Text="Name" />
-        <Entry Placeholder="name" WidthRequest="300"/>
+        <Entry Placeholder="John Doe" WidthRequest="300" />
+        
         <Label Text="Email" />
-        <Entry Placeholder="email" WidthRequest="300"/>
+        <Entry Placeholder="jdoe@uark.edu" WidthRequest="300"/>
+        
         <Label Text="Password" />
-        <Entry Placeholder="password" IsPassword="True" WidthRequest="300"/>
+        <Entry Placeholder="password123" IsPassword="True" WidthRequest="300"/>
+        
         <Label Text="Point Meter" />
-        <ProgressBar Progress="0.5" ProgressColor="Blue" />
+        <ProgressBar Progress="0.5" ProgressColor="#549fdf" />
+        
         <Label Text="Vehicle Type" />
-        <Entry Placeholder="car type" WidthRequest="300"/>
+        <Entry Placeholder="BMW" WidthRequest="300"/>
+
+        <!-- Using BoxView to put the button on the bottom of the page. -->
+        <BoxView HeightRequest="180" />
+        
         <Button Clicked="SaveSettings" Text="Save" CornerRadius="10" HorizontalOptions="CenterAndExpand" HeightRequest="50" WidthRequest="300" />
+    
     </StackLayout>
 </ContentPage>
