@@ -12,10 +12,9 @@
         
         <Label Text="Email" />
         <Entry Placeholder="jdoe@uark.edu" WidthRequest="300"/>
-        
+
         <Label Text="Password" />
-        <Entry Placeholder="password123" IsPassword="True" WidthRequest="300"/>
-        
+
         <Label Text="Point Meter" />
         <ProgressBar Progress="0.5" ProgressColor="#549fdf" />
         
