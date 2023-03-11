@@ -14,7 +14,21 @@ namespace EV_Charger_App.Views
     {
         public UserSettings()
         {
-            InitializeComponent();
+            Title = "Settings";
+            Content = new StackLayout
+            {
+                Margin = new Thickness(20),
+                Children =
+            {
+                new Label { Text = "Your profile" },
+                new Label { Text = "Name" },
+                new Label { Text = "Email" },
+                new Label { Text = "Password" },
+                new Label { Text = "Address" },
+                new Label { Text = "Point Meter" },
+                new Label { Text = "Vehicle Type" }
+            }
+            };
         }
     }
 }

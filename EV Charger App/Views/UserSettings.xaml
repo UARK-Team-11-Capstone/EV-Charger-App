@@ -1,12 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="EV_Charger_App.Views.UserSettings">
-    <ContentPage.Content>
-        <StackLayout>
-            <Label Text="UserSettings!"
-                VerticalOptions="CenterAndExpand" 
-                HorizontalOptions="CenterAndExpand" />
-        </StackLayout>
-    </ContentPage.Content>
+             x:Class="StackLayoutDemos.Views.VerticalStackLayoutPage"
+             Title="Settings">
+    
+    <StackLayout Margin="20">
+        <Label Text="Your Profile" />
+        <Label Text="Name" />
+        <Label Text="Email" />
+        <Label Text="Password" />
+        <Label Text="Point Meter" />
+        <Label Text="Vehicle Type" />
+    </StackLayout>
 </ContentPage>
