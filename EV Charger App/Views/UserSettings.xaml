@@ -22,7 +22,7 @@
         <Entry Placeholder="BMW" WidthRequest="300"/>
 
         <!-- Using BoxView to put the button on the bottom of the page. -->
-        <BoxView HeightRequest="180" />
+        <BoxView HeightRequest="220" />
         
         <Button Clicked="SaveSettings" Text="Save" CornerRadius="10" HorizontalOptions="CenterAndExpand" HeightRequest="50" WidthRequest="300" />
     
