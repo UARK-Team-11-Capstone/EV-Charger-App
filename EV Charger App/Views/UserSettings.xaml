@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="StackLayoutDemos.Views.VerticalStackLayoutPage"
+             x:Class="EV_Charger_App.Views.UserSettings"
              Title="Settings">
     
     <StackLayout Margin="20">
@@ -11,5 +11,6 @@
         <Label Text="Password" />
         <Label Text="Point Meter" />
         <Label Text="Vehicle Type" />
+        <Button Clicked="SaveSettings" Text="Save" CornerRadius="10" HorizontalOptions="CenterAndExpand" HeightRequest="50" WidthRequest="300" />
     </StackLayout>
 </ContentPage>
