@@ -3,14 +3,19 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="EV_Charger_App.Views.UserSettings"
              Title="Settings">
-    
-    <StackLayout Margin="20">
+
+    <StackLayout  Margin="20">
         <Label Text="Your Profile" />
         <Label Text="Name" />
+        <Entry Placeholder="name" WidthRequest="300"/>
         <Label Text="Email" />
+        <Entry Placeholder="email" WidthRequest="300"/>
         <Label Text="Password" />
+        <Entry Placeholder="password" IsPassword="True" WidthRequest="300"/>
         <Label Text="Point Meter" />
+        <ProgressBar Progress="0.5" ProgressColor="Blue" />
         <Label Text="Vehicle Type" />
+        <Entry Placeholder="car type" WidthRequest="300"/>
         <Button Clicked="SaveSettings" Text="Save" CornerRadius="10" HorizontalOptions="CenterAndExpand" HeightRequest="50" WidthRequest="300" />
     </StackLayout>
 </ContentPage>
