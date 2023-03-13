@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Xamarin.Forms;
+using Xamarin.Forms.PlatformConfiguration.AndroidSpecific;
 using Xamarin.Forms.Xaml;
 
 namespace EV_Charger_App.Views
@@ -15,12 +16,22 @@ namespace EV_Charger_App.Views
         public UserSettings()
         {
             InitializeComponent();
+
         }
+
+
 
         //This is the function called when the save button is clicked
         async private void SaveSettings(object sender, EventArgs e)
         {
             await Navigation.PushAsync(new MainPage());
         }
+
+        async private void ChangePasswordTapped(object sender, EventArgs e)
+        {
+            await Navigation.PushAsync(new ChangePassword());
+        }
+
+       
     }
 }

@@ -4,27 +4,32 @@
              x:Class="EV_Charger_App.Views.UserSettings"
              Title="Settings">
 
-    <StackLayout Margin="20">
-        <Label Text="Your Profile" FontAttributes="Bold" FontSize="Large" />
+    <TableView Intent="Settings" >
+        <TableRoot>
+            <TableSection Title="Your Profile" TextColor="Blue" >
+                <EntryCell Label="Name" Placeholder="John Doe" />
+                <EntryCell Label="Email" Placeholder="jdoe@uark.edu"/>
+                <EntryCell Label="Vehicle Type" Placeholder="BMW"/>
 
-        <Label Text="Name" />
-        <Entry Placeholder="John Doe" WidthRequest="300" />
-        
-        <Label Text="Email" />
-        <Entry Placeholder="jdoe@uark.edu" WidthRequest="300"/>
+                <ViewCell x:Name="Password" Tapped="ChangePasswordTapped">
+                    <StackLayout >
+                        <Label Text="    Change Passord" VerticalOptions="CenterAndExpand" FontSize="Body"/>
+                    </StackLayout>
+                </ViewCell>
 
-        <Label Text="Password" />
+                <ViewCell>
+                    <StackLayout  >
 
-        <Label Text="Point Meter" />
-        <ProgressBar Progress="0.5" ProgressColor="#549fdf" />
-        
-        <Label Text="Vehicle Type" />
-        <Entry Placeholder="BMW" WidthRequest="300"/>
+                        <BoxView HeightRequest="20" />
+                    </StackLayout>
+                </ViewCell>
 
-        <!-- Using BoxView to put the button on the bottom of the page. -->
-        <BoxView HeightRequest="220" />
-        
-        <Button Clicked="SaveSettings" Text="Save" CornerRadius="10" HorizontalOptions="CenterAndExpand" HeightRequest="50" WidthRequest="300" />
-    
-    </StackLayout>
+                <ViewCell>
+                    <StackLayout  >
+                        <Button Clicked="SaveSettings" Text="Save" CornerRadius="10" />
+                    </StackLayout>
+                </ViewCell>
+            </TableSection>
+        </TableRoot>
+    </TableView>
 </ContentPage>
