@@ -4,32 +4,24 @@
              x:Class="EV_Charger_App.Views.UserSettings"
              Title="Settings">
 
-    <TableView Intent="Settings" >
-        <TableRoot>
-            <TableSection Title="Your Profile" TextColor="Blue" >
-                <EntryCell Label="Name" Placeholder="John Doe" />
-                <EntryCell Label="Email" Placeholder="jdoe@uark.edu"/>
-                <EntryCell Label="Vehicle Type" Placeholder="BMW"/>
+    <StackLayout>
+        <TableView Intent="Settings" >
+            <TableRoot>
+                <TableSection>
+                    <EntryCell Label="Name" Placeholder="John Doe" />
+                    <EntryCell Label="Email" Placeholder="jdoe@uark.edu"/>
+                    <EntryCell Label="Vehicle Type" Placeholder="BMW"/>
 
-                <ViewCell x:Name="Password" Tapped="ChangePasswordTapped">
-                    <StackLayout >
-                        <Label Text="    Change Passord" VerticalOptions="CenterAndExpand" FontSize="Body"/>
-                    </StackLayout>
-                </ViewCell>
-
-                <ViewCell>
-                    <StackLayout  >
-
-                        <BoxView HeightRequest="20" />
-                    </StackLayout>
-                </ViewCell>
-
-                <ViewCell>
-                    <StackLayout  >
-                        <Button Clicked="SaveSettings" Text="Save" CornerRadius="10" />
-                    </StackLayout>
-                </ViewCell>
-            </TableSection>
-        </TableRoot>
-    </TableView>
+                    <ViewCell x:Name="Password" Tapped="ChangePasswordTapped">
+                        <StackLayout >
+                            <Label Text="    Change Passord" VerticalOptions="CenterAndExpand" FontSize="Body"/>
+                        </StackLayout>
+                    </ViewCell>
+                </TableSection>
+            </TableRoot>
+        </TableView>
+        <Button Clicked="SaveSettings" Text="Save" HorizontalOptions="CenterAndExpand" CornerRadius="10" HeightRequest="50" WidthRequest="300"/>
+        <BoxView HeightRequest="30" />
+    </StackLayout>
+    
 </ContentPage>
