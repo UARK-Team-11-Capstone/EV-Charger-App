@@ -6,6 +6,7 @@ using System.Linq;
 using EV_Charger_App.ViewModels;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
+using EV_Charger_App.Views;
 
 namespace EV_Charger_App
 {
@@ -108,6 +109,14 @@ namespace EV_Charger_App
                 await Task.Delay(1000);
 
             }
+        }
+
+        //This gets called when you click the gm logo on the ribbon
+        // Will send the user to the page containing a list of pages
+        // (map screen link, login screen link, settings link)
+        async private void ListClicked(object sender, EventArgs e)
+        {
+            await Navigation.PushAsync(new PagesList());
         }
 
     }

@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="EV_Charger_App.Views.PagesList">
+    <ContentPage.ToolbarItems>
+        <ToolbarItem IconImageSource="gmlogo.png" Clicked="ListClicked"/>
+    </ContentPage.ToolbarItems>
+    <ContentPage.Content>
+        <StackLayout>
+            <Label Text="Map Screen" HorizontalOptions="Center" TextColor="Blue" FontSize="Large">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer
+                        Tapped="MapScreen"/>
+                </Label.GestureRecognizers>
+            </Label>
+            <Label Text="Login Screen" HorizontalOptions="Center" TextColor="Blue" FontSize="Large">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer
+                        Tapped="LoginScreen"/>
+                </Label.GestureRecognizers>
+            </Label>
+            <Label Text="Settings" HorizontalOptions="Center" TextColor="Blue" FontSize="Large">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer
+                        Tapped="UserSettings"/>
+                </Label.GestureRecognizers>
+            </Label>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>
