@@ -3,7 +3,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="EV_Charger_App.Views.UserSettings"
              Title="Settings">
-
+    <ContentPage.ToolbarItems>
+        <ToolbarItem IconImageSource="menubar1.png" Clicked="ListClicked"/>
+    </ContentPage.ToolbarItems>
     <StackLayout>
         <TableView Intent="Settings" >
             <TableRoot>

@@ -5,10 +5,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
              x:Class="EV_Charger_App.Views.LoginPage"
-             Shell.NavBarIsVisible="False">
-    <ContentPage.ToolbarItems>
-        <ToolbarItem IconImageSource="gmlogo.png" Clicked="ListClicked"/>
-    </ContentPage.ToolbarItems>
+             Shell.NavBarIsVisible="True">
+    
     <ContentPage.Content>
         <StackLayout Padding="10,0,10,0" Margin="0,90">
             <Image Source="gmlogo.png" Aspect="Fill" HeightRequest="200" WidthRequest="200" HorizontalOptions="Center" Margin="0,20"/>
