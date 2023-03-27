@@ -7,6 +7,7 @@ using EV_Charger_App.ViewModels;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 using EV_Charger_App.Views;
+using System.Diagnostics;
 
 namespace EV_Charger_App
 {
@@ -17,12 +18,12 @@ namespace EV_Charger_App
         public MainPage()
         {
             InitializeComponent();
-            
+
             BindingContext = mainPageViewModel = new MainPageViewModel();
-            
+
             NavigationPage.SetHasNavigationBar(this, true);
             LoadMap(36.09171012916079, -94.20143973570228);
-            
+
         }
 
         public async void LoadMap(double latitude, double longitude)
@@ -71,6 +72,10 @@ namespace EV_Charger_App
 
                 // Add map to screen stack
                 stackLayout.Children.Add(map);
+
+                Services.DoEAPI test = new Services.DoEAPI();
+                Debug.WriteLine("HTTP Call");
+                test.getAvailableChargersInZip("72704");
 
                 ContentMap.Content = stackLayout;
                 ContentMap.IsVisible = true;

@@ -12,11 +12,11 @@
                 <TableSection>
                     <EntryCell Label="Name" Placeholder="John Doe" />
                     <EntryCell Label="Email" Placeholder="jdoe@uark.edu"/>
-                    <EntryCell Label="Vehicle Type" Placeholder="BMW"/>
+                    <EntryCell Label="Vehicle Type" Placeholder="Bolt"/>
 
                     <ViewCell x:Name="Password" Tapped="ChangePasswordTapped">
                         <StackLayout >
-                            <Label Text="    Change Passord" VerticalOptions="CenterAndExpand" FontSize="Body"/>
+                            <Label Text="    Change Password" VerticalOptions="CenterAndExpand" FontSize="Body"/>
                         </StackLayout>
                     </ViewCell>
                 </TableSection>
