@@ -32,6 +32,11 @@ namespace EV_Charger_App.Views
             await Navigation.PushAsync(new UserSettings());
         }
 
+        async private void ReviewChargers(object sender, EventArgs e)
+        {
+            await Navigation.PushAsync(new ReviewCharger());
+        }
+
         //This gets called when you click the menu bar on the ribbon
         // Will send the user to the page containing a list of pages
         // (map screen link, login screen link, settings link)
