@@ -116,7 +116,7 @@ namespace EV_Charger_App
             }
         }
 
-        //This gets called when you click the gm logo on the ribbon
+        //This gets called when you click the menu bar on the ribbon
         // Will send the user to the page containing a list of pages
         // (map screen link, login screen link, settings link)
         async private void ListClicked(object sender, EventArgs e)
