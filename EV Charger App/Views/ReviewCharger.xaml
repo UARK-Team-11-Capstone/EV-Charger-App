@@ -1,50 +1,31 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="EV_Charger_App.Views.ReviewCharger">
+             x:Class="EV_Charger_App.Views.ReviewCharger"
+             Title="Review Page">
     <ContentPage.Content>
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="100" />
-                <RowDefinition />
-                <RowDefinition Height="100" />
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition />
-                <ColumnDefinition />
-            </Grid.ColumnDefinitions>
-            <BoxView Color="Green" />
-            <Label Text="Row 0, Column 0"
-               HorizontalOptions="Center"
-               VerticalOptions="Center" />
-            <BoxView Grid.Column="1"
-                 Color="Blue" />
-            <Label Grid.Column="1"
-               Text="Row 0, Column 1"
-               HorizontalOptions="Center"
-               VerticalOptions="Center" />
-            <BoxView Grid.Row="1"
-                 Color="Teal" />
-            <Label Grid.Row="1"
-               Text="Row 1, Column 0"
-               HorizontalOptions="Center"
-               VerticalOptions="Center" />
-            <BoxView Grid.Row="1"
-                 Grid.Column="1"
-                 Color="Purple" />
-            <Label Grid.Row="1"
-               Grid.Column="1"
-               Text="Row1, Column 1"
-               HorizontalOptions="Center"
-               VerticalOptions="Center" />
-            <BoxView Grid.Row="2"
-                 Grid.ColumnSpan="2"
-                 Color="Red" />
-            <Label Grid.Row="2"
-               Grid.ColumnSpan="2"
-               Text="Row 2, Columns 0 and 1"
-               HorizontalOptions="Center"
-               VerticalOptions="Center" />
-        </Grid>
+        <RelativeLayout>
+            <ImageButton Source="yellowstar.png" 
+             BackgroundColor="Transparent"
+             RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width, Factor=0}"
+             RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent, Property=Height, Factor=0}" />
+            <ImageButton Source="graystar.png" 
+             BackgroundColor="Transparent"
+             RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width, Factor=.2}"
+             RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent, Property=Height, Factor=0}" />
+            <ImageButton Source="graystar.png"
+             BackgroundColor="Transparent"
+             RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width, Factor=.4}"
+             RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent, Property=Height, Factor=0}" />
+            <ImageButton Source="graystar.png" 
+             BackgroundColor="Transparent"
+             RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width, Factor=.6}"
+             RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent, Property=Height, Factor=0}" />
+            <ImageButton Source="graystar.png"
+             BackgroundColor="Transparent"
+             RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width, Factor=.8}"
+             RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent, Property=Height, Factor=0}" />
+            
+        </RelativeLayout>
     </ContentPage.Content>
 </ContentPage>
