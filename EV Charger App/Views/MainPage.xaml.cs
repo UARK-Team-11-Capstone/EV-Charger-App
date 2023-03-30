@@ -5,9 +5,12 @@ using Xamarin.Forms.GoogleMaps;
 using System.Linq;
 using EV_Charger_App.ViewModels;
 using System.Threading.Tasks;
-using System.Runtime.InteropServices;
 using EV_Charger_App.Views;
-using System.Diagnostics;
+using EV_Charger_App.Services;
+using Android.Util;
+using Android.Views;
+using System.Collections.Generic;
+using Android.Graphics;
 
 namespace EV_Charger_App
 {
@@ -15,6 +18,8 @@ namespace EV_Charger_App
     {
         MainPageViewModel mainPageViewModel;
         Xamarin.Forms.GoogleMaps.Map map;
+        Location previousLocation;
+        DoEAPI doe = new DoEAPI();
         public MainPage()
         {
             InitializeComponent();
@@ -24,9 +29,19 @@ namespace EV_Charger_App
             NavigationPage.SetHasNavigationBar(this, true);
             LoadMap(36.09171012916079, -94.20143973570228);
 
+            map.CameraChanged += Map_CameraChanged;
+            
         }
 
-        public async void LoadMap(double latitude, double longitude)
+        // Responds on a camera moved action
+        private void Map_CameraChanged(object sender, CameraChangedEventArgs e)
+        {
+            CameraPosition pos = e.Position;
+            DynamicChargerLoadingAsync(pos);
+        }
+
+        // Intialize the Google Map
+        public void LoadMap(double latitude, double longitude)
         {
             try
             {
@@ -48,35 +63,13 @@ namespace EV_Charger_App
                 {
                     HorizontalOptions = LayoutOptions.FillAndExpand,
                     VerticalOptions = LayoutOptions.FillAndExpand,
-                    BackgroundColor = Color.Transparent,
+                    BackgroundColor = System.Drawing.Color.Transparent,
                     Orientation = StackOrientation.Vertical
                 };
 
-                // Load the nearby chargers on startup
-                var chargers = mainPageViewModel.LoadChargers();
-                if (chargers != null)
-                {
-                    foreach (var charger in chargers)
-                    {
-                        var chargerPin = new Pin()
-                        {
-                            Type = PinType.Place,
-                            Label = "Charger",
-                            Icon = (Device.RuntimePlatform == Device.Android) ? BitmapDescriptorFactory.FromBundle("Battery-Icon.png") : BitmapDescriptorFactory.FromView(new Image() { Source = "Battery-Icon.png", WidthRequest = 10, HeightRequest = 10 }),
-                            Position = new Position(Convert.ToDouble(charger.Latitude), Convert.ToDouble(charger.Longitude)),
-
-                        };
-                        map.Pins.Add(chargerPin);
-                    }
-                }
-
                 // Add map to screen stack
                 stackLayout.Children.Add(map);
-
-                Services.DoEAPI test = new Services.DoEAPI();
-                Debug.WriteLine("HTTP Call");
-                test.getAvailableChargersInZip("72704");
-
+                
                 ContentMap.Content = stackLayout;
                 ContentMap.IsVisible = true;
                 layoutContainer.IsVisible = true;
@@ -93,28 +86,108 @@ namespace EV_Charger_App
             }
         }
 
+        // Update the location of the users pin every 5 seconds
         async void TrackLocation()
         {
-            while(true)
+            // Intialization
+            previousLocation = await Geolocation.GetLocationAsync(new GeolocationRequest(GeolocationAccuracy.Default, TimeSpan.FromMinutes(1)));
+            map.MoveToRegion(MapSpan.FromCenterAndRadius(new Position(previousLocation.Latitude, previousLocation.Longitude), Distance.FromMiles(1)));
+
+            var locationPin = new Pin()
+            {
+                Type = PinType.Place,
+                Label = "Current Location",
+                //Icon = BitmapDescriptorFactory.FromView(new Image() { Source = "Location-Dot.png", Scale = .25}),
+                Position = new Position(Convert.ToDouble(previousLocation.Latitude), Convert.ToDouble(previousLocation.Longitude)),
+            };
+            map.Pins.Add(locationPin);
+
+            // Call DoE API to get nearest chargers in a radius relative to the camera zoom level
+            double alt = map.CameraPosition.Zoom;
+            double radius = GetVisibleRadius(alt);
+            doe.getNearestCharger(previousLocation.Latitude.ToString(), previousLocation.Longitude.ToString(), radius.ToString());
+
+            while (true)
             {
                 // Retrieve the current location of the user
                 var loc = await Geolocation.GetLocationAsync(new GeolocationRequest(GeolocationAccuracy.Default, TimeSpan.FromMinutes(1)));
-                // Move to current location of user with radius of one mile
-                map.MoveToRegion(MapSpan.FromCenterAndRadius(new Position(loc.Latitude, loc.Longitude),
-                Distance.FromMiles(1)));
-
-                var locationPin = new Pin()
+                // Only move if location has changed
+                if (loc != previousLocation)
                 {
-                    Type = PinType.Place,
-                    Label = "",
-                    //Icon = BitmapDescriptorFactory.FromView(new Image() { Source = "Location-Dot.png", Scale = .25}),
-                    Position = new Position(Convert.ToDouble(loc.Latitude), Convert.ToDouble(loc.Longitude)),
-                };
-                map.Pins.Add(locationPin);
-                await Task.Delay(1000);
+                    // Move to current location of user with radius of one mile
+                    // map.MoveToRegion(MapSpan.FromCenterAndRadius(new Position(loc.Latitude, loc.Longitude), Distance.FromMiles(1)));
+                    // Find the current location pin and adjust the location
+                    Pin currLoc = map.Pins.First(Pin => Pin.Label == "Current Location");
+                    currLoc.Position = new Position(Convert.ToDouble(loc.Latitude), Convert.ToDouble(loc.Longitude));
+
+                }
+                // Set previousLocation to the current location
+                previousLocation = loc;
+
+                // Wait five seconds
+                await Task.Delay(2000);
 
             }
         }
+
+        // Load chargers based on the camera position asynchronously 
+        public void DynamicChargerLoadingAsync(CameraPosition pos)
+        {
+            double lat = pos.Target.Latitude;
+            double lng = pos.Target.Longitude;
+
+            if (previousLocation != null && pos != null)
+            {
+                // Call DoE API to get nearest chargers in a radius relative to the camera zoom level
+                double alt = pos.Zoom;
+                double radius = GetVisibleRadius(alt);
+                doe.getNearestCharger(lat.ToString(), lng.ToString(), radius.ToString());
+                //doe.getAvailableChargersInZip("72704");
+                // Load the nearby chargers on startup
+                Root chargers = doe.LoadChargers();
+                if (chargers != null)
+                {
+                    foreach (var charger in chargers.fuel_stations)
+                    {
+                        var chargerPin = new Pin()
+                        {
+                            Type = PinType.Place,
+                            Label = charger.station_name,
+                            Icon = (Device.RuntimePlatform == Device.Android) ? BitmapDescriptorFactory.FromBundle("Battery-Icon.png") : BitmapDescriptorFactory.FromView(new Image() { Source = "Battery-Icon.png", WidthRequest = 10, HeightRequest = 10 }),
+                            Position = new Position(Convert.ToDouble(charger.latitude), Convert.ToDouble(charger.longitude)),
+
+                        };
+                        map.Pins.Add(chargerPin);
+                    }
+                }
+
+            }
+        }
+
+        // Find the relative radius of the camera view
+        public static double GetVisibleRadius(double zoomLevel)
+        {
+            // Based on pixel five
+            int screenWidth = 1080;
+            int screenHeight = 2340; 
+            double mapAspectRatio = screenHeight/screenWidth;
+
+            // Calculate the dimensions of the visible area in pixels
+            double visibleWidth = screenWidth;
+            double visibleHeight = screenWidth / mapAspectRatio;
+
+            // Calculate the visible area in meters using the Mercator projection
+            double metersPerPixel = 156543.03392 * Math.Cos(0) / Math.Pow(2, zoomLevel);
+            double visibleWidthMeters = visibleWidth * metersPerPixel;
+            double visibleHeightMeters = visibleHeight * metersPerPixel;
+
+            // Calculate the visible radius in miles
+            double visibleAreaMeters = Math.PI * visibleWidthMeters * visibleHeightMeters;
+            double visibleRadiusMiles = Math.Sqrt(visibleAreaMeters) / 1609.344;
+
+            return visibleRadiusMiles;
+        }
+
 
         //This gets called when you click the gm logo on the ribbon
         // Will send the user to the page containing a list of pages

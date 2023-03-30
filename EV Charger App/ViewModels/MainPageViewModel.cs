@@ -1,7 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using Android.Icu.Number;
+using Android.Media;
+using Android.OS;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel;
-
-
+using System.IO;
+using System.Runtime.Serialization.Json;
+using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace EV_Charger_App.ViewModels
 {
@@ -11,22 +17,6 @@ namespace EV_Charger_App.ViewModels
         {
         }
 
-        public class ChargerLocations
-        {
-            public string Latitude { get; set; }
-            public string Longitude { get; set; }
-
-        }
-
-        internal List<ChargerLocations> LoadChargers()
-        {
-            List<ChargerLocations> chargerLocations = new List<ChargerLocations>()
-            {
-                
-                new ChargerLocations{Latitude = "36.09165811091142", Longitude = "-94.20148265104417"}
-
-            };
-            return chargerLocations;
-        }
+       
     }
 }
