@@ -13,7 +13,7 @@
             <SearchBar x:Name="searchBar" Placeholder="SEARCH" BackgroundColor="White" 
                        RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width, Factor=0.95}" 
                        RelativeLayout.HeightConstraint="{ConstraintExpression Type=Constant, Constant=50}"
-                       RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width, Factor=0.5, Constant=-170}"
+                       RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width, Factor=0.5, Constant=-171}"
                        RelativeLayout.YConstraint="{ConstraintExpression Type=Constant, Constant=10}"
                        />
             <Label x:Name="lblInfo" Margin="5" RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width}" RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToView, ElementName=searchBar, Property=Y, Factor=1, Constant=50}" />
