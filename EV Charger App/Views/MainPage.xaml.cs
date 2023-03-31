@@ -153,7 +153,7 @@ namespace EV_Charger_App
                         {
                             Type = PinType.Place,
                             Label = charger.station_name,
-                            Icon = (Device.RuntimePlatform == Device.Android) ? BitmapDescriptorFactory.FromBundle("icon_charger.png") : BitmapDescriptorFactory.FromView(new Image() { Source = "Battery-Icon.png", WidthRequest = 10, HeightRequest = 10, Aspect = Aspect.AspectFit }),
+                            Icon = (Device.RuntimePlatform == Device.Android) ? BitmapDescriptorFactory.FromBundle("Charger-Icon.png") : BitmapDescriptorFactory.FromView(new Image() { Source = "Charger-Icon.png", WidthRequest = 10, HeightRequest = 10, Aspect = Aspect.AspectFit}),
                             Position = new Position(Convert.ToDouble(charger.latitude), Convert.ToDouble(charger.longitude)),
 
                         };
