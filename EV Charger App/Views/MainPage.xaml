@@ -7,12 +7,19 @@
         <ToolbarItem IconImageSource="menubar1.png" Clicked="ListClicked"/>
     </ContentPage.ToolbarItems>
     <ContentPage.Content>
-        <StackLayout x:Name="layoutContainer">
-            <Label x:Name="lblInfo"  Margin="5"/>
-            <ContentView x:Name="ContentMap" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand"/>
-            <Entry x:Name="searchBar" Placeholder="SEARCH" HorizontalOptions="FillAndExpand" Margin="0, 0, 0, 0" Background="transparent"></Entry>
-        </StackLayout>
+        <RelativeLayout x:Name="layoutContainer">
+            <ContentView x:Name="ContentMap" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand" RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width}" RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent, Property=Height}"/>
+            <Frame Padding="0" BorderColor="DarkGray" HasShadow="True" HorizontalOptions="FillAndExpand"  VerticalOptions="Center"></Frame>
+            <SearchBar x:Name="searchBar" Placeholder="SEARCH" BackgroundColor="White" 
+                       RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width, Factor=0.95}" 
+                       RelativeLayout.HeightConstraint="{ConstraintExpression Type=Constant, Constant=50}"
+                       RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width, Factor=0.5, Constant=-171}"
+                       RelativeLayout.YConstraint="{ConstraintExpression Type=Constant, Constant=10}"
+                       />
+            <Label x:Name="lblInfo" Margin="5" RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width}" RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToView, ElementName=searchBar, Property=Y, Factor=1, Constant=50}" />
+        </RelativeLayout>
     </ContentPage.Content>
-
-
 </ContentPage>
+
+
+
