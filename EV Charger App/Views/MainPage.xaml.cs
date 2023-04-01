@@ -11,6 +11,10 @@ using Android.Util;
 using Android.Views;
 using System.Collections.Generic;
 using Android.Graphics;
+using Android.Webkit;
+using GoogleApi.Entities.Places.AutoComplete.Request;
+using System.Diagnostics;
+using GoogleApi.Entities.Common.Enums;
 
 namespace EV_Charger_App
 {
@@ -29,8 +33,20 @@ namespace EV_Charger_App
             NavigationPage.SetHasNavigationBar(this, true);
             LoadMap(36.09171012916079, -94.20143973570228);
 
+            #pragma warning disable CS0618 // Type or member is obsolete
             map.CameraChanged += Map_CameraChanged;
+            #pragma warning restore CS0618 // Type or member is obsolete
+
+            map.InfoWindowLongClicked += Map_InfoWindowLongClicked;
             
+        }
+
+        // Overload functions for if the user double clicks on an info card
+        private void Map_InfoWindowLongClicked(object sender, InfoWindowLongClickedEventArgs e)
+        {
+            // Add code here to open up a different view of charger information
+            // @kate and @grant
+
         }
 
         // Responds on a camera moved action
@@ -124,7 +140,7 @@ namespace EV_Charger_App
                 // Set previousLocation to the current location
                 previousLocation = loc;
 
-                // Wait five seconds
+                // Wait two seconds
                 await Task.Delay(2000);
 
             }
@@ -186,6 +202,71 @@ namespace EV_Charger_App
             double visibleRadiusMiles = Math.Sqrt(visibleAreaMeters) / 1609.344;
 
             return visibleRadiusMiles;
+        }
+
+        private async Task<List<AutocompletePrediction>> GetPlaces(string query)
+        {
+            var places = new List<AutocompletePrediction>();
+
+            try
+            {
+                var result = await new PlaceAutocompleteRequest
+                {
+                    Input = query,
+                    Language = "en",
+                    Types = AutocompleteType.Address,
+                    Components = new ComponentFilter[] { new ComponentFilter(ComponentFilterType.Country, "US") }
+                }.GetResponseAsync();
+
+                if (result != null && result.Status == Status.Ok)
+                {
+                    places = result.AutoCompletePlaces.ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error getting places: {ex.Message}");
+            }
+
+            return places;
+        }
+
+        private async void OnSearchTextChanged(object sender, TextChangedEventArgs e)
+        {
+            var query = e.NewTextValue;
+
+            if (!string.IsNullOrEmpty(query))
+            {
+                var places = await GetPlaces(query);
+
+                if (places != null && places.Count > 0)
+                {
+                    predictionList.ItemsSource = places;
+                    predictionList.IsVisible = true;
+                }
+                else
+                {
+                    predictionList.ItemsSource = null;
+                    predictionList.IsVisible = false;
+                }
+            }
+            else
+            {
+                predictionList.ItemsSource = null;
+                predictionList.IsVisible = false;
+            }
+        }
+
+        private void OnPredictionSelected(object sender, SelectedItemChangedEventArgs e)
+        {
+            var prediction = e.SelectedItem as AutocompletePrediction;
+
+            if (prediction != null)
+            {
+                searchBar.Text = prediction.Description;
+                predictionList.ItemsSource = null;
+                predictionList.IsVisible = false;
+            }
         }
 
         //This gets called when you click the menu bar on the ribbon

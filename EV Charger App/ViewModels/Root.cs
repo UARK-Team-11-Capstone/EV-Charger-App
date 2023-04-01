@@ -73,16 +73,6 @@ namespace EV_Charger_App.ViewModels
         public string street_address { get; set; }
         public string zip { get; set; }
         public string country { get; set; }
-        public object bd_blends { get; set; }
-        public object cng_dispenser_num { get; set; }
-        public object cng_fill_type_code { get; set; }
-        public object cng_psi { get; set; }
-        public object cng_renewable_source { get; set; }
-        public object cng_total_compression { get; set; }
-        public object cng_total_storage { get; set; }
-        public object cng_vehicle_class { get; set; }
-        public object e85_blender_pump { get; set; }
-        public object e85_other_ethanol_blends { get; set; }
         public List<string> ev_connector_types { get; set; }
         public object ev_dc_fast_num { get; set; }
         public object ev_level1_evse_num { get; set; }
@@ -92,21 +82,6 @@ namespace EV_Charger_App.ViewModels
         public object ev_other_evse { get; set; }
         public object ev_pricing { get; set; }
         public object ev_renewable_source { get; set; }
-        public object hy_is_retail { get; set; }
-        public object hy_pressures { get; set; }
-        public object hy_standards { get; set; }
-        public object hy_status_link { get; set; }
-        public object lng_renewable_source { get; set; }
-        public object lng_vehicle_class { get; set; }
-        public object lpg_primary { get; set; }
-        public object lpg_nozzle_types { get; set; }
-        public object ng_fill_type_code { get; set; }
-        public object ng_psi { get; set; }
-        public object ng_vehicle_class { get; set; }
-        public object rd_blends { get; set; }
-        public object rd_blends_fr { get; set; }
-        public object rd_blended_with_biodiesel { get; set; }
-        public object rd_max_biodiesel_level { get; set; }
         public object access_days_time_fr { get; set; }
         public object intersection_directions_fr { get; set; }
         public object bd_blends_fr { get; set; }
