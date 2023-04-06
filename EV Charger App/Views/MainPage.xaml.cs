@@ -7,28 +7,23 @@ using EV_Charger_App.ViewModels;
 using System.Threading.Tasks;
 using EV_Charger_App.Views;
 using EV_Charger_App.Services;
-using Android.Util;
-using Android.Views;
+using GoogleApi.Entities.Common;
 using System.Collections.Generic;
-using Android.Graphics;
-using Android.Webkit;
-using GoogleApi.Entities.Places.AutoComplete.Request;
+using Android.OS;
 using System.Diagnostics;
-using GoogleApi.Entities.Common.Enums;
 
 namespace EV_Charger_App
 {
     public partial class MainPage : ContentPage
     {
-        MainPageViewModel mainPageViewModel;
+
         Xamarin.Forms.GoogleMaps.Map map;
         Location previousLocation;
         DoEAPI doe = new DoEAPI();
+        GooglePlacesApi googlePlacesApi = new GooglePlacesApi();
         public MainPage()
         {
             InitializeComponent();
-
-            BindingContext = mainPageViewModel = new MainPageViewModel();
 
             NavigationPage.SetHasNavigationBar(this, true);
             LoadMap(36.09171012916079, -94.20143973570228);
@@ -38,8 +33,43 @@ namespace EV_Charger_App
             #pragma warning restore CS0618 // Type or member is obsolete
 
             map.InfoWindowLongClicked += Map_InfoWindowLongClicked;
+
+            searchBar.TextChanged += OnTextChanged;
             
         }
+
+        // If the text changes in the search bar send a query for an autocomplete
+        private async void OnTextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (!string.IsNullOrEmpty(e.NewTextValue)) 
+            {
+                Coordinate latlng = new Coordinate(previousLocation.Latitude, previousLocation.Longitude);
+                var response = await googlePlacesApi.QueryAutoComplete(e.NewTextValue, latlng, GetVisibleRadius(map.CameraPosition.Zoom));
+                List<string> result = new List<string>();
+                // If response is not null then display the possible results in the list view
+                if (response != null)
+                {
+                    foreach (var pred in response.Predictions)
+                    {
+                        System.Diagnostics.Debug.WriteLine("Prediction: " + pred.Description);
+                        result.Add(pred.Description);
+                    }
+                    searchResultsListView.ItemsSource = result;
+                    searchResultsListView.IsVisible = true;
+                }
+                else
+                {
+                    searchResultsListView.ItemsSource = null;
+                    searchResultsListView.IsVisible = false;
+                }
+            }
+            else
+            {
+                searchResultsListView.ItemsSource = null;
+                searchResultsListView.IsVisible = false;
+            }
+        }
+
 
         // Overload functions for if the user double clicks on an info card
         private void Map_InfoWindowLongClicked(object sender, InfoWindowLongClickedEventArgs e)
@@ -202,71 +232,6 @@ namespace EV_Charger_App
             double visibleRadiusMiles = Math.Sqrt(visibleAreaMeters) / 1609.344;
 
             return visibleRadiusMiles;
-        }
-
-        private async Task<List<AutocompletePrediction>> GetPlaces(string query)
-        {
-            var places = new List<AutocompletePrediction>();
-
-            try
-            {
-                var result = await new PlaceAutocompleteRequest
-                {
-                    Input = query,
-                    Language = "en",
-                    Types = AutocompleteType.Address,
-                    Components = new ComponentFilter[] { new ComponentFilter(ComponentFilterType.Country, "US") }
-                }.GetResponseAsync();
-
-                if (result != null && result.Status == Status.Ok)
-                {
-                    places = result.AutoCompletePlaces.ToList();
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Error getting places: {ex.Message}");
-            }
-
-            return places;
-        }
-
-        private async void OnSearchTextChanged(object sender, TextChangedEventArgs e)
-        {
-            var query = e.NewTextValue;
-
-            if (!string.IsNullOrEmpty(query))
-            {
-                var places = await GetPlaces(query);
-
-                if (places != null && places.Count > 0)
-                {
-                    predictionList.ItemsSource = places;
-                    predictionList.IsVisible = true;
-                }
-                else
-                {
-                    predictionList.ItemsSource = null;
-                    predictionList.IsVisible = false;
-                }
-            }
-            else
-            {
-                predictionList.ItemsSource = null;
-                predictionList.IsVisible = false;
-            }
-        }
-
-        private void OnPredictionSelected(object sender, SelectedItemChangedEventArgs e)
-        {
-            var prediction = e.SelectedItem as AutocompletePrediction;
-
-            if (prediction != null)
-            {
-                searchBar.Text = prediction.Description;
-                predictionList.ItemsSource = null;
-                predictionList.IsVisible = false;
-            }
         }
 
         //This gets called when you click the menu bar on the ribbon

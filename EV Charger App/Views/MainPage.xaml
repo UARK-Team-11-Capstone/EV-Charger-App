@@ -16,10 +16,23 @@
                        RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width, Factor=0.5, Constant=-171}"
                        RelativeLayout.YConstraint="{ConstraintExpression Type=Constant, Constant=10}"
                        />
-            <Label x:Name="lblInfo" Margin="5" RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width}" RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToView, ElementName=searchBar, Property=Y, Factor=1, Constant=50}" />
+            <ListView x:Name="searchResultsListView" ItemsSource="{Binding searchResults}" BackgroundColor="White"
+                      RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width, Factor=0.5, Constant=-171}"
+                      RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToView, ElementName=searchBar, Property=Y, Factor=1, Constant=50}"
+                      RelativeLayout.HeightConstraint="{ConstraintExpression Type=Constant, Constant=150}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <ViewCell>
+                            <Label Text="{Binding}" />
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            <Label x:Name="lblInfo" Margin="5" RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width}" RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToView, ElementName=searchResultsListView, Property=Height, Factor=1, Constant=5}" />
         </RelativeLayout>
     </ContentPage.Content>
 </ContentPage>
+
 
 
 

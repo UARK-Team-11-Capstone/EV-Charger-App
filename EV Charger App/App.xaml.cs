@@ -3,6 +3,7 @@ using EV_Charger_App.Views;
 using System;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+using GoogleApi;
 
 namespace EV_Charger_App
 {
@@ -20,7 +21,6 @@ namespace EV_Charger_App
             */
 
             MainPage = new NavigationPage(new LoginPage());
-
 
         }
 

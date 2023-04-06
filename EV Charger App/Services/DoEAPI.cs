@@ -1,12 +1,9 @@
 ﻿using EV_Charger_App.ViewModels;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Schema;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace EV_Charger_App.Services

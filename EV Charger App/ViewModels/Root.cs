@@ -1,8 +1,6 @@
-﻿using Android.Icu.Number;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using static EV_Charger_App.ViewModels.MainPageViewModel;
+
 
 namespace EV_Charger_App.ViewModels
 {
