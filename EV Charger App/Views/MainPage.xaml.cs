@@ -11,6 +11,12 @@ using GoogleApi.Entities.Common;
 using System.Collections.Generic;
 using Android.OS;
 using System.Diagnostics;
+using GoogleApi.Entities.Maps.Common;
+using Android.App.AppSearch;
+using Distance = Xamarin.Forms.GoogleMaps.Distance;
+using Location = Xamarin.Essentials.Location;
+using Debug = System.Diagnostics.Debug;
+using GoogleApi.Entities.Places.Common;
 
 namespace EV_Charger_App
 {
@@ -21,6 +27,7 @@ namespace EV_Charger_App
         Location previousLocation;
         DoEAPI doe = new DoEAPI();
         GooglePlacesApi googlePlacesApi = new GooglePlacesApi();
+        List<Prediction> prediction = new List<Prediction>();
         public MainPage()
         {
             InitializeComponent();
@@ -35,27 +42,41 @@ namespace EV_Charger_App
             map.InfoWindowLongClicked += Map_InfoWindowLongClicked;
 
             searchBar.TextChanged += OnTextChanged;
+            searchResultsListView.ItemTapped += ListItemTapped;
             
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------
         // If the text changes in the search bar send a query for an autocomplete
+        //-----------------------------------------------------------------------------------------------------------------------------
         private async void OnTextChanged(object sender, TextChangedEventArgs e)
         {
-            if (!string.IsNullOrEmpty(e.NewTextValue)) 
+            try
             {
-                Coordinate latlng = new Coordinate(previousLocation.Latitude, previousLocation.Longitude);
-                var response = await googlePlacesApi.QueryAutoComplete(e.NewTextValue, latlng, GetVisibleRadius(map.CameraPosition.Zoom));
-                List<string> result = new List<string>();
-                // If response is not null then display the possible results in the list view
-                if (response != null)
+                if (!string.IsNullOrEmpty(e.NewTextValue))
                 {
-                    foreach (var pred in response.Predictions)
+                    // Take coordinates from previousLocation
+                    Coordinate latlng = new Coordinate(previousLocation.Latitude, previousLocation.Longitude);
+                    // Send API call based on text and location
+                    var response = await googlePlacesApi.AutoComplete(e.NewTextValue, latlng, GetVisibleRadius(map.CameraPosition.Zoom));
+                    prediction = (List<Prediction>)response.Predictions;
+                    List<string> result = new List<string>();
+                   
+                    // If response is not null then display the possible results in the list view
+                    if (response != null)
                     {
-                        System.Diagnostics.Debug.WriteLine("Prediction: " + pred.Description);
-                        result.Add(pred.Description);
+                        foreach (var pred in response.Predictions)
+                        {
+                            result.Add(pred.Description);
+                        }
+                        searchResultsListView.ItemsSource = result;
+                        searchResultsListView.IsVisible = true;
                     }
-                    searchResultsListView.ItemsSource = result;
-                    searchResultsListView.IsVisible = true;
+                    else
+                    {
+                        searchResultsListView.ItemsSource = null;
+                        searchResultsListView.IsVisible = false;
+                    }
                 }
                 else
                 {
@@ -63,30 +84,77 @@ namespace EV_Charger_App
                     searchResultsListView.IsVisible = false;
                 }
             }
-            else
-            {
-                searchResultsListView.ItemsSource = null;
-                searchResultsListView.IsVisible = false;
+            catch (Exception ex) {
+                Debug.WriteLine("Error calling autocomplete: " + ex.Message);
             }
         }
 
-
-        // Overload functions for if the user double clicks on an info card
-        private void Map_InfoWindowLongClicked(object sender, InfoWindowLongClickedEventArgs e)
+        //-----------------------------------------------------------------------------------------------------------------------------
+        // If user taps on item in prediction list move to that location
+        //-----------------------------------------------------------------------------------------------------------------------------
+        private async void ListItemTapped(object sender, ItemTappedEventArgs e)
         {
-            // Add code here to open up a different view of charger information
-            // @kate and @grant
+            try
+            {
+                string locationName = e.Item.ToString();
+                Debug.WriteLine("Item tapped" + locationName);
+                Location selectedPlace = new Location();
+
+                selectedPlace = await Task.Run(() => googlePlacesApi.GetLocationAsync(locationName).Result);
+
+                Debug.WriteLine("Location retrieved: " + selectedPlace.ToString());
+                if (selectedPlace == null)
+                {
+                    Debug.WriteLine("SelectePlace is null");
+                    Debug.WriteLine(e.Item.ToString());
+                    return;
+                }
+
+                // Move the map to the selected place
+                Position position = new Position(selectedPlace.Latitude, selectedPlace.Longitude);
+                Debug.WriteLine("Position is: " + position.Latitude + ", " + position.Longitude);
+
+                Pin pin = new Pin()
+                {
+                    Label = locationName,
+                    Position = position
+                };
+                
+                map.Pins.Add(pin);
+                map.MoveToRegion(MapSpan.FromCenterAndRadius(position, Distance.FromMiles(1)));
+
+                // Clear the search results and hide the list
+                searchResultsListView.IsVisible = false;
+            
+            }catch(Exception ex)
+            {
+                Debug.WriteLine("Error in Tapping Handler: " + $"{ex.Message}");
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------
+        // Overload functions for if the user double clicks on an info card
+        //-----------------------------------------------------------------------------------------------------------------------------
+        private async void Map_InfoWindowLongClicked(object sender, InfoWindowLongClickedEventArgs e)
+        {
+            await Navigation.PushAsync(new ReviewCharger());
 
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------
         // Responds on a camera moved action
+        //-----------------------------------------------------------------------------------------------------------------------------
         private void Map_CameraChanged(object sender, CameraChangedEventArgs e)
         {
             CameraPosition pos = e.Position;
             DynamicChargerLoadingAsync(pos);
         }
 
+        
+
+        //-----------------------------------------------------------------------------------------------------------------------------
         // Intialize the Google Map
+        //-----------------------------------------------------------------------------------------------------------------------------
         public void LoadMap(double latitude, double longitude)
         {
             try
@@ -132,7 +200,9 @@ namespace EV_Charger_App
             }
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------
         // Update the location of the users pin every 5 seconds
+        //-----------------------------------------------------------------------------------------------------------------------------
         async void TrackLocation()
         {
             // Intialization
@@ -176,7 +246,9 @@ namespace EV_Charger_App
             }
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------
         // Load chargers based on the camera position asynchronously 
+        //-----------------------------------------------------------------------------------------------------------------------------
         public void DynamicChargerLoadingAsync(CameraPosition pos)
         {
             double lat = pos.Target.Latitude;
@@ -188,7 +260,7 @@ namespace EV_Charger_App
                 double alt = pos.Zoom;
                 double radius = GetVisibleRadius(alt);
                 doe.getNearestCharger(lat.ToString(), lng.ToString(), radius.ToString());
-                //doe.getAvailableChargersInZip("72704");
+                
                 // Load the nearby chargers on startup
                 Root chargers = doe.LoadChargers();
                 if (chargers != null)
@@ -210,7 +282,9 @@ namespace EV_Charger_App
             }
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------
         // Find the relative radius of the camera view
+        //-----------------------------------------------------------------------------------------------------------------------------
         public static double GetVisibleRadius(double zoomLevel)
         {
             // Based on pixel five
@@ -234,9 +308,11 @@ namespace EV_Charger_App
             return visibleRadiusMiles;
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------
         //This gets called when you click the menu bar on the ribbon
         // Will send the user to the page containing a list of pages
         // (map screen link, login screen link, settings link)
+        //-----------------------------------------------------------------------------------------------------------------------------
         async private void ListClicked(object sender, EventArgs e)
         {
             await Navigation.PushAsync(new PagesList());

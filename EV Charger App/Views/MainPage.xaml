@@ -16,7 +16,7 @@
                        RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width, Factor=0.5, Constant=-171}"
                        RelativeLayout.YConstraint="{ConstraintExpression Type=Constant, Constant=10}"
                        />
-            <ListView x:Name="searchResultsListView" ItemsSource="{Binding searchResults}" BackgroundColor="White"
+            <ListView x:Name="searchResultsListView" ItemsSource="{Binding searchResults}" BackgroundColor="White" IsVisible="False"
                       RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width, Factor=0.5, Constant=-171}"
                       RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToView, ElementName=searchBar, Property=Y, Factor=1, Constant=50}"
                       RelativeLayout.HeightConstraint="{ConstraintExpression Type=Constant, Constant=150}">

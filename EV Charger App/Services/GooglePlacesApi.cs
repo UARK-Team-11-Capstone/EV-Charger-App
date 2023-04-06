@@ -1,13 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Android.App;
 using GoogleApi;
 using GoogleApi.Entities.Common;
 using GoogleApi.Entities.Maps.Common;
-using GoogleApi.Entities.Places.QueryAutoComplete.Request;
-using GoogleApi.Entities.Places.QueryAutoComplete.Response;
+using GoogleApi.Entities.Places.AutoComplete.Request;
+using GoogleApi.Entities.Places.AutoComplete.Response;
+using Xamarin.Essentials;
+using Location = Xamarin.Essentials.Location;
 
 namespace EV_Charger_App.Services
 {
@@ -19,10 +23,10 @@ namespace EV_Charger_App.Services
 
         }
 
-        public async Task<PlacesQueryAutoCompleteResponse> QueryAutoComplete(string input, Coordinate latlng, double radius)
+        public async Task<PlacesAutoCompleteResponse> AutoComplete(string input, Coordinate latlng, double radius)
         {
 
-            var autoCompleteRequest = new PlacesQueryAutoCompleteRequest()
+            var autoCompleteRequest = new PlacesAutoCompleteRequest()
             {
                 Key = apiKey,
                 Input = input,
@@ -30,11 +34,33 @@ namespace EV_Charger_App.Services
                 Radius = radius
             };
 
-            var autoCompleteResponse = await GooglePlaces.QueryAutoComplete.QueryAsync(autoCompleteRequest); 
+            var autoCompleteResponse = await GooglePlaces.AutoComplete.QueryAsync(autoCompleteRequest); 
 
             return autoCompleteResponse;
 
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------
+        // Provided with an address get the coordinate location
+        //-----------------------------------------------------------------------------------------------------------------------------
+        public async Task<Location> GetLocationAsync(string address)
+        {
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(address))
+                {
+                    Debug.WriteLine("Getting coordinates....");
+                    var locations = await Geocoding.GetLocationsAsync(address);
+                    Debug.WriteLine("Coordinate found: " + locations.First().Latitude + locations.First().Longitude);
+                    return locations.FirstOrDefault();
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"{ex.Message}");
+            }
+            return null;
+        }
+
     }
-    
 }
