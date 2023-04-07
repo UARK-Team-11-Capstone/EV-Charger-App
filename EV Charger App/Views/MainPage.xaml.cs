@@ -41,15 +41,41 @@ namespace EV_Charger_App
 
             map.InfoWindowLongClicked += Map_InfoWindowLongClicked;
 
-            searchBar.TextChanged += OnTextChanged;
-            searchResultsListView.ItemTapped += ListItemTapped;
-            
+            searchBar.TextChanged += (sender, e) => OnTextChanged(sender, e, searchResultsListView, searchBar);
+            secondSearchBar.TextChanged += (sender, e) => OnTextChanged(sender, e, searchResultsListView, secondSearchBar);
+            secondSearchBar.PropertyChanged += SecondSearchBar_PropertyChanged;
+            searchResultsListView.ItemTapped += (sender, e) => ListItemTapped(sender, e, searchResultsListView, searchBar);
+           
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------
+        // Trigger if the second search bar becomes visible
+        //-----------------------------------------------------------------------------------------------------------------------------
+        private void SecondSearchBar_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "IsVisible")
+            {
+                if (secondSearchBar.IsVisible)
+                {
+                    // Move the searchResultsListView down by the height of the secondSearchBar
+                    RelativeLayout.SetYConstraint(searchResultsListView, Constraint.RelativeToView(secondSearchBar, (parent, sibling) => sibling.Height + 10));
+                    // Position the lblInfo label below the secondSearchBar
+                    RelativeLayout.SetYConstraint(lblInfo, Constraint.RelativeToView(secondSearchBar, (parent, sibling) => sibling.Height + 70));
+                }
+                else
+                {
+                    // Move the searchResultsListView back to its original position
+                    RelativeLayout.SetYConstraint(searchResultsListView, Constraint.Constant(50));
+                    // Position the lblInfo label below the searchResultsListView
+                    RelativeLayout.SetYConstraint(lblInfo, Constraint.RelativeToView(searchResultsListView, (parent, sibling) => sibling.Height + 60));
+                }
+            }
+        }
+        
+        //-----------------------------------------------------------------------------------------------------------------------------
         // If the text changes in the search bar send a query for an autocomplete
         //-----------------------------------------------------------------------------------------------------------------------------
-        private async void OnTextChanged(object sender, TextChangedEventArgs e)
+        private async void OnTextChanged(object sender, TextChangedEventArgs e, ListView list, SearchBar srchBar)
         {
             try
             {
@@ -69,19 +95,19 @@ namespace EV_Charger_App
                         {
                             result.Add(pred.Description);
                         }
-                        searchResultsListView.ItemsSource = result;
-                        searchResultsListView.IsVisible = true;
+                        list.ItemsSource = result;
+                        list.IsVisible = true;
                     }
                     else
                     {
-                        searchResultsListView.ItemsSource = null;
-                        searchResultsListView.IsVisible = false;
+                        list.ItemsSource = null;
+                        list.IsVisible = false;
                     }
                 }
                 else
                 {
-                    searchResultsListView.ItemsSource = null;
-                    searchResultsListView.IsVisible = false;
+                    list.ItemsSource = null;
+                    list.IsVisible = false;
                 }
             }
             catch (Exception ex) {
@@ -92,7 +118,7 @@ namespace EV_Charger_App
         //-----------------------------------------------------------------------------------------------------------------------------
         // If user taps on item in prediction list move to that location
         //-----------------------------------------------------------------------------------------------------------------------------
-        private async void ListItemTapped(object sender, ItemTappedEventArgs e)
+        private async void ListItemTapped(object sender, ItemTappedEventArgs e, ListView listView, SearchBar srchBar)
         {
             try
             {
@@ -123,8 +149,15 @@ namespace EV_Charger_App
                 map.Pins.Add(pin);
                 map.MoveToRegion(MapSpan.FromCenterAndRadius(position, Distance.FromMiles(1)));
 
-                // Clear the search results and hide the list
-                searchResultsListView.IsVisible = false;
+                // Set the value in the search bar to the item being tapped and set whichever list is being used to invisible
+                srchBar.Text = locationName;
+                listView.IsVisible = false;
+
+                // If we have inputted our first destination make the second search bar visible
+                if (srchBar == searchBar)
+                {
+                    secondSearchBar.IsVisible = true;
+                }           
             
             }catch(Exception ex)
             {
