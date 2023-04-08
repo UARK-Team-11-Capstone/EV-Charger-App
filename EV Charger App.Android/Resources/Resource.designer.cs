@@ -16879,6 +16879,9 @@ namespace EV_Charger_App.Droid
 			// aapt resource value: 0x7F0700AC
 			public const int yellowstar = 2131165356;
 			
+			// aapt resource value: 0x7F0700AD
+			public const int yellowstar1 = 2131165357;
+			
 			static Drawable()
 			{
 				global::Android.Runtime.ResourceIdManager.UpdateIdValues();
