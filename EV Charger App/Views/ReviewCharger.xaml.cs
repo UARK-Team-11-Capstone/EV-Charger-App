@@ -20,35 +20,25 @@ namespace EV_Charger_App.Views
 		{
 			InitializeComponent ();
 		}
-
-        async private void SecondStar(object sender, EventArgs args)
+        
+        private async void OnSubmitButtonClicked(object sender, EventArgs e)
         {
-            
-            await Navigation.PushAsync(new MainPage());
+            // Get the selected rating and comment
+            int rating = (int)RatingSlider.Value;
+            String comment = CommentEditor.Text;
 
+            // Save the review to the database
+            //await App.Database.SaveReviewAsync(rating, comment);
+
+            // Show a confirmation message
+            await DisplayAlert("Thank you", "Your review has been submitted.", "OK");
+
+            // Reset the form
+            RatingSlider.Value = 1;
+            CommentEditor.Text = "";
         }
 
-        async private void ThirdStar(object sender, EventArgs args)
-        {
-
-            await Navigation.PushAsync(new MainPage());
-
-        }
-
-        async private void FourthStar(object sender, EventArgs args)
-        {
-
-            await Navigation.PushAsync(new MainPage());
-
-        }
-
-        async private void FifthStar(object sender, EventArgs args)
-        {
-
-            await Navigation.PushAsync(new MainPage());
-
-        }
     }
 
-    
+
 }
