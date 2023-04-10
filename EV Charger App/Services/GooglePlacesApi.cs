@@ -63,9 +63,7 @@ namespace EV_Charger_App.Services
             {
                 if (!string.IsNullOrWhiteSpace(address))
                 {
-                    Debug.WriteLine("Getting coordinates....");
-                    var locations = await Geocoding.GetLocationsAsync(address);
-                    Debug.WriteLine("Coordinate found: " + locations.First().Latitude + locations.First().Longitude);
+                    var locations = await Geocoding.GetLocationsAsync(address);                   
                     return locations.FirstOrDefault();
                 }
             }

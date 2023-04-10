@@ -36,21 +36,17 @@ namespace EV_Charger_App.Services
             string api_param = "api_key=" + api_key;
             
             string fileName = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Chargers.json");
-            //Debug.WriteLine("File path: " + fileName);
             
             try
             {
                 string URL = requestURL + callType + api_param + parameters;
-                Debug.WriteLine("URL COMMAND: " + URL);
+
                 HttpResponseMessage response = await client.GetAsync(URL);
                 if (response.IsSuccessStatusCode)
                 {
 
                     // Copy data from HTTP request to a string
                     string jsonContent = await response.Content.ReadAsStringAsync();
-                    // Serialize JSON data
-                    //string serializedJson = JsonConvert.SerializeObject(jsonContent);
-                    //Debug.WriteLine(serializedJson);
 
                     // Use lock on file and then write to the file
                     lock (_lock)
@@ -72,8 +68,6 @@ namespace EV_Charger_App.Services
                 Debug.WriteLine("Exception: " + ex.Message);
             }
 
-            //string file = File.ReadAllText(fileName);
-            //Debug.WriteLine("Content: " + file);
         }
 
         public Root LoadChargers()
@@ -102,7 +96,6 @@ namespace EV_Charger_App.Services
         {
             // Parameter for this request
             string param = "&zip=" + zipCode + fuel_type + status_code + ev_connector_type + access;
-            //Debug.WriteLine("Calling DoE for chargers in ZIP");
             _ = HTTPRequestAsync(param, callDefault);
         }
 
@@ -110,7 +103,6 @@ namespace EV_Charger_App.Services
         {
             // Parameter for this request
             string param = "&LINESTRING=" + lineString + "&distance=" + distance + fuel_type + status_code + ev_connector_type + access;
-
             // Collect response
             _ = HTTPRequestAsync(param, callNearestRoute);
         }
@@ -118,7 +110,6 @@ namespace EV_Charger_App.Services
         public void getNearestCharger(string latitude, string longitude, string radius)
         {
             string param = "&latitude=" + latitude + "&longitude=" + longitude + "&radius=" + radius + fuel_type + status_code + ev_connector_type + access;
-            Debug.WriteLine("Calling DoE for chargers in LAT/LONG radius");
             // Collect response
             _ = HTTPRequestAsync(param, callNearest);
             
@@ -127,7 +118,6 @@ namespace EV_Charger_App.Services
         public void getStationByID(string id)
         {
             string param = "&id=" + id;
-
             // Collect response
             _ = HTTPRequestAsync(param, callId);
         }
