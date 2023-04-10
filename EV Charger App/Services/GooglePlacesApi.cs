@@ -8,6 +8,8 @@ using Android.App;
 using GoogleApi;
 using GoogleApi.Entities.Common;
 using GoogleApi.Entities.Maps.Common;
+using GoogleApi.Entities.Maps.Directions.Request;
+using GoogleApi.Entities.Maps.Directions.Response;
 using GoogleApi.Entities.Places.AutoComplete.Request;
 using GoogleApi.Entities.Places.AutoComplete.Response;
 using Xamarin.Essentials;
@@ -38,6 +40,18 @@ namespace EV_Charger_App.Services
 
             return autoCompleteResponse;
 
+        }
+
+        public async Task<DirectionsResponse> Directions(string input, Coordinate latlng, double radius)
+        {
+            var directions = new DirectionsRequest()
+            {
+                Key= apiKey
+            };
+
+            var directionsResponse = await GoogleMaps.Directions.QueryAsync(directions);
+            
+            return directionsResponse;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------

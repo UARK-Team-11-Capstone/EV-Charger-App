@@ -4,55 +4,14 @@
              x:Class="EV_Charger_App.Views.ReviewCharger"
              Title="Review Page">
     <ContentPage.Content>
-        <RelativeLayout>
-            <ImageButton 
-                Source="yellowstar.png" 
-                BackgroundColor="Transparent"
-                RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width, Factor=0}"
-                RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent, Property=Height, Factor=0}" />
-            <ImageButton 
-                Source="graystar.png" 
-                BackgroundColor="Transparent"
-                
-                RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width, Factor=.2}"
-                RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent, Property=Height, Factor=0}" >
-
-                <VisualStateManager.VisualStateGroups>
-                    <VisualStateGroup x:Name="button">
-                        <VisualState x:Name="Normal">
-                            <VisualState.Setters>
-                                <Setter Property="Source" Value="yellowstar.png" />
-                            </VisualState.Setters>
-                        </VisualState>
-                        <VisualState x:Name="Pressed">
-                            <VisualState.Setters>
-                                <Setter Property="Source" Value="yellowstar.png" />
-                            </VisualState.Setters>
-                        </VisualState>
-                    </VisualStateGroup>
-                </VisualStateManager.VisualStateGroups>
-            </ImageButton>
-            
-            <ImageButton 
-                Source="graystar.png"
-                BackgroundColor="Transparent"
-                Clicked="ThirdStar"
-                RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width, Factor=.4}"
-                RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent, Property=Height, Factor=0}" />
-            <ImageButton 
-                Source="graystar.png" 
-                BackgroundColor="Transparent"
-                Clicked="FourthStar"
-                RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width, Factor=.6}"
-                RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent, Property=Height, Factor=0}" />
-            <ImageButton 
-                Source="graystar.png"
-                BackgroundColor="Transparent"
-                Clicked="FifthStar"
-
-                RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width, Factor=.8}"
-                RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent, Property=Height, Factor=0}" />
-            
-        </RelativeLayout>
+        <StackLayout Padding="20">
+            <Label Text="Leave a Review" FontSize="Large" HorizontalOptions="CenterAndExpand" />
+            <Label Text="Select a Rating:" />
+            <Slider x:Name="RatingSlider" Minimum="0" Maximum="5" Value="1" MinimumTrackColor="Gold"  ThumbImageSource="yellowstar1.png" />
+            <Label Text="{Binding Value, Source={x:Reference RatingSlider}, StringFormat='Rating: {0:F0}'}" />
+            <Label Text="Leave a Comment:" />
+            <Editor x:Name="CommentEditor" HeightRequest="100" />
+            <Button Text="Submit" Clicked="OnSubmitButtonClicked" />
+        </StackLayout>
     </ContentPage.Content>
 </ContentPage>

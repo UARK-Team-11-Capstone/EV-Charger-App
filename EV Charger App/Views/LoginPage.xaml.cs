@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EV_Charger_App.Services;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,9 +12,11 @@ namespace EV_Charger_App.Views
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class LoginPage : ContentPage
     {
-        public LoginPage()
+        Database database;
+        public LoginPage(Database db)
         {
             InitializeComponent();
+            database = db;
         }
 
         async private void LoginToCreate(object sender, EventArgs e)
@@ -32,8 +35,6 @@ namespace EV_Charger_App.Views
         //This is the function called when the login button is clicked
         async private void SubmitLogin(object sender, EventArgs args)
         {
-            //TODO: Add code to compare inputted credentials with existing credentials in the database
-
             String email = emailInput.Text;
             String password = passwordInput.Text;
 
