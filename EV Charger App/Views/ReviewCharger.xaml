@@ -2,10 +2,10 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="EV_Charger_App.Views.ReviewCharger"
-             Title="Review Page">
+             Title="Leave a Review">
     <ContentPage.Content>
         <StackLayout Padding="20">
-            <Label Text="Leave a Review" FontSize="Large" HorizontalOptions="CenterAndExpand" />
+            <Label Text="Name of Charger" FontSize="Large" HorizontalOptions="CenterAndExpand" />
             <Label Text="Select a Rating:" />
             <Slider x:Name="RatingSlider" Minimum="0" Maximum="5" Value="1" MinimumTrackColor="Gold"  ThumbImageSource="yellowstar1.png" />
             <Label Text="{Binding Value, Source={x:Reference RatingSlider}, StringFormat='Rating: {0:F0}'}" />
