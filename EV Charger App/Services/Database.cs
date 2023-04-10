@@ -1,10 +1,11 @@
 ﻿using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace EV_Charger_App.Services
 {
-    internal class Database
+    public class Database
     {
         // Login information
         private readonly string endpoint = "database-1.c2crdg7hfqi3.us-east-1.rds.amazonaws.com";
@@ -56,12 +57,25 @@ namespace EV_Charger_App.Services
         {
             if (Connect())
             {
-                string values = string.Join(",", recordValues);
-                string query = $"INSERT INTO {tableName} VALUES ({values})";
+                // Build the value placeholders of the SQL query
+                string valuePlaceholders = string.Join(",", recordValues.Select(r => $"@{Guid.NewGuid()}"));
+
+                // Build the full SQL query
+                string query = $"INSERT INTO {tableName} VALUES ({valuePlaceholders})";
+
+                // Create the parameter list
+                List<MySqlParameter> parameters = new List<MySqlParameter>();
+                for (int i = 0; i < recordValues.Length; i++)
+                {
+                    parameters.Add(new MySqlParameter($"@{i}", recordValues[i]));
+                }
+
                 MySqlCommand command = new MySqlCommand(query, connection);
+                command.Parameters.AddRange(parameters.ToArray());
                 command.ExecuteNonQuery();
             }
         }
+
 
         //Inserts a record with only the specified column values
         public void InsertRecordSpecific(string tableName, string[] columnNames, string[] recordValues)
@@ -70,14 +84,27 @@ namespace EV_Charger_App.Services
             {
                 if (columnNames.Length == recordValues.Length)
                 {
+                    // Build the column list and value placeholders of the SQL query
                     string columns = string.Join(",", columnNames);
-                    string values = string.Join(",", recordValues);
-                    string query = $"INSERT INTO {tableName} ({columns}) VALUES ({values})";
+                    string valuePlaceholders = string.Join(",", columnNames.Select(c => $"@{c}"));
+
+                    // Build the full SQL query
+                    string query = $"INSERT INTO {tableName} ({columns}) VALUES ({valuePlaceholders})";
+
+                    // Create the parameter list
+                    List<MySqlParameter> parameters = new List<MySqlParameter>();
+                    for (int i = 0; i < columnNames.Length; i++)
+                    {
+                        parameters.Add(new MySqlParameter($"@{columnNames[i]}", recordValues[i]));
+                    }
+
                     MySqlCommand command = new MySqlCommand(query, connection);
+                    command.Parameters.AddRange(parameters.ToArray());
                     command.ExecuteNonQuery();
                 }
             }
         }
+
 
         public void UpdateRecord(string tableName, string[] columnNames, string[] columnValues, string whereColumn, string whereValue)
         {
@@ -86,26 +113,32 @@ namespace EV_Charger_App.Services
                 if (columnNames.Length == columnValues.Length)
                 {
                     // Build the SET clause of the SQL query
-
                     List<string> setClauses = new List<string>();
+                    List<MySqlParameter> parameters = new List<MySqlParameter>();
 
                     for (int i = 0; i < columnNames.Length; i++)
                     {
-                        setClauses.Add($"{columnNames[i]} = '{columnValues[i]}'");
+                        string parameterName = $"@{columnNames[i]}";
+                        setClauses.Add($"{columnNames[i]} = {parameterName}");
+                        parameters.Add(new MySqlParameter(parameterName, columnValues[i]));
                     }
 
                     string setClause = string.Join(", ", setClauses);
 
                     // Build the WHERE clause of the SQL query
-                    string whereClause = $"{whereColumn} = '{whereValue}'";
+                    string whereClause = $"{whereColumn} = @whereValue";
+                    parameters.Add(new MySqlParameter("@whereValue", whereValue));
 
                     // Build the full SQL query
                     string query = $"UPDATE {tableName} SET {setClause} WHERE {whereClause}";
+
                     MySqlCommand command = new MySqlCommand(query, connection);
+                    command.Parameters.AddRange(parameters.ToArray());
                     command.ExecuteNonQuery();
                 }
             }
         }
+
 
         //Returns a list of array of objects, where each array of objects is a record, and each individual object in the array is a value in the record
         public List<object[]> GetQueryRecords(string query)
