@@ -59,10 +59,12 @@ namespace EV_Charger_App.Views
         //Checks if the email and password inputted match an email and password combination in the database
         bool CredentialsValid(String email, String password)
         {
+            string hashedPassword = app.database.HashPassword(password);
+
             string query = "SELECT * FROM Users WHERE email = @email AND password = @password";
 
             MySqlParameter emailParam = new MySqlParameter("@email", email);
-            MySqlParameter passwordParam = new MySqlParameter("@password", password);
+            MySqlParameter passwordParam = new MySqlParameter("@password", hashedPassword);
 
             return app.database.RecordExists(query, emailParam, passwordParam);
         }
