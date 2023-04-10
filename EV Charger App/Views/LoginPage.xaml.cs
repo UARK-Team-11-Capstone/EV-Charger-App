@@ -41,17 +41,20 @@ namespace EV_Charger_App.Views
             String email = emailInput.Text;
             String password = passwordInput.Text;
 
-            //Check if credentials are valid
-            if(CredentialsValid(email, password))
+            if(!string.IsNullOrWhiteSpace(email) && !string.IsNullOrWhiteSpace(password))
             {
-                //Create a session with a session token for the logged in user
-                app.CreateSession(email);
-                await Navigation.PushAsync(new MainPage(app));
-            }
-            else
-            {
-                //Display error message
-                LoginErrorText.Opacity = 1.0;
+                //Check if credentials are valid
+                if (CredentialsValid(email, password))
+                {
+                    //Create a session with a session token for the logged in user
+                    app.CreateSession(email);
+                    await Navigation.PushAsync(new MainPage(app));
+                }
+                else
+                {
+                    //Display error message
+                    LoginErrorText.Opacity = 1.0;
+                }
             }
             
         }
