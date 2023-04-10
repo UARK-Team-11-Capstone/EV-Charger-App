@@ -14,6 +14,7 @@ namespace EV_Charger_App.Services
         public Session(string email, Database db)
         {
             token = GenerateToken();
+            TokenToDatabase(email, db);
         }
 
         // Generates a new session token
@@ -46,6 +47,16 @@ namespace EV_Charger_App.Services
             return TokenToString(token);
         }
 
+
+        public bool TokenValid(string tokenInQuestion)
+        {
+            if(tokenInQuestion == TokenToString(token))
+            {
+                return true;
+            }
+
+            return false;
+        }
 
     }
 }

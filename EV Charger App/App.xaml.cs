@@ -32,7 +32,7 @@ namespace EV_Charger_App
 
         protected override void OnSleep()
         {
-            database.Disconnect();
+            
         }
 
         protected override void OnResume()

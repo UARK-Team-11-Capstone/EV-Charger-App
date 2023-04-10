@@ -1,4 +1,4 @@
-﻿using MySql.Data.MySqlClient;
+﻿using MySqlConnector;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,8 +16,6 @@ namespace EV_Charger_App.Services
 
         private MySqlConnection connection;
 
-        public MySqlConnection Connection => connection;
-
         public bool Connect()
         {
             try
@@ -25,7 +23,9 @@ namespace EV_Charger_App.Services
                 if (connection == null)
                 {
                     string connectionString = string.Format("Server={0}; database={1}; UID={2}; password={3}", endpoint, databaseName, username, password);
+
                     connection = new MySqlConnection(connectionString);
+                    
                     connection.Open();
                 }
 
@@ -165,17 +165,34 @@ namespace EV_Charger_App.Services
             return results;
         }
 
-
-        public bool RecordExists(string query)
+        //This is a general purpose function to safely check if a record exists
+        public bool RecordExists(string query, params MySqlParameter[] parameters)
         {
-            List<object[]> results = GetQueryRecords(query);
+            int recordCount = 0;
 
-            if (results.Count > 0)
+            if(Connect())
             {
-                return true;
+                using (MySqlCommand command = new MySqlCommand(query, connection))
+                {
+                    // Add parameters to the command
+                    if (parameters != null && parameters.Length > 0)
+                    {
+                        command.Parameters.AddRange(parameters);
+                    }
+
+                    // Execute the SELECT statement and count the number of records returned
+                    using (MySqlDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            recordCount++;
+                        }
+                    }
+                }
             }
 
-            return false;
+            // Return true if any records were found, false otherwise
+            return recordCount > 0;
         }
 
     }
