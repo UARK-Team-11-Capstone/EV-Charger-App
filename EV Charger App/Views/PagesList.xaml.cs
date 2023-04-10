@@ -48,7 +48,7 @@ namespace EV_Charger_App.Views
         // (map screen link, login screen link, settings link)
         async private void ListClicked(object sender, EventArgs e)
         {
-            await Navigation.PushAsync(new PagesList());
+            await Navigation.PushAsync(new PagesList(app));
         }
     }
 }

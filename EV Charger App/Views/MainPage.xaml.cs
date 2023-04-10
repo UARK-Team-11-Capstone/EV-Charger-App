@@ -350,7 +350,7 @@ namespace EV_Charger_App
         //-----------------------------------------------------------------------------------------------------------------------------
         async private void ListClicked(object sender, EventArgs e)
         {
-            await Navigation.PushAsync(new PagesList());
+            await Navigation.PushAsync(new PagesList(app));
         }
 
     }

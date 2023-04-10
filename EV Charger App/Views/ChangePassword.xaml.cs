@@ -23,7 +23,7 @@ namespace EV_Charger_App.Views
         //This is the function called when the Update Password button is clicked
         async private void SavePassword(object sender, EventArgs e)
         {
-            await Navigation.PushAsync(new UserSettings());
+            await Navigation.PushAsync(new UserSettings(app));
         }
     }
 }
