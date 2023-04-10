@@ -12,33 +12,35 @@ namespace EV_Charger_App.Views
 	[XamlCompilation(XamlCompilationOptions.Compile)]
 	public partial class PagesList : ContentPage
 	{
-		public PagesList ()
+        App app;
+		public PagesList (App app)
 		{
 			InitializeComponent ();
+            this.app = app;
 		}
 
         async private void MapScreen(object sender, EventArgs e)
         {
-            await Navigation.PushAsync(new MainPage());
+            await Navigation.PushAsync(new MainPage(app));
         }
 
         async private void LoginScreen(object sender, EventArgs e)
         {
-            await Navigation.PushAsync(new LoginPage());
+            await Navigation.PushAsync(new LoginPage(app));
         }
 
         async private void UserSettings(object sender, EventArgs e)
         {
-            await Navigation.PushAsync(new UserSettings());
+            await Navigation.PushAsync(new UserSettings(app));
         }
 
         async private void ReviewChargers(object sender, EventArgs e)
         {
-            await Navigation.PushAsync(new ReviewCharger());
+            await Navigation.PushAsync(new ReviewCharger(app));
         }
         async private void ChargerInformation(object sender, EventArgs e)
         {
-            await Navigation.PushAsync(new ChargerInfo());
+            await Navigation.PushAsync(new ChargerInfo(app));
         }
 
         //This gets called when you click the menu bar on the ribbon

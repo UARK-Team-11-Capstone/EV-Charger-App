@@ -12,16 +12,18 @@ namespace EV_Charger_App.Views
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class LoginPage : ContentPage
     {
-        Database database;
-        public LoginPage(Database db)
+
+        App app;
+
+        public LoginPage(App app)
         {
             InitializeComponent();
-            database = db;
+            this.app = app; 
         }
 
         async private void LoginToCreate(object sender, EventArgs e)
         {
-            await Navigation.PushAsync(new CreateAccountPage());
+            await Navigation.PushAsync(new CreateAccountPage(app));
         }
 
         //This gets called when you click the menu bar on the ribbon
@@ -41,7 +43,7 @@ namespace EV_Charger_App.Views
             //Check if credentials are valid
             if(CredentialsValid(email, password))
             {
-                await Navigation.PushAsync(new MainPage());
+                await Navigation.PushAsync(new MainPage(app));
             }
             else
             {

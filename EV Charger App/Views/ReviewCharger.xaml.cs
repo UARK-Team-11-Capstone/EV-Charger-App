@@ -16,9 +16,13 @@ namespace EV_Charger_App.Views
 	[XamlCompilation(XamlCompilationOptions.Compile)]
 	public partial class ReviewCharger : ContentPage
 	{
-		public ReviewCharger ()
+
+        App app;
+
+		public ReviewCharger (App app)
 		{
 			InitializeComponent ();
+            this.app = app;
 		}
         
         private async void OnSubmitButtonClicked(object sender, EventArgs e)

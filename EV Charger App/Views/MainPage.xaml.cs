@@ -22,13 +22,14 @@ namespace EV_Charger_App
 {
     public partial class MainPage : ContentPage
     {
+        App app;
 
         Xamarin.Forms.GoogleMaps.Map map;
         Location previousLocation;
         DoEAPI doe = new DoEAPI();
         GooglePlacesApi googlePlacesApi = new GooglePlacesApi();
         List<Prediction> prediction = new List<Prediction>();
-        public MainPage()
+        public MainPage(App app)
         {
             InitializeComponent();
 
@@ -45,7 +46,8 @@ namespace EV_Charger_App
             secondSearchBar.TextChanged += (sender, e) => OnTextChanged(sender, e, searchResultsListView, secondSearchBar);
             secondSearchBar.PropertyChanged += SecondSearchBar_PropertyChanged;
             searchResultsListView.ItemTapped += (sender, e) => ListItemTapped(sender, e, searchResultsListView, searchBar);
-           
+            
+            this.app = app;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------
@@ -170,7 +172,7 @@ namespace EV_Charger_App
         //-----------------------------------------------------------------------------------------------------------------------------
         private async void Map_InfoWindowLongClicked(object sender, InfoWindowLongClickedEventArgs e)
         {
-            await Navigation.PushAsync(new ReviewCharger());
+            await Navigation.PushAsync(new ReviewCharger(app));
 
         }
 
