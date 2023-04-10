@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace EV_Charger_App.Services
 {
@@ -193,6 +195,15 @@ namespace EV_Charger_App.Services
 
             // Return true if any records were found, false otherwise
             return recordCount > 0;
+        }
+
+        public string HashPassword(string password)
+        {
+            using (var sha256 = SHA256.Create())
+            {
+                byte[] hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+                return Convert.ToBase64String(hashedBytes);
+            }
         }
 
     }
