@@ -2,6 +2,7 @@
 using Xamarin.Essentials;
 using Xamarin.Forms;
 using Xamarin.Forms.GoogleMaps;
+using Xamarin.Forms.GoogleMaps.Extensions;
 using System.Linq;
 using EV_Charger_App.ViewModels;
 using System.Threading.Tasks;
@@ -11,12 +12,15 @@ using GoogleApi.Entities.Common;
 using System.Collections.Generic;
 using Android.OS;
 using System.Diagnostics;
+using GoogleApi;
 using GoogleApi.Entities.Maps.Common;
 using Android.App.AppSearch;
 using Distance = Xamarin.Forms.GoogleMaps.Distance;
 using Location = Xamarin.Essentials.Location;
 using Debug = System.Diagnostics.Debug;
 using GoogleApi.Entities.Places.Common;
+using GoogleApi.Entities.Maps.Directions.Response;
+using GoogleApi.Entities.Interfaces;
 
 namespace EV_Charger_App
 {
@@ -27,6 +31,7 @@ namespace EV_Charger_App
         Xamarin.Forms.GoogleMaps.Map map;
         Location previousLocation;
         DoEAPI doe = new DoEAPI();
+        RoutingAPI routeapi = new RoutingAPI();
         GooglePlacesApi googlePlacesApi = new GooglePlacesApi();
         List<Prediction> prediction = new List<Prediction>();
         public MainPage(App app)
@@ -36,9 +41,9 @@ namespace EV_Charger_App
             NavigationPage.SetHasNavigationBar(this, true);
             LoadMap(36.09171012916079, -94.20143973570228);
 
-            #pragma warning disable CS0618 // Type or member is obsolete
+#pragma warning disable CS0618 // Type or member is obsolete
             map.CameraChanged += Map_CameraChanged;
-            #pragma warning restore CS0618 // Type or member is obsolete
+#pragma warning restore CS0618 // Type or member is obsolete
 
             map.InfoWindowLongClicked += Map_InfoWindowLongClicked;
 
@@ -46,8 +51,7 @@ namespace EV_Charger_App
             secondSearchBar.TextChanged += (sender, e) => OnTextChanged(sender, e, searchResultsListView, secondSearchBar);
             secondSearchBar.PropertyChanged += SecondSearchBar_PropertyChanged;
             searchResultsListView.ItemTapped += (sender, e) => ListItemTapped(sender, e, searchResultsListView, searchBar);
-            
-            this.app = app;
+           
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------
@@ -73,7 +77,7 @@ namespace EV_Charger_App
                 }
             }
         }
-        
+
         //-----------------------------------------------------------------------------------------------------------------------------
         // If the text changes in the search bar send a query for an autocomplete
         //-----------------------------------------------------------------------------------------------------------------------------
@@ -89,7 +93,7 @@ namespace EV_Charger_App
                     var response = await googlePlacesApi.AutoComplete(e.NewTextValue, latlng, GetVisibleRadius(map.CameraPosition.Zoom));
                     prediction = (List<Prediction>)response.Predictions;
                     List<string> result = new List<string>();
-                   
+
                     // If response is not null then display the possible results in the list view
                     if (response != null)
                     {
@@ -147,7 +151,7 @@ namespace EV_Charger_App
                     Label = locationName,
                     Position = position
                 };
-                
+
                 map.Pins.Add(pin);
                 map.MoveToRegion(MapSpan.FromCenterAndRadius(position, Distance.FromMiles(1)));
 
@@ -159,9 +163,9 @@ namespace EV_Charger_App
                 if (srchBar == searchBar)
                 {
                     secondSearchBar.IsVisible = true;
-                }           
-            
-            }catch(Exception ex)
+                }
+
+            } catch (Exception ex)
             {
                 Debug.WriteLine("Error in Tapping Handler: " + $"{ex.Message}");
             }
@@ -185,7 +189,7 @@ namespace EV_Charger_App
             DynamicChargerLoadingAsync(pos);
         }
 
-        
+
 
         //-----------------------------------------------------------------------------------------------------------------------------
         // Intialize the Google Map
@@ -218,7 +222,7 @@ namespace EV_Charger_App
 
                 // Add map to screen stack
                 stackLayout.Children.Add(map);
-                
+
                 ContentMap.Content = stackLayout;
                 ContentMap.IsVisible = true;
                 layoutContainer.IsVisible = true;
@@ -295,7 +299,7 @@ namespace EV_Charger_App
                 double alt = pos.Zoom;
                 double radius = GetVisibleRadius(alt);
                 doe.getNearestCharger(lat.ToString(), lng.ToString(), radius.ToString());
-                
+
                 // Load the nearby chargers on startup
                 Root chargers = doe.LoadChargers();
                 if (chargers != null)
@@ -306,7 +310,7 @@ namespace EV_Charger_App
                         {
                             Type = PinType.Place,
                             Label = charger.station_name,
-                            Icon = (Device.RuntimePlatform == Device.Android) ? BitmapDescriptorFactory.FromBundle("Charger-Icon.png") : BitmapDescriptorFactory.FromView(new Image() { Source = "Charger-Icon.png", WidthRequest = 10, HeightRequest = 10, Aspect = Aspect.AspectFit}),
+                            Icon = (Device.RuntimePlatform == Device.Android) ? BitmapDescriptorFactory.FromBundle("Charger-Icon.png") : BitmapDescriptorFactory.FromView(new Image() { Source = "Charger-Icon.png", WidthRequest = 10, HeightRequest = 10, Aspect = Aspect.AspectFit }),
                             Position = new Position(Convert.ToDouble(charger.latitude), Convert.ToDouble(charger.longitude)),
 
                         };
@@ -324,8 +328,8 @@ namespace EV_Charger_App
         {
             // Based on pixel five
             int screenWidth = 1080;
-            int screenHeight = 2340; 
-            double mapAspectRatio = screenHeight/screenWidth;
+            int screenHeight = 2340;
+            double mapAspectRatio = screenHeight / screenWidth;
 
             // Calculate the dimensions of the visible area in pixels
             double visibleWidth = screenWidth;
@@ -341,6 +345,80 @@ namespace EV_Charger_App
             double visibleRadiusMiles = Math.Sqrt(visibleAreaMeters) / 1609.344;
 
             return visibleRadiusMiles;
+        }
+
+        public async void MakeRoute()
+        {
+            Address originAddress = new Address("");
+            Address destinationAddress = new Address("");
+
+            LocationEx origin = new LocationEx(originAddress);
+            LocationEx destination = new LocationEx(destinationAddress);
+            
+            var result = await routeapi.GetRouteAsync(origin, destination);
+
+            if (result == null)
+            {
+                // Handle error
+                return;
+            }
+
+            var encodedOverviewPolyline = result.Routes.First().OverviewPath.Points;
+
+            var positions = DecodePolyline(encodedOverviewPolyline);
+
+            var polyline = new Xamarin.Forms.GoogleMaps.Polyline
+            {
+                StrokeColor = Color.Blue,
+                StrokeWidth = 5,
+            };
+
+            foreach (var p in positions)
+            {
+                polyline.Positions.Add(p);
+            }
+
+            map.Polylines.Clear();
+            map.Polylines.Add(polyline);
+
+            map.MoveToRegion(MapSpan.FromPositions(positions));
+        }
+
+        public static List<Position> DecodePolyline(string encodedPoints)
+        {
+            var poly = new List<Position>();
+            int index = 0, len = encodedPoints.Length;
+            int lat = 0, lng = 0;
+
+            while (index < len)
+            {
+                int b, shift = 0, result = 0;
+                do
+                {
+                    b = encodedPoints[index++] - 63;
+                    result |= (b & 0x1f) << shift;
+                    shift += 5;
+                } while (b >= 0x20);
+
+                int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+                lat += dlat;
+
+                shift = 0;
+                result = 0;
+                do
+                {
+                    b = encodedPoints[index++] - 63;
+                    result |= (b & 0x1f) << shift;
+                    shift += 5;
+                } while (b >= 0x20);
+
+                int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+                lng += dlng;
+
+                poly.Add(new Position(lat / 1E5, lng / 1E5));
+            }
+
+            return poly;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------
