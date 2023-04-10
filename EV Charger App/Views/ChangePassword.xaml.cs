@@ -12,15 +12,18 @@ namespace EV_Charger_App.Views
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class ChangePassword : ContentPage
     {
-        public ChangePassword()
+        App app;
+
+        public ChangePassword(App app)
         {
             InitializeComponent();
+            this.app = app;
         }
 
         //This is the function called when the Update Password button is clicked
         async private void SavePassword(object sender, EventArgs e)
         {
-            await Navigation.PushAsync(new UserSettings());
+            await Navigation.PushAsync(new UserSettings(app));
         }
     }
 }

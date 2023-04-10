@@ -13,15 +13,18 @@ namespace EV_Charger_App.Views
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class UserSettings : ContentPage
     {
-        public UserSettings()
+
+        App app;
+
+        public UserSettings(App app)
         {
             InitializeComponent();
-
+            this.app = app;
         }
 
         async private void ListClicked(object sender, EventArgs e)
         {
-            await Navigation.PushAsync(new PagesList());
+            await Navigation.PushAsync(new PagesList(app));
         }
 
 
@@ -29,12 +32,12 @@ namespace EV_Charger_App.Views
         //This is the function called when the save button is clicked
         async private void SaveSettings(object sender, EventArgs e)
         {
-            await Navigation.PushAsync(new MainPage());
+            await Navigation.PushAsync(new MainPage(app));
         }
 
         async private void ChangePasswordTapped(object sender, EventArgs e)
         {
-            await Navigation.PushAsync(new ChangePassword());
+            await Navigation.PushAsync(new ChangePassword(app));
         }
 
        

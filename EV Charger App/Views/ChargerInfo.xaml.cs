@@ -12,9 +12,13 @@ namespace EV_Charger_App.Views
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class ChargerInfo : ContentPage
     {
-        public ChargerInfo()
+
+        App app;
+
+        public ChargerInfo(App app)
         {
             InitializeComponent();
+            this.app = app; 
         }
     }
 }

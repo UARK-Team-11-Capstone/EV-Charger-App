@@ -9,35 +9,37 @@ using EV_Charger_App.Views;
 using EV_Charger_App.Services;
 using GoogleApi.Entities.Common;
 using System.Collections.Generic;
-using Android.OS;
-using System.Diagnostics;
 using GoogleApi.Entities.Maps.Common;
-using Android.App.AppSearch;
 using Distance = Xamarin.Forms.GoogleMaps.Distance;
 using Location = Xamarin.Essentials.Location;
 using Debug = System.Diagnostics.Debug;
 using GoogleApi.Entities.Places.Common;
 
+
 namespace EV_Charger_App
 {
     public partial class MainPage : ContentPage
     {
+        App app;
 
         Xamarin.Forms.GoogleMaps.Map map;
         Location previousLocation;
         DoEAPI doe = new DoEAPI();
+        RoutingAPI routeapi = new RoutingAPI();
         GooglePlacesApi googlePlacesApi = new GooglePlacesApi();
         List<Prediction> prediction = new List<Prediction>();
-        public MainPage()
+        SearchBar lastChanged;
+        String lastAddress;
+        public MainPage(App app)
         {
             InitializeComponent();
 
             NavigationPage.SetHasNavigationBar(this, true);
             LoadMap(36.09171012916079, -94.20143973570228);
 
-            #pragma warning disable CS0618 // Type or member is obsolete
+#pragma warning disable CS0618 // Type or member is obsolete
             map.CameraChanged += Map_CameraChanged;
-            #pragma warning restore CS0618 // Type or member is obsolete
+#pragma warning restore CS0618 // Type or member is obsolete
 
             map.InfoWindowLongClicked += Map_InfoWindowLongClicked;
 
@@ -46,6 +48,25 @@ namespace EV_Charger_App
             secondSearchBar.PropertyChanged += SecondSearchBar_PropertyChanged;
             searchResultsListView.ItemTapped += (sender, e) => ListItemTapped(sender, e, searchResultsListView, searchBar);
            
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------
+        // Routing Button Clicked event handler
+        //-----------------------------------------------------------------------------------------------------------------------------
+        private async void OnButtonClicked(object sender, EventArgs e)
+        {
+            secondSearchBar.IsVisible = true;
+            searchBar.Placeholder = "Starting Point";
+
+            // Make sure addresses are valid
+            var search1 = await Task.Run(() => googlePlacesApi.GetLocationAsync(searchBar.Text).Result);
+            var search2 = await Task.Run(() => googlePlacesApi.GetLocationAsync(secondSearchBar.Text).Result);
+
+            // If the return address is valid then get a route
+            if (search1 != null && search2 != null)
+            {
+                GetRoute(searchBar.Text, secondSearchBar.Text);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------
@@ -58,20 +79,20 @@ namespace EV_Charger_App
                 if (secondSearchBar.IsVisible)
                 {
                     // Move the searchResultsListView down by the height of the secondSearchBar
-                    RelativeLayout.SetYConstraint(searchResultsListView, Constraint.RelativeToView(secondSearchBar, (parent, sibling) => sibling.Height + 10));
+                    RelativeLayout.SetYConstraint(searchResultsListView, Constraint.RelativeToView(secondSearchBar, (parent, sibling) => sibling.Bounds.Bottom));
                     // Position the lblInfo label below the secondSearchBar
-                    RelativeLayout.SetYConstraint(lblInfo, Constraint.RelativeToView(secondSearchBar, (parent, sibling) => sibling.Height + 70));
+                    RelativeLayout.SetYConstraint(lblInfo, Constraint.RelativeToView(secondSearchBar, (parent, sibling) => sibling.Bounds.Bottom + 70));
                 }
                 else
                 {
                     // Move the searchResultsListView back to its original position
-                    RelativeLayout.SetYConstraint(searchResultsListView, Constraint.Constant(50));
+                    RelativeLayout.SetYConstraint(searchResultsListView, Constraint.RelativeToView(searchBar, (parent, sibling) => sibling.Bounds.Bottom));
                     // Position the lblInfo label below the searchResultsListView
                     RelativeLayout.SetYConstraint(lblInfo, Constraint.RelativeToView(searchResultsListView, (parent, sibling) => sibling.Height + 60));
                 }
             }
         }
-        
+
         //-----------------------------------------------------------------------------------------------------------------------------
         // If the text changes in the search bar send a query for an autocomplete
         //-----------------------------------------------------------------------------------------------------------------------------
@@ -79,7 +100,7 @@ namespace EV_Charger_App
         {
             try
             {
-                if (!string.IsNullOrEmpty(e.NewTextValue))
+                if (!string.IsNullOrEmpty(e.NewTextValue) && !string.IsNullOrWhiteSpace(e.NewTextValue) && e.NewTextValue != "" && e.NewTextValue != lastAddress)
                 {
                     // Take coordinates from previousLocation
                     Coordinate latlng = new Coordinate(previousLocation.Latitude, previousLocation.Longitude);
@@ -87,7 +108,9 @@ namespace EV_Charger_App
                     var response = await googlePlacesApi.AutoComplete(e.NewTextValue, latlng, GetVisibleRadius(map.CameraPosition.Zoom));
                     prediction = (List<Prediction>)response.Predictions;
                     List<string> result = new List<string>();
-                   
+
+                    lastChanged = srchBar;
+
                     // If response is not null then display the possible results in the list view
                     if (response != null)
                     {
@@ -123,43 +146,36 @@ namespace EV_Charger_App
             try
             {
                 string locationName = e.Item.ToString();
-                Debug.WriteLine("Item tapped" + locationName);
                 Location selectedPlace = new Location();
 
                 selectedPlace = await Task.Run(() => googlePlacesApi.GetLocationAsync(locationName).Result);
 
-                Debug.WriteLine("Location retrieved: " + selectedPlace.ToString());
                 if (selectedPlace == null)
                 {
-                    Debug.WriteLine("SelectePlace is null");
-                    Debug.WriteLine(e.Item.ToString());
                     return;
                 }
 
                 // Move the map to the selected place
                 Position position = new Position(selectedPlace.Latitude, selectedPlace.Longitude);
-                Debug.WriteLine("Position is: " + position.Latitude + ", " + position.Longitude);
 
                 Pin pin = new Pin()
                 {
                     Label = locationName,
                     Position = position
                 };
-                
+
                 map.Pins.Add(pin);
                 map.MoveToRegion(MapSpan.FromCenterAndRadius(position, Distance.FromMiles(1)));
 
                 // Set the value in the search bar to the item being tapped and set whichever list is being used to invisible
-                srchBar.Text = locationName;
-                listView.IsVisible = false;
+                lastChanged.Text = locationName;
 
-                // If we have inputted our first destination make the second search bar visible
-                if (srchBar == searchBar)
-                {
-                    secondSearchBar.IsVisible = true;
-                }           
-            
-            }catch(Exception ex)
+                await Task.Delay(250);
+
+                listView.IsVisible = false;
+                lastAddress = locationName;
+
+            } catch (Exception ex)
             {
                 Debug.WriteLine("Error in Tapping Handler: " + $"{ex.Message}");
             }
@@ -170,7 +186,7 @@ namespace EV_Charger_App
         //-----------------------------------------------------------------------------------------------------------------------------
         private async void Map_InfoWindowLongClicked(object sender, InfoWindowLongClickedEventArgs e)
         {
-            await Navigation.PushAsync(new ReviewCharger());
+            await Navigation.PushAsync(new ReviewCharger(app));
 
         }
 
@@ -182,8 +198,6 @@ namespace EV_Charger_App
             CameraPosition pos = e.Position;
             DynamicChargerLoadingAsync(pos);
         }
-
-        
 
         //-----------------------------------------------------------------------------------------------------------------------------
         // Intialize the Google Map
@@ -216,7 +230,7 @@ namespace EV_Charger_App
 
                 // Add map to screen stack
                 stackLayout.Children.Add(map);
-                
+
                 ContentMap.Content = stackLayout;
                 ContentMap.IsVisible = true;
                 layoutContainer.IsVisible = true;
@@ -293,7 +307,7 @@ namespace EV_Charger_App
                 double alt = pos.Zoom;
                 double radius = GetVisibleRadius(alt);
                 doe.getNearestCharger(lat.ToString(), lng.ToString(), radius.ToString());
-                
+
                 // Load the nearby chargers on startup
                 Root chargers = doe.LoadChargers();
                 if (chargers != null)
@@ -304,7 +318,7 @@ namespace EV_Charger_App
                         {
                             Type = PinType.Place,
                             Label = charger.station_name,
-                            Icon = (Device.RuntimePlatform == Device.Android) ? BitmapDescriptorFactory.FromBundle("Charger-Icon.png") : BitmapDescriptorFactory.FromView(new Image() { Source = "Charger-Icon.png", WidthRequest = 10, HeightRequest = 10, Aspect = Aspect.AspectFit}),
+                            Icon = (Device.RuntimePlatform == Device.Android) ? BitmapDescriptorFactory.FromBundle("Charger-Icon.png") : BitmapDescriptorFactory.FromView(new Image() { Source = "Charger-Icon.png", WidthRequest = 10, HeightRequest = 10, Aspect = Aspect.AspectFit }),
                             Position = new Position(Convert.ToDouble(charger.latitude), Convert.ToDouble(charger.longitude)),
 
                         };
@@ -322,8 +336,8 @@ namespace EV_Charger_App
         {
             // Based on pixel five
             int screenWidth = 1080;
-            int screenHeight = 2340; 
-            double mapAspectRatio = screenHeight/screenWidth;
+            int screenHeight = 2340;
+            double mapAspectRatio = screenHeight / screenWidth;
 
             // Calculate the dimensions of the visible area in pixels
             double visibleWidth = screenWidth;
@@ -342,13 +356,93 @@ namespace EV_Charger_App
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------
+        // Call Directions API to get a route between two different locations
+        //-----------------------------------------------------------------------------------------------------------------------------
+        public async void GetRoute(string originAdd, string destinationAdd)
+        {
+            Address originAddress = new Address(originAdd);
+            Address destinationAddress = new Address(destinationAdd);
+
+            LocationEx origin = new LocationEx(originAddress);
+            LocationEx destination = new LocationEx(destinationAddress);
+            
+            var result = await routeapi.GetRouteAsync(origin, destination);
+
+            if (result == null)
+            {
+                // Handle error
+                return;
+            }
+
+            var encodedOverviewPolyline = result.Routes.First().OverviewPath.Points;
+
+            var positions = DecodePolyline(encodedOverviewPolyline);
+
+            var polyline = new Xamarin.Forms.GoogleMaps.Polyline
+            {
+                StrokeColor = Color.Blue,
+                StrokeWidth = 5,
+            };
+
+            foreach (var p in positions)
+            {
+                polyline.Positions.Add(p);
+            }
+
+            map.Polylines.Clear();
+            map.Polylines.Add(polyline);
+
+            map.MoveToRegion(MapSpan.FromPositions(positions));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------
+        // Draw the polyline onto the map
+        //-----------------------------------------------------------------------------------------------------------------------------
+        public static List<Position> DecodePolyline(string encodedPoints)
+        {
+            var poly = new List<Position>();
+            int index = 0, len = encodedPoints.Length;
+            int lat = 0, lng = 0;
+
+            while (index < len)
+            {
+                int b, shift = 0, result = 0;
+                do
+                {
+                    b = encodedPoints[index++] - 63;
+                    result |= (b & 0x1f) << shift;
+                    shift += 5;
+                } while (b >= 0x20);
+
+                int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+                lat += dlat;
+
+                shift = 0;
+                result = 0;
+                do
+                {
+                    b = encodedPoints[index++] - 63;
+                    result |= (b & 0x1f) << shift;
+                    shift += 5;
+                } while (b >= 0x20);
+
+                int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+                lng += dlng;
+
+                poly.Add(new Position(lat / 1E5, lng / 1E5));
+            }
+
+            return poly;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------
         //This gets called when you click the menu bar on the ribbon
         // Will send the user to the page containing a list of pages
         // (map screen link, login screen link, settings link)
         //-----------------------------------------------------------------------------------------------------------------------------
         async private void ListClicked(object sender, EventArgs e)
         {
-            await Navigation.PushAsync(new PagesList());
+            await Navigation.PushAsync(new PagesList(app));
         }
 
     }

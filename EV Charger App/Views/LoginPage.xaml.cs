@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EV_Charger_App.Services;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,14 +12,18 @@ namespace EV_Charger_App.Views
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class LoginPage : ContentPage
     {
-        public LoginPage()
+
+        App app;
+
+        public LoginPage(App app)
         {
             InitializeComponent();
+            this.app = app; 
         }
 
         async private void LoginToCreate(object sender, EventArgs e)
         {
-            await Navigation.PushAsync(new CreateAccountPage());
+            await Navigation.PushAsync(new CreateAccountPage(app));
         }
 
         //This gets called when you click the menu bar on the ribbon
@@ -26,21 +31,19 @@ namespace EV_Charger_App.Views
         // (map screen link, login screen link, settings link)
         async private void ListClicked(object sender, EventArgs e)
         {
-            await Navigation.PushAsync(new PagesList());
+            await Navigation.PushAsync(new PagesList(app));
         }
 
         //This is the function called when the login button is clicked
         async private void SubmitLogin(object sender, EventArgs args)
         {
-            //TODO: Add code to compare inputted credentials with existing credentials in the database
-
             String email = emailInput.Text;
             String password = passwordInput.Text;
 
             //Check if credentials are valid
             if(CredentialsValid(email, password))
             {
-                await Navigation.PushAsync(new MainPage());
+                await Navigation.PushAsync(new MainPage(app));
             }
             else
             {
