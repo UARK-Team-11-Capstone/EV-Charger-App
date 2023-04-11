@@ -13,7 +13,7 @@ namespace EV_Charger_App.Services
         private static readonly object _lock = new object();
         HttpClient client = new HttpClient();
 
-        static string api_key = "hFdk47D7j0ulexFWZ3a3IGqQIBJSA46W5srlkAaF";
+        static string api_key;
         static string fuel_type = "&fuel_type=ELEC";
         static string status_code = "&status_code=E";
         static string ev_connector_type = "&ev_connector_type=J1772";
@@ -25,9 +25,9 @@ namespace EV_Charger_App.Services
         static string callNearest = "v1/nearest.json?";
         static string callNearestRoute = "v1/nearby-route.json?";
         static string callId = ":id.json?";
-        public DoEAPI()
+        public DoEAPI(string key)
         {
-
+            api_key = key;
         }
       
         public async Task HTTPRequestAsync(string parameters, string callType)

@@ -49,9 +49,9 @@ namespace EV_Charger_App
             searchResultsListView.ItemTapped += (sender, e) => ListItemTapped(sender, e, searchResultsListView, searchBar);
 
             this.app = app;
-            doe = new DoEAPI();
+            doe = new DoEAPI(app.database.GetDOEAPIKey());
             routeAPI = new RoutingAPI();
-            googlePlacesApi = new GooglePlacesApi();
+            googlePlacesApi = new GooglePlacesApi(app.database.GetGoogleAPIKey());
             prediction = new List<Prediction>();
             mapFunc = new MapFunctionality(map, previousLocation, doe, routeAPI);
 
