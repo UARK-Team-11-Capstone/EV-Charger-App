@@ -1,4 +1,5 @@
-﻿using Android.OS;
+﻿using Android.Net.Wifi.Aware;
+using Android.OS;
 using MySqlConnector;
 using System;
 using System.Collections.Generic;
