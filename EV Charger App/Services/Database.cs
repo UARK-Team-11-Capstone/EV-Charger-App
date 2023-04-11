@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using Debug = System.Diagnostics.Debug;
 
 
@@ -258,6 +259,32 @@ namespace EV_Charger_App.Services
             Debug.WriteLine("DOE API Key: " + key);
 
             return key;
+        }
+
+        //Check if given email is valid
+        public bool IsValidEmail(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                return false;
+
+            try
+            {
+                // check for right formatting
+                return Regex.IsMatch(email,
+                    @"^[^@\s]+@[^@\s]+\.[^@\s]+$",
+                    RegexOptions.IgnoreCase);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        //Check if given password is valid
+        bool IsPasswordValid(string password)
+        {
+            // Check if password matches the pattern of 8 alphanumeric characters
+            return Regex.IsMatch(password, @"^[a-zA-Z0-9]{8}$");
         }
 
     }
