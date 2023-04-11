@@ -35,7 +35,7 @@ namespace EV_Charger_App
             InitializeComponent();
 
             NavigationPage.SetHasNavigationBar(this, true);
-            LoadMap(36.09171012916079, -94.20143973570228);
+            LoadMap(39.5, -98.35);
 
 #pragma warning disable CS0618 // Type or member is obsolete
             map.CameraChanged += Map_CameraChanged;
@@ -215,7 +215,9 @@ namespace EV_Charger_App
                     MapType = MapType.Street,
                     IsEnabled = true
                 };
-
+                
+                map.MoveToRegion(MapSpan.FromCenterAndRadius(new Position(latitude,longitude), Distance.FromMiles(1000)));
+                
                 // Call the track location function
                 TrackLocation();
 
@@ -277,8 +279,6 @@ namespace EV_Charger_App
                 // Only move if location has changed
                 if (loc != previousLocation)
                 {
-                    // Move to current location of user with radius of one mile
-                    // map.MoveToRegion(MapSpan.FromCenterAndRadius(new Position(loc.Latitude, loc.Longitude), Distance.FromMiles(1)));
                     // Find the current location pin and adjust the location
                     Pin currLoc = map.Pins.First(Pin => Pin.Label == "Current Location");
                     currLoc.Position = new Position(Convert.ToDouble(loc.Latitude), Convert.ToDouble(loc.Longitude));
@@ -300,6 +300,8 @@ namespace EV_Charger_App
         {
             double lat = pos.Target.Latitude;
             double lng = pos.Target.Longitude;
+            // Get the current DateTime object
+            DateTime currentDate = DateTime.Now;
 
             if (previousLocation != null && pos != null)
             {
@@ -314,18 +316,46 @@ namespace EV_Charger_App
                 {
                     foreach (var charger in chargers.fuel_stations)
                     {
-                        var chargerPin = new Pin()
-                        {
-                            Type = PinType.Place,
-                            Label = charger.station_name,
-                            Icon = (Device.RuntimePlatform == Device.Android) ? BitmapDescriptorFactory.FromBundle("Charger-Icon.png") : BitmapDescriptorFactory.FromView(new Image() { Source = "Charger-Icon.png", WidthRequest = 10, HeightRequest = 10, Aspect = Aspect.AspectFit }),
-                            Position = new Position(Convert.ToDouble(charger.latitude), Convert.ToDouble(charger.longitude)),
 
-                        };
-                        map.Pins.Add(chargerPin);
+                        // Get the difference in last updated for the charger and assign green, yellow, or red status based on this
+                        DateTime chargerDate = charger.updated_at;
+                        TimeSpan difference = currentDate - chargerDate;
+
+                        if(difference.TotalDays < 7)
+                        {
+                            var chargerPin = new Pin()
+                            {
+                                Type = PinType.Place,
+                                Label = charger.station_name,
+                                Icon = (Device.RuntimePlatform == Device.Android) ? BitmapDescriptorFactory.FromBundle("Charger-Icon-Green.png") : BitmapDescriptorFactory.FromView(new Image() { Source = "Charger-Icon-Green.png", WidthRequest = 10, HeightRequest = 10, Aspect = Aspect.AspectFit }),
+                                Position = new Position(Convert.ToDouble(charger.latitude), Convert.ToDouble(charger.longitude)),
+                            };
+                            map.Pins.Add(chargerPin);
+                        }
+                        else if(difference.TotalDays < 31)
+                        {
+                            var chargerPin = new Pin()
+                            {
+                                Type = PinType.Place,
+                                Label = charger.station_name,
+                                Icon = (Device.RuntimePlatform == Device.Android) ? BitmapDescriptorFactory.FromBundle("Charger-Icon-Yellow.png") : BitmapDescriptorFactory.FromView(new Image() { Source = "Charger-Icon-Yellow.png", WidthRequest = 10, HeightRequest = 10, Aspect = Aspect.AspectFit }),
+                                Position = new Position(Convert.ToDouble(charger.latitude), Convert.ToDouble(charger.longitude)),
+                            };
+                            map.Pins.Add(chargerPin);
+                        }
+                        else
+                        {
+                            var chargerPin = new Pin()
+                            {
+                                Type = PinType.Place,
+                                Label = charger.station_name,
+                                Icon = (Device.RuntimePlatform == Device.Android) ? BitmapDescriptorFactory.FromBundle("Charger-Icon-Red.png") : BitmapDescriptorFactory.FromView(new Image() { Source = "Charger-Icon-Red.png", WidthRequest = 10, HeightRequest = 10, Aspect = Aspect.AspectFit }),
+                                Position = new Position(Convert.ToDouble(charger.latitude), Convert.ToDouble(charger.longitude)),
+                            };
+                            map.Pins.Add(chargerPin);
+                        }                                                           
                     }
                 }
-
             }
         }
 

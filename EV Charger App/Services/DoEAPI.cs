@@ -77,7 +77,7 @@ namespace EV_Charger_App.Services
                 // Grab directory path to the JSON file
                 string fileName = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData), "Chargers.json");
                 
-                lock (_lock)
+                lock (_lock) 
                 {
                     string jsonString = File.ReadAllText(fileName);
                     return JsonConvert.DeserializeObject<Root>(jsonString);
