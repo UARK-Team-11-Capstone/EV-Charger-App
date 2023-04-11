@@ -5,9 +5,10 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
              x:Class="EV_Charger_App.Views.LoginPage"
+             BackgroundColor="#F0F3F5"
              Shell.NavBarIsVisible="True">
-    
-    <ContentPage.Content>
+
+    <ContentPage.Content >
         <StackLayout Padding="10,0,10,0" Margin="0,90">
             <Image Source="gmlogo.png" Aspect="Fill" HeightRequest="200" WidthRequest="200" HorizontalOptions="Center" Margin="0,20"/>
             <Label Text="SIGN IN" HorizontalOptions="Center" TextColor="Black" FontAttributes="Bold" FontSize="Large"/>

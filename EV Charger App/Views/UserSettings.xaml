@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="EV_Charger_App.Views.UserSettings"
+             BackgroundColor="#F0F3F5"
              Title="Settings">
     <ContentPage.ToolbarItems>
         <ToolbarItem IconImageSource="menubar1.png" Clicked="ListClicked"/>
@@ -10,13 +11,13 @@
         <TableView Intent="Settings" >
             <TableRoot>
                 <TableSection>
-                    <EntryCell Label="Name" Placeholder="John Doe" />
-                    <EntryCell Label="Email" Placeholder="jdoe@uark.edu"/>
-                    <EntryCell Label="Vehicle Type" Placeholder="Bolt"/>
+                    <EntryCell Label="Name" Placeholder="John Doe" LabelColor="#3D3935"/>
+                    <EntryCell Label="Email" Placeholder="jdoe@uark.edu" LabelColor="#3D3935"/>
+                    <EntryCell Label="Vehicle Type" Placeholder="Bolt" LabelColor="#3D3935"/>
 
                     <ViewCell x:Name="Password" Tapped="ChangePasswordTapped">
                         <StackLayout >
-                            <Label Text="    Change Password" VerticalOptions="CenterAndExpand" FontSize="Body"/>
+                            <Label Text="    Change Password" VerticalOptions="CenterAndExpand" FontSize="Body" TextColor="#3D3935"/>
                         </StackLayout>
                     </ViewCell>
                 </TableSection>

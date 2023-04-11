@@ -22,9 +22,6 @@ namespace EV_Charger_App.Views
 
             Title = "Charger Information";
 
-            /*var mapView = new MapView();
-            mapView.MapType = MapType.Standard;*/
-
             var nameLabel = new Label
             {
                 Text = "Name of Charger",
@@ -51,16 +48,15 @@ namespace EV_Charger_App.Views
                 Margin = new Thickness(10),
             };
 
-            var websiteLabel = new Label
-            {
-                Text = "https://www.gm.com",
-                Margin = new Thickness(10),
-                TextColor = Color.Blue,
-            };
-            websiteLabel.GestureRecognizers.Add(new TapGestureRecognizer
-            {
-                Command = new Command(() => Device.OpenUri(new Uri("https://www.gm.com"))),
-            });
+            //GM specific hex color used for the text 
+            string hexColor = "#3D3935";
+            Color GMBlack = Color.FromHex(hexColor);
+
+            //Changing the color to the text to GM black  
+            nameLabel.TextColor = GMBlack;
+            addressLabel.TextColor = GMBlack;
+            updatedLabel.TextColor = GMBlack;
+            accessibilityLabel.TextColor = GMBlack;
 
             var infoLayout = new StackLayout
             {
@@ -70,7 +66,6 @@ namespace EV_Charger_App.Views
                     addressLabel,
                     updatedLabel,
                     accessibilityLabel,
-                    websiteLabel,
                 }
             };
 
