@@ -74,6 +74,10 @@ namespace EV_Charger_App.Views
                 Content = infoLayout,
             };
 
+            //GM specific hex color used for the button
+            string bluehexColor = "#0072CE";
+            Color GMBlue = Color.FromHex(bluehexColor);
+
             var buttonLayout = new StackLayout
             {
                 Orientation = StackOrientation.Horizontal,
@@ -82,13 +86,15 @@ namespace EV_Charger_App.Views
                 {
                     new Button
                     {
-                        Text = "Directions",
+                        Text = "Review Charger",
                         HorizontalOptions = LayoutOptions.FillAndExpand,
-                    },
-                    new Button
-                    {
-                        Text = "Save",
-                        HorizontalOptions = LayoutOptions.FillAndExpand,
+                        BackgroundColor = GMBlue,
+                        CornerRadius=10,
+                        Command = new Command(async () =>
+                        {
+                            await Navigation.PushAsync(new ReviewCharger(app));
+                        })
+
                     },
                 }
             };
