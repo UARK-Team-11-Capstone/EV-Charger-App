@@ -51,6 +51,11 @@ namespace EV_Charger_App.Views
                     await Navigation.PushAsync(new UserSettings(app));
                 }
             }
+            else
+            {
+                //Display error message
+                SavePasswordErrorText.Opacity = 1.0;
+            }
         }
 
         public bool VerifyCurrentPassword(string currentPassword, string token)
@@ -68,5 +73,6 @@ namespace EV_Charger_App.Views
             
             return app.database.RecordExists(query, passwordParam, tokenParam);
         }
+
     }
 }
