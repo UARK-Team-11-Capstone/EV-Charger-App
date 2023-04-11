@@ -1,9 +1,12 @@
-﻿using MySqlConnector;
+﻿using Android.OS;
+using MySqlConnector;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using Debug = System.Diagnostics.Debug;
+
 
 namespace EV_Charger_App.Services
 {
@@ -204,6 +207,56 @@ namespace EV_Charger_App.Services
                 byte[] hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
                 return Convert.ToBase64String(hashedBytes);
             }
+        }
+
+        public string GetGoogleAPIKey()
+        {
+            string key = "";
+
+            if(Connect())
+            {
+                string query = "SELECT * FROM APIKeys WHERE KeyName = 'Google API Key'";
+
+                using (MySqlCommand command = new MySqlCommand(query, connection))
+                {
+                    using (MySqlDataReader reader = command.ExecuteReader())
+                    {
+                        if(reader.Read())
+                        {
+                            key = reader.GetString(1);
+                        }
+                    }
+                }
+            }
+
+            Debug.WriteLine("Google API Key: " + key);
+
+            return key;
+        }
+
+        public string GetDOEAPIKey()
+        {
+            string key = "";
+
+            if (Connect())
+            {
+                string query = "SELECT * FROM APIKeys WHERE KeyName = 'DOE API Key'";
+
+                using (MySqlCommand command = new MySqlCommand(query, connection))
+                {
+                    using (MySqlDataReader reader = command.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            key = reader.GetString(1);
+                        }
+                    }
+                }
+            }
+
+            Debug.WriteLine("DOE API Key: " + key);
+
+            return key;
         }
 
     }
