@@ -5,6 +5,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
              x:Class="EV_Charger_App.Views.CreateAccountPage"
+             BackgroundColor="#F0F3F5"
              Shell.NavBarIsVisible="False">
 
     <ContentPage.Content>
