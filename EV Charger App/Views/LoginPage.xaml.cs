@@ -48,7 +48,7 @@ namespace EV_Charger_App.Views
                 {
                     //Create a session with a session token for the logged in user
                     app.CreateSession(email);
-                    await Navigation.PushAsync(new MainPage(app));
+                    await Navigation.PushAsync(new ChangePassword(app));
                 }
                 else
                 {
@@ -56,7 +56,12 @@ namespace EV_Charger_App.Views
                     LoginErrorText.Opacity = 1.0;
                 }
             }
-            
+            else
+            {
+                //Display error message
+                LoginErrorText.Opacity = 1.0;
+            }
+
         }
 
         //Checks if the email and password inputted match an email and password combination in the database
