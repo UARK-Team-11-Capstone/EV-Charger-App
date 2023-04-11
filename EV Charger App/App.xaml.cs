@@ -4,6 +4,8 @@ using System;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using GoogleApi;
+using Debug = System.Diagnostics.Debug;
+
 
 namespace EV_Charger_App
 {
@@ -15,6 +17,8 @@ namespace EV_Charger_App
         public App()
         {
             InitializeComponent();
+            Debug.WriteLine("App Initialized");
+
             database = new Database();
             /*
             DependencyService.Register<MockDataStore>();
