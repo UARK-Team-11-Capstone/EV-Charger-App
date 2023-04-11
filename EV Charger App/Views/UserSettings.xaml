@@ -22,7 +22,7 @@
                 </TableSection>
             </TableRoot>
         </TableView>
-        <Button Clicked="SaveSettings" Text="Save" HorizontalOptions="CenterAndExpand" CornerRadius="10" HeightRequest="50" WidthRequest="300"/>
+        <Button Clicked="SaveSettings" Text="Save" BackgroundColor="#0072CE" HorizontalOptions="CenterAndExpand" CornerRadius="10" HeightRequest="50" WidthRequest="300"/>
         <BoxView HeightRequest="30" />
     </StackLayout>
     

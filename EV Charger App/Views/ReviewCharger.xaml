@@ -11,7 +11,7 @@
             <Label Text="{Binding Value, Source={x:Reference RatingSlider}, StringFormat='Rating: {0:F0}'}" />
             <Label Text="Leave a Comment:" />
             <Editor x:Name="CommentEditor" HeightRequest="100" />
-            <Button Text="Submit" Clicked="OnSubmitButtonClicked" />
+            <Button Text="Submit" BackgroundColor="#0072CE" CornerRadius="10" Clicked="OnSubmitButtonClicked" />
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>
