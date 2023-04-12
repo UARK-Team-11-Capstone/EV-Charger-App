@@ -22,7 +22,7 @@ namespace EV_Charger_App.Services
         private static readonly object _lock = new object();
         HttpClient client = new HttpClient();
 
-        static string api_key;
+        private static string api_key;
         static string fuel_type = "&fuel_type=ELEC";
         static string status_code = "&status_code=E";
         static string ev_connector_type = "&ev_connector_type=J1772";

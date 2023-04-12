@@ -343,42 +343,31 @@ namespace EV_Charger_App
                         DateTime chargerDate = charger.updated_at;
                         TimeSpan difference = currentDate - chargerDate;
 
+                        string chargerIconName = "";
+
                         if(difference.TotalDays < 7)
                         {
-                            var chargerPin = new Pin()
-                            {                                                                
-                                Tag = charger.id,
-                                Type = PinType.Place,
-                                Label = charger.station_name,
-                                Icon = (Device.RuntimePlatform == Device.Android) ? BitmapDescriptorFactory.FromBundle("Charger-Icon-Green.png") : BitmapDescriptorFactory.FromView(new Image() { Source = "Charger-Icon-Green.png", WidthRequest = 10, HeightRequest = 10, Aspect = Aspect.AspectFit }),
-                                Position = new Position(Convert.ToDouble(charger.latitude), Convert.ToDouble(charger.longitude)),
-                            };
-                            map.Pins.Add(chargerPin);
+                            chargerIconName = "Charger-Icon-Green.png";
                         }
                         else if(difference.TotalDays < 31)
                         {
-                            var chargerPin = new Pin()
-                            {
-                                Tag = charger.id,
-                                Type = PinType.Place,
-                                Label = charger.station_name,
-                                Icon = (Device.RuntimePlatform == Device.Android) ? BitmapDescriptorFactory.FromBundle("Charger-Icon-Yellow.png") : BitmapDescriptorFactory.FromView(new Image() { Source = "Charger-Icon-Yellow.png", WidthRequest = 10, HeightRequest = 10, Aspect = Aspect.AspectFit }),
-                                Position = new Position(Convert.ToDouble(charger.latitude), Convert.ToDouble(charger.longitude)),
-                            };
-                            map.Pins.Add(chargerPin);
+                            chargerIconName = "Charger-Icon-Yellow.png";
                         }
                         else
                         {
-                            var chargerPin = new Pin()
-                            {
-                                Tag = charger.id,
-                                Type = PinType.Place,
-                                Label = charger.station_name,
-                                Icon = (Device.RuntimePlatform == Device.Android) ? BitmapDescriptorFactory.FromBundle("Charger-Icon-Red.png") : BitmapDescriptorFactory.FromView(new Image() { Source = "Charger-Icon-Red.png", WidthRequest = 10, HeightRequest = 10, Aspect = Aspect.AspectFit }),
-                                Position = new Position(Convert.ToDouble(charger.latitude), Convert.ToDouble(charger.longitude)),
-                            };
-                            map.Pins.Add(chargerPin);
-                        }                                                           
+                            chargerIconName = "Charger-Icon-Red.png";
+                        }
+
+                        var chargerPin = new Pin()
+                        {
+                            Tag = charger.id,
+                            Type = PinType.Place,
+                            Label = charger.station_name,
+                            Icon = (Device.RuntimePlatform == Device.Android) ? BitmapDescriptorFactory.FromBundle(chargerIconName) : BitmapDescriptorFactory.FromView(new Image() { Source = "Charger-Icon-Green.png", WidthRequest = 10, HeightRequest = 10, Aspect = Aspect.AspectFit }),
+                            Position = new Position(Convert.ToDouble(charger.latitude), Convert.ToDouble(charger.longitude)),
+                        };
+
+                        map.Pins.Add(chargerPin);
                     }
                 }
             }
