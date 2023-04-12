@@ -19,10 +19,10 @@ namespace EV_Charger_App.Services
 {
    public class GooglePlacesApi
     {
-        private readonly string apiKey = "AIzaSyAg3OyUuTc-u3Q28HD3D3PGErkVDv0fTkc";
-        public GooglePlacesApi() 
+        private static string apiKey;
+        public GooglePlacesApi(string key) 
         {
-
+            apiKey = key;
         }
 
         public async Task<PlacesAutoCompleteResponse> AutoComplete(string input, Coordinate latlng, double radius)

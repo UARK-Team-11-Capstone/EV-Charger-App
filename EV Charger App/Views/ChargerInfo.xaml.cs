@@ -15,6 +15,8 @@ namespace EV_Charger_App.Views
 
         App app;
 
+        string chargerID = "";
+
         public ChargerInfo(App app)
         {
             InitializeComponent();
@@ -92,7 +94,7 @@ namespace EV_Charger_App.Views
                         CornerRadius=10,
                         Command = new Command(async () =>
                         {
-                            await Navigation.PushAsync(new ReviewCharger(app));
+                            await Navigation.PushAsync(new ReviewCharger(app, chargerID));
                         })
 
                     },

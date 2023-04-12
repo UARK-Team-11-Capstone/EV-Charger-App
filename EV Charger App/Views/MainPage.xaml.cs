@@ -57,10 +57,10 @@ namespace EV_Charger_App
             secondSearchBar.PropertyChanged += SecondSearchBar_PropertyChanged;
             searchResultsListView.ItemTapped += (sender, e) => ListItemTapped(sender, e, searchResultsListView, searchBar);
 
-            chargerRouting = true;
-            doe = new DoEAPI();
+            this.app = app;
+            doe = new DoEAPI(app.database.GetDOEAPIKey());
             routeAPI = new RoutingAPI();
-            googlePlacesApi = new GooglePlacesApi();
+            googlePlacesApi = new GooglePlacesApi(app.database.GetGoogleAPIKey());
             prediction = new List<Prediction>();
             chargePercentage = 100;
             maxRange = 1;

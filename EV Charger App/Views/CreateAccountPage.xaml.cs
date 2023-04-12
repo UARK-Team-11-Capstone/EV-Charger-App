@@ -46,6 +46,7 @@ namespace EV_Charger_App.Views
                 RegisterUser(email, password);
             }
 
+            await DisplayAlert("", "Your account has been created.", "OK");
 
             await Navigation.PushAsync(new LoginPage(app));
         }

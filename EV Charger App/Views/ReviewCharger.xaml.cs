@@ -19,10 +19,13 @@ namespace EV_Charger_App.Views
 
         App app;
 
-		public ReviewCharger (App app)
+        string chargerID;
+
+		public ReviewCharger (App app, string id)
 		{
 			InitializeComponent ();
             this.app = app;
+            this.chargerID = id;
 		}
         
         private async void OnSubmitButtonClicked(object sender, EventArgs e)
@@ -32,6 +35,13 @@ namespace EV_Charger_App.Views
             String comment = CommentEditor.Text;
 
             // Save the review to the database
+            string email = GetUserFromToken();
+
+            //I need some way of getting the charger ID
+            string chargerID = "";
+
+            app.database.InsertRecord("Reviews", new string[4] { chargerID, email, rating.ToString(), comment });
+
             //await App.Database.SaveReviewAsync(rating, comment);
 
             // Show a confirmation message
@@ -40,6 +50,22 @@ namespace EV_Charger_App.Views
             // Reset the form
             RatingSlider.Value = 1;
             CommentEditor.Text = "";
+
+        }
+
+        string GetUserFromToken()
+        {
+            string email = "";
+
+            string token = app.session.getToken();
+
+            string query = "SELECT * FROM Users WHERE sessionToken = '" + token + "'";
+
+            List<Object[]> data = app.database.GetQueryRecords(query);
+
+            email = data[0][0].ToString();
+
+            return email;
         }
 
     }
