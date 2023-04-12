@@ -19,10 +19,13 @@ namespace EV_Charger_App.Views
 
         App app;
 
-		public ReviewCharger (App app)
+        string chargerID;
+
+		public ReviewCharger (App app, string id)
 		{
 			InitializeComponent ();
             this.app = app;
+            this.chargerID = id;
 		}
         
         private async void OnSubmitButtonClicked(object sender, EventArgs e)
