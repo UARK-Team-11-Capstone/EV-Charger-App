@@ -203,7 +203,7 @@ namespace EV_Charger_App
         //-----------------------------------------------------------------------------------------------------------------------------
         private async void Map_InfoWindowLongClicked(object sender, InfoWindowLongClickedEventArgs e)
         {
-            await Navigation.PushAsync(new ReviewCharger(app));
+            await Navigation.PushAsync(new ReviewCharger(app, ""));
 
         }
 
