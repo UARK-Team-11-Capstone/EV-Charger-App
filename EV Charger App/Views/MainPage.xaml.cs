@@ -333,7 +333,6 @@ namespace EV_Charger_App
                 {
                     foreach (var charger in chargers)
                     {
-
                         // Get the difference in last updated for the charger and assign green, yellow, or red status based on this
                         DateTime chargerDate = charger.updated_at;
                         TimeSpan difference = currentDate - chargerDate;
@@ -341,7 +340,7 @@ namespace EV_Charger_App
                         if(difference.TotalDays < 7)
                         {
                             var chargerPin = new Pin()
-                            {
+                            {                                                                
                                 Type = PinType.Place,
                                 Label = charger.station_name,
                                 Icon = (Device.RuntimePlatform == Device.Android) ? BitmapDescriptorFactory.FromBundle("Charger-Icon-Green.png") : BitmapDescriptorFactory.FromView(new Image() { Source = "Charger-Icon-Green.png", WidthRequest = 10, HeightRequest = 10, Aspect = Aspect.AspectFit }),

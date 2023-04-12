@@ -36,8 +36,12 @@ namespace EV_Charger_App.Services
 
         Root chargersAlongRoute;
         Root previousResults;
+        Root CHARGER_LIST;
+        bool writeToFile;
         public DoEAPI()
         {
+            writeToFile = false;
+            CHARGER_LIST = new Root();
             chargersAlongRoute = new Root();
             previousResults = new Root();
         }
@@ -123,79 +127,96 @@ namespace EV_Charger_App.Services
 
         public void ProcessResponse(string response, string callType)
         {
-            // Copy data from HTTP request to a string
-            string fileName = Path.Combine(Application.Context.FilesDir.AbsolutePath, "Chargers.json");
-            previousResults = JsonConvert.DeserializeObject<Root>(response);
-
-            Root doeResponse = previousResults;
-
-            // Store chargers separately if from route call
-            if (callType == callNearestRoute)
+            // Add toggle for whether or not we want to store in a file
+            if (writeToFile == false)
             {
-                chargersAlongRoute = previousResults;
+                // Add new chargers to the master object
+                var result = JsonConvert.DeserializeObject<Root>(response);
+                CHARGER_LIST.fuel_stations = result.fuel_stations.Except(result.fuel_stations).ToList();
             }
-
-            // If this is the devices first time using the app we need to create the Chargers.json file first
-            if (!File.Exists(fileName))
+            else
             {
-                File.Create(fileName);
-            }
+                // Copy data from HTTP request to a string
+                string fileName = Path.Combine(Application.Context.FilesDir.AbsolutePath, "Chargers.json");
+                previousResults = JsonConvert.DeserializeObject<Root>(response);
 
-            // Use lock on file and then write to the file
-            lock (_lock)
-            {
-                // Read current status, append new stations, and then append file
-                string json = File.ReadAllText(fileName);
-                Root curr = JsonConvert.DeserializeObject<Root>(json);
+                Root doeResponse = previousResults;
 
-                // Check to make sure the file wasn't empty
-                if (curr != null)
+                // Store chargers separately if from route call
+                if (callType == callNearestRoute)
                 {
-                    curr.fuel_stations.AddRange(doeResponse.fuel_stations);
-
-                    string updatedRoot = JsonConvert.SerializeObject(curr);
-                    // Serialize object and append file
-                    File.WriteAllText(fileName, updatedRoot);
+                    chargersAlongRoute = previousResults;
                 }
-                else
+
+                // If this is the devices first time using the app we need to create the Chargers.json file first
+                if (!File.Exists(fileName))
                 {
-                    File.WriteAllText(fileName, response);
+                    File.Create(fileName);
+                }
+
+                // Use lock on file and then write to the file
+                lock (_lock)
+                {
+                    // Read current status, append new stations, and then append file
+                    string json = File.ReadAllText(fileName);
+                    Root curr = JsonConvert.DeserializeObject<Root>(json);
+
+                    // Check to make sure the file wasn't empty
+                    if (curr != null)
+                    {
+                        curr.fuel_stations.AddRange(doeResponse.fuel_stations);
+
+                        string updatedRoot = JsonConvert.SerializeObject(curr);
+                        // Serialize object and append file
+                        File.WriteAllText(fileName, updatedRoot);
+                    }
+                    else
+                    {
+                        File.WriteAllText(fileName, response);
+                    }
                 }
             }
         }
         public List<FuelStation> LoadChargers()
         {
-            try
+            if (writeToFile == false)
             {
-                // Grab directory path to the JSON file
-                string fileName = Path.Combine(Application.Context.FilesDir.AbsolutePath, "Chargers.json");
-
-                lock (_lock) 
+                return CHARGER_LIST.fuel_stations;
+            }
+            else
+            {
+                try
                 {
-                    string jsonString = File.ReadAllText(fileName);
-                    // We only want to add the stations that are new
-                    if (previousResults != null && !string.IsNullOrEmpty(jsonString))
+                    // Grab directory path to the JSON file
+                    string fileName = Path.Combine(Application.Context.FilesDir.AbsolutePath, "Chargers.json");
+
+                    lock (_lock)
                     {
-                        JsonSerializerSettings settings = new JsonSerializerSettings { CheckAdditionalContent = true };
-                        List<FuelStation> list = JsonConvert.DeserializeObject<Root>(jsonString).fuel_stations.Except(previousResults.fuel_stations).ToList();                      
-                        return list;
+                        string jsonString = File.ReadAllText(fileName);
+                        // We only want to add the stations that are new
+                        if (previousResults != null && !string.IsNullOrEmpty(jsonString))
+                        {
+                            JsonSerializerSettings settings = new JsonSerializerSettings { CheckAdditionalContent = true };
+                            List<FuelStation> list = JsonConvert.DeserializeObject<Root>(jsonString).fuel_stations.Except(previousResults.fuel_stations).ToList();
+                            return list;
+                        }
+                        else
+                        {
+                            return null;
+                        }
                     }
-                    else
-                    {
-                        return null;
-                    }                    
                 }
-            }
-            catch (JsonSerializationException ex)
-            {
-                Console.WriteLine($"Error reading JSON file: {ex.Message}"); 
-                Console.WriteLine($"Stack Trace: {ex.StackTrace}");
-                return null;
-            }
-            catch(Exception ex )
-            {
-                Console.WriteLine("Exception loading chargers: " + ex.Message);
-                return null;
+                catch (JsonSerializationException ex)
+                {
+                    Console.WriteLine($"Error reading JSON file: {ex.Message}");
+                    Console.WriteLine($"Stack Trace: {ex.StackTrace}");
+                    return null;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Exception loading chargers: " + ex.Message);
+                    return null;
+                }
             }
 
         }
