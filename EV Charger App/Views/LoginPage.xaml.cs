@@ -48,7 +48,7 @@ namespace EV_Charger_App.Views
                 {
                     //Create a session with a session token for the logged in user
                     app.CreateSession(email);
-                    await Navigation.PushAsync(new ChangePassword(app));
+                    await Navigation.PushAsync(new MainPage(app));
                 }
                 else
                 {

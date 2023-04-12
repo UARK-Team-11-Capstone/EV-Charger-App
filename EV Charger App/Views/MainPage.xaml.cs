@@ -14,7 +14,12 @@ using Distance = Xamarin.Forms.GoogleMaps.Distance;
 using Location = Xamarin.Essentials.Location;
 using Debug = System.Diagnostics.Debug;
 using GoogleApi.Entities.Places.Common;
-
+using Android.Locations;
+using Address = GoogleApi.Entities.Common.Address;
+using static Android.Icu.Text.Transliterator;
+using Position = Xamarin.Forms.GoogleMaps.Position;
+using GoogleApi.Entities.Interfaces;
+using GoogleApi.Entities.Maps.Directions.Response;
 
 namespace EV_Charger_App
 {
@@ -24,12 +29,16 @@ namespace EV_Charger_App
 
         Xamarin.Forms.GoogleMaps.Map map;
         Location previousLocation;
-        DoEAPI doe = new DoEAPI();
-        RoutingAPI routeapi = new RoutingAPI();
-        GooglePlacesApi googlePlacesApi = new GooglePlacesApi();
-        List<Prediction> prediction = new List<Prediction>();
+        DoEAPI doe;
+        RoutingAPI routeAPI;
+        GooglePlacesApi googlePlacesApi;
+        List<Prediction> prediction;
         SearchBar lastChanged;
         String lastAddress;
+        bool chargerRouting;
+        private int chargePercentage;
+        private int maxRange;
+        private int rechargeMileage;
         public MainPage(App app)
         {
             InitializeComponent();
@@ -47,7 +56,15 @@ namespace EV_Charger_App
             secondSearchBar.TextChanged += (sender, e) => OnTextChanged(sender, e, searchResultsListView, secondSearchBar);
             secondSearchBar.PropertyChanged += SecondSearchBar_PropertyChanged;
             searchResultsListView.ItemTapped += (sender, e) => ListItemTapped(sender, e, searchResultsListView, searchBar);
-           
+
+            chargerRouting = true;
+            doe = new DoEAPI();
+            routeAPI = new RoutingAPI();
+            googlePlacesApi = new GooglePlacesApi();
+            prediction = new List<Prediction>();
+            chargePercentage = 100;
+            maxRange = 1;
+            rechargeMileage = 10;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------
@@ -311,10 +328,10 @@ namespace EV_Charger_App
                 doe.getNearestCharger(lat.ToString(), lng.ToString(), radius.ToString());
 
                 // Load the nearby chargers on startup
-                Root chargers = doe.LoadChargers();
+                List<FuelStation> chargers = doe.LoadChargers();
                 if (chargers != null)
                 {
-                    foreach (var charger in chargers.fuel_stations)
+                    foreach (var charger in chargers)
                     {
 
                         // Get the difference in last updated for the charger and assign green, yellow, or red status based on this
@@ -395,8 +412,9 @@ namespace EV_Charger_App
 
             LocationEx origin = new LocationEx(originAddress);
             LocationEx destination = new LocationEx(destinationAddress);
-            
-            var result = await routeapi.GetRouteAsync(origin, destination);
+
+            // Call the routing api
+            var result = await routeAPI.GetRouteAsync(origin, destination);
 
             if (result == null)
             {
@@ -404,25 +422,199 @@ namespace EV_Charger_App
                 return;
             }
 
+            // Encoded points of polylines
             var encodedOverviewPolyline = result.Routes.First().OverviewPath.Points;
 
+            // Decoded point of polyline
             var positions = DecodePolyline(encodedOverviewPolyline);
 
-            var polyline = new Xamarin.Forms.GoogleMaps.Polyline
+            // If we want to route with charging consideration
+            if (chargerRouting == true)
             {
-                StrokeColor = Color.Blue,
-                StrokeWidth = 5,
-            };
+                // Call function to determine which chargers along the route we are going to use
+                List<FuelStation> finalRouteChargers = await GetChargingStationsAlongRouteAsync(positions, originAdd, destinationAdd);
+                List<Position> finalRoute = new List<Position>();                
+                FuelStation prev = new FuelStation();
 
-            foreach (var p in positions)
-            {
-                polyline.Positions.Add(p);
+                // Ensure that we have a valid list of chargers
+                if (finalRouteChargers != null)
+                {
+
+                    // We need to make API calls between the origin, chargers, and destination and combine the point data
+                    foreach (var charger in finalRouteChargers)
+                    {
+                        string chargerStringAdd = charger.street_address + ", " + charger.city + ", " + charger.state + "," + charger.zip;
+                        Address chargerAddress = new Address(chargerStringAdd);
+                        LocationEx chargerLocationEx = new LocationEx(chargerAddress);
+                        DirectionsResponse response = new DirectionsResponse();
+
+                        // If we are getting the first set of points from origin to the first charger
+                        if (charger == finalRouteChargers.First())
+                        {
+                            // Call the routing api between the origin and charger locationEx
+                            response = await routeAPI.GetRouteAsync(origin, chargerLocationEx);
+                        }
+                        else if (charger == finalRouteChargers.Last())
+                        {
+                            // Call the routing api between the charger and the destination
+                            response = await routeAPI.GetRouteAsync(chargerLocationEx, destination);
+                        }
+                        else
+                        {
+                            // Call the routing api between the previous charger and the current charger
+                            string prevChargerStringAdd = prev.street_address + ", " + prev.city + ", " + prev.state + "," + prev.zip;
+                            Address prevChargerAddress = new Address(chargerStringAdd);
+                            LocationEx prevChargerLocationEx = new LocationEx(chargerAddress);
+                            response = await routeAPI.GetRouteAsync(chargerLocationEx, prevChargerLocationEx);
+                        }
+
+                        // If we get a valid reponse add it to the list
+                        if (response != null)
+                        {
+                            // Add the points to the finalRoute list
+                            finalRoute.AddRange(DecodePolyline(response.Routes.First().OverviewPath.Points));
+                        }
+
+                        // Keep track of the previous charger
+                        prev = charger;
+                    }
+
+                    // Create actual polyline
+                    var polyline = new Xamarin.Forms.GoogleMaps.Polyline
+                    {
+                        StrokeColor = Color.Blue,
+                        StrokeWidth = 5,
+                    };
+
+                    // Add each point to the polyline
+                    foreach (var p in positions)
+                    {
+                        polyline.Positions.Add(p);
+                    }
+
+                    // Clear map and add line to map
+                    map.Polylines.Clear();
+                    map.Polylines.Add(polyline);
+
+                    map.MoveToRegion(MapSpan.FromPositions(positions));
+                }
             }
+            else
+            {
+                // Create actual polyline
+                var polyline = new Xamarin.Forms.GoogleMaps.Polyline
+                {
+                    StrokeColor = Color.Blue,
+                    StrokeWidth = 5,
+                };
 
-            map.Polylines.Clear();
-            map.Polylines.Add(polyline);
+                // Add each point to the polyline
+                foreach (var p in positions)
+                {
+                    polyline.Positions.Add(p);
+                }
 
-            map.MoveToRegion(MapSpan.FromPositions(positions));
+                // Clear map and add line to map
+                map.Polylines.Clear();
+                map.Polylines.Add(polyline);
+
+                map.MoveToRegion(MapSpan.FromPositions(positions));
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------
+        // Determine which charging stations to route to given a start and end point
+        //-----------------------------------------------------------------------------------------------------------------------------
+        public async Task<List<FuelStation>> GetChargingStationsAlongRouteAsync(List<Position> positions, string originAdd, string destinationAdd)
+        {
+            // Geocode the addresses to obtain coordinates
+            var originLocation = await Geocoding.GetLocationsAsync(originAdd);
+            var destinationLocation = await Geocoding.GetLocationsAsync(destinationAdd);
+            var originLocationLoc = originLocation.FirstOrDefault();
+            var destinationLocationLoc = destinationLocation.FirstOrDefault();
+            double distance = Location.CalculateDistance(originLocationLoc, destinationLocationLoc, DistanceUnits.Miles);
+
+            // Only route with chargers if the distances is long enough
+            if (maxRange * (chargePercentage * 1E-3) < distance)
+            {
+                List<Position> pos = new List<Position>();
+
+                Position prev = new Position();
+                foreach(var ps in positions)
+                {
+                    if(ps == positions.First())
+                    {
+                        prev = ps;
+                        continue;
+                    }
+                    else
+                    {
+                        // If the distance between two points is less than 5 miles we don't need that point
+                        if(Location.CalculateDistance(new Location(prev.Latitude, prev.Longitude), new Location(ps.Latitude, ps.Longitude), DistanceUnits.Miles) > 5)
+                        {
+                            // If we find a point more than five miles away add it to the list and move on
+                            pos.Add(ps);
+                            prev = ps;
+                        }
+                        else
+                        {
+                            prev = ps; continue;
+                        }
+                    }
+                }
+                //pos.Clear();
+                //pos.Add(new Position(originLocationLoc.Latitude, originLocationLoc.Longitude));
+                //pos.Add(new Position(destinationLocationLoc.Latitude, destinationLocationLoc.Longitude));
+                // Using the position data get list of chargers along the route from DoE
+                Root chargersAlongRoute = doe.getChargersAlongRoute(pos, "2");
+                int numChargers = (int)distance / rechargeMileage;
+
+                List<FuelStation> finalRouteChargers = new List<FuelStation>();
+                if (chargersAlongRoute != null && chargersAlongRoute.fuel_stations != null)
+                {
+                    // Loop through each charger provided
+                    foreach (var charger in chargersAlongRoute.fuel_stations)
+                    {
+                        // If we have enough chargers, break
+                        if (finalRouteChargers.Count >= numChargers)
+                        {
+                            break;
+                        }
+
+                        // Find the first charger
+                        if (finalRouteChargers.Count == 0)
+                        {
+                            // Find the distance between the origin and the first charger in the list
+                            double dist = Location.CalculateDistance(originLocationLoc, new Location(charger.latitude, charger.longitude), DistanceUnits.Miles);
+                            if (dist >= rechargeMileage)
+                            {
+                                finalRouteChargers.Add(charger);
+                            }
+                            // If the distance from the last charger added to the destination is greater than recharge distance, find the next charger
+                        }
+                        else if (Location.CalculateDistance(new Location(finalRouteChargers.Last().latitude, finalRouteChargers.Last().longitude), destinationLocationLoc, DistanceUnits.Miles) > rechargeMileage)
+                        {
+
+                            // Get distance between the last charger on the route and the next possible charger
+                            double dist = Location.CalculateDistance(new Location(finalRouteChargers.Last().latitude, finalRouteChargers.Last().longitude), new Location(charger.latitude, charger.longitude), DistanceUnits.Miles);
+                            if (dist >= rechargeMileage)
+                            {
+                                finalRouteChargers.Add(charger);
+                            }
+                        }                        
+                    }
+                    Debug.WriteLine("Num chargers on Route: " + finalRouteChargers.Count);
+                    return finalRouteChargers;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            else
+            {
+                return null;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------
