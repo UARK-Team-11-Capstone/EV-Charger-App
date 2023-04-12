@@ -64,7 +64,13 @@ namespace EV_Charger_App
             prediction = new List<Prediction>();
             chargePercentage = 100;
             maxRange = 1;
-            rechargeMileage = 10;
+            rechargeMileage = 5;
+            chargerRouting = false;
+        }
+
+        private void ChargerRoutingClicked(object sender, EventArgs e)
+        {
+            chargerRouting = !chargerRouting;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------
@@ -444,6 +450,7 @@ namespace EV_Charger_App
                 List<Position> finalRoute = new List<Position>();                
                 FuelStation prev = new FuelStation();
 
+                Debug.WriteLine("Chargers found along route, creating route...");
                 // Ensure that we have a valid list of chargers
                 if (finalRouteChargers != null)
                 {
@@ -478,6 +485,7 @@ namespace EV_Charger_App
                         // If we get a valid reponse add it to the list
                         if (response != null)
                         {
+                            Debug.WriteLine("Adding points to final route line ");
                             // Add the points to the finalRoute list
                             finalRoute.AddRange(DecodePolyline(response.Routes.First().OverviewPath.Points));
                         }
@@ -494,7 +502,7 @@ namespace EV_Charger_App
                     };
 
                     // Add each point to the polyline
-                    foreach (var p in positions)
+                    foreach (var p in finalRoute)
                     {
                         polyline.Positions.Add(p);
                     }
@@ -503,7 +511,7 @@ namespace EV_Charger_App
                     map.Polylines.Clear();
                     map.Polylines.Add(polyline);
 
-                    map.MoveToRegion(MapSpan.FromPositions(positions));
+                    map.MoveToRegion(MapSpan.FromPositions(finalRoute));
                 }
             }
             else
@@ -556,8 +564,10 @@ namespace EV_Charger_App
                     }
                     else
                     {
+                        double dist = Location.CalculateDistance(new Location(prev.Latitude, prev.Longitude), new Location(ps.Latitude, ps.Longitude), DistanceUnits.Miles);
+                        //Debug.WriteLine("Distance between chargers: " + dist);
                         // If the distance between two points is less than 5 miles we don't need that point
-                        if(Location.CalculateDistance(new Location(prev.Latitude, prev.Longitude), new Location(ps.Latitude, ps.Longitude), DistanceUnits.Miles) > 5)
+                        if (dist > 2)
                         {
                             // If we find a point more than five miles away add it to the list and move on
                             pos.Add(ps);
@@ -565,7 +575,7 @@ namespace EV_Charger_App
                         }
                         else
                         {
-                            prev = ps; continue;
+                            continue;
                         }
                     }
                 }
@@ -576,6 +586,7 @@ namespace EV_Charger_App
                     pos.Add(positions.Last());
                 }
 
+                Debug.WriteLine("Calling to get chargers along route with position points: (" + pos.First().Latitude + ", " + pos.First().Longitude + ") " + "(" + pos.Last().Latitude + ", " + pos.Last().Longitude + ")" );
                 // Using the position data get list of chargers along the route from DoE
                 Root chargersAlongRoute = doe.getChargersAlongRoute(pos, "2");
                 int numChargers = (int)distance / rechargeMileage;
@@ -589,27 +600,30 @@ namespace EV_Charger_App
                         // If we have enough chargers, break
                         if (finalRouteChargers.Count >= numChargers)
                         {
+                            Debug.WriteLine("Reached number of chargers needed");
                             break;
                         }
 
                         // Find the first charger
                         if (finalRouteChargers.Count == 0)
                         {
+                            
                             // Find the distance between the origin and the first charger in the list
                             double dist = Location.CalculateDistance(originLocationLoc, new Location(charger.latitude, charger.longitude), DistanceUnits.Miles);
                             if (dist >= rechargeMileage)
                             {
+                                Debug.WriteLine("Added first charger to final route charging");
                                 finalRouteChargers.Add(charger);
                             }
                             // If the distance from the last charger added to the destination is greater than recharge distance, find the next charger
                         }
                         else if (Location.CalculateDistance(new Location(finalRouteChargers.Last().latitude, finalRouteChargers.Last().longitude), destinationLocationLoc, DistanceUnits.Miles) > rechargeMileage)
                         {
-
                             // Get distance between the last charger on the route and the next possible charger
                             double dist = Location.CalculateDistance(new Location(finalRouteChargers.Last().latitude, finalRouteChargers.Last().longitude), new Location(charger.latitude, charger.longitude), DistanceUnits.Miles);
                             if (dist >= rechargeMileage)
                             {
+                                Debug.WriteLine("Added middle chargerg to final route charging");
                                 finalRouteChargers.Add(charger);
                             }
                         }                        
