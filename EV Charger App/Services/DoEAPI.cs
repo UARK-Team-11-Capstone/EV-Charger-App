@@ -70,7 +70,7 @@ namespace EV_Charger_App.Services
             }          
             catch (Exception ex)
             {
-                Debug.WriteLine("Exception: " + ex.Message);
+                Debug.WriteLine("In HTTPRequest Exception: " + ex.Message);
             }
         }
 
@@ -133,7 +133,15 @@ namespace EV_Charger_App.Services
             {
                 // Add new chargers to the master object
                 var result = JsonConvert.DeserializeObject<Root>(response);
-                CHARGER_LIST.fuel_stations = result.fuel_stations.Except(result.fuel_stations).ToList();
+                if (result != null && CHARGER_LIST.fuel_stations != null)
+                {
+                    CHARGER_LIST.fuel_stations.AddRange(result.fuel_stations);
+                    Debug.WriteLine("Charger Count is: " + CHARGER_LIST.fuel_stations.Count);
+                }
+                else if(result != null)
+                {
+                    CHARGER_LIST.fuel_stations = new List<FuelStation>(result.fuel_stations);
+                }
             }
             else
             {
@@ -182,7 +190,15 @@ namespace EV_Charger_App.Services
         {
             if (writeToFile == false)
             {
-                return CHARGER_LIST.fuel_stations;
+                if (CHARGER_LIST.fuel_stations != null)
+                {
+                    Debug.WriteLine("Charger Count: " + CHARGER_LIST.fuel_stations.Count);
+                    return CHARGER_LIST.fuel_stations;
+                }
+                else
+                {
+                    return null;
+                }
             }
             else
             {

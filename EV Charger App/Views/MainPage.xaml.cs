@@ -441,7 +441,6 @@ namespace EV_Charger_App
                 // Ensure that we have a valid list of chargers
                 if (finalRouteChargers != null)
                 {
-
                     // We need to make API calls between the origin, chargers, and destination and combine the point data
                     foreach (var charger in finalRouteChargers)
                     {
@@ -564,9 +563,13 @@ namespace EV_Charger_App
                         }
                     }
                 }
-                //pos.Clear();
-                //pos.Add(new Position(originLocationLoc.Latitude, originLocationLoc.Longitude));
-                //pos.Add(new Position(destinationLocationLoc.Latitude, destinationLocationLoc.Longitude));
+                
+                // If we ended up with only one charging station make sure we at least have two points for the request
+                if(pos.Count < 2)
+                {
+                    pos.Add(positions.Last());
+                }
+
                 // Using the position data get list of chargers along the route from DoE
                 Root chargersAlongRoute = doe.getChargersAlongRoute(pos, "2");
                 int numChargers = (int)distance / rechargeMileage;
