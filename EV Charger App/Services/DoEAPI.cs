@@ -13,6 +13,7 @@ using System.Linq;
 using Android.App;
 using GoogleApi.Entities.Maps.Common;
 using Android.Provider;
+using Org.Apache.Http.Impl.IO;
 
 namespace EV_Charger_App.Services
 {
@@ -74,7 +75,7 @@ namespace EV_Charger_App.Services
             }
         }
 
-        public async void PostHTTPRequestAsync(string callType, string lineString, string distance)
+        public async void PostHTTPRequestAsync(string callType, string lineStringPOST, string getParam, string distance)
         {
 
             string api_param = "api_key=" + api_key;
@@ -84,7 +85,7 @@ namespace EV_Charger_App.Services
             // Create a dictionary to hold the request parameters
             Dictionary<string, string> requestData = new Dictionary<string, string>
             {
-                { "route", lineString },
+                { "route", lineStringPOST },
                 { "distance", distance},
                 { "fuel_type", "ELEC" },
                 { "access", "public" },
@@ -116,7 +117,7 @@ namespace EV_Charger_App.Services
                     }
                     else
                     {
-                        Debug.WriteLine($"Error in Post Request: {response.StatusCode}");
+                        HTTPRequestAsync(getParam, callNearestRoute);
                     }
 
                 }
@@ -136,7 +137,11 @@ namespace EV_Charger_App.Services
                 if (result != null && CHARGER_LIST.fuel_stations != null)
                 {
                     CHARGER_LIST.fuel_stations.AddRange(result.fuel_stations);
-                    Debug.WriteLine("Charger Count is: " + CHARGER_LIST.fuel_stations.Count);
+
+                    if(callType == callNearestRoute)
+                    {
+                        chargersAlongRoute.fuel_stations = new List<FuelStation>(result.fuel_stations);
+                    }
                 }
                 else if(result != null)
                 {
@@ -244,32 +249,37 @@ namespace EV_Charger_App.Services
             HTTPRequestAsync(param, callDefault);
         }
 
-        public Root getChargersAlongRoute(List<Position> lineString, string distance)
+        public Root getChargersAlongRoute(List<Position> lineStringPOS, string distance)
         {
             // Given a list of locations create a request for the DOE
             int count = 0;
-            string LineString = "LINESTRING(";
+            string lineStringPOST = "LINESTRING(";
+            string lineStringGET = "LINESTRING(";
             
-            foreach(Position line in lineString)
+            foreach(Position line in lineStringPOS)
             {   
                 if (count == 0)
                 {
-                    LineString += line.Latitude + " " +line.Longitude;
+                    lineStringPOST += line.Longitude + " " +line.Latitude;
+                    lineStringGET += line.Longitude + "+" + line.Latitude;
                 }
                 else
                 {
-                    LineString += "," + line.Latitude + " " + line.Longitude;
+                    lineStringPOST += "," + line.Longitude + " " + line.Latitude;
+                    lineStringGET += "," + line.Longitude + "+" + line.Latitude;
                 }
                 count++;
             }
 
-            LineString += ")";
+            lineStringPOST += ")";
+            lineStringGET+= ")";
 
-            Debug.WriteLine("LineString:" + LineString);
-            Debug.WriteLine("Calling DoE for chargers along route...");
-            
+            string param = "&distance=2" + "&route=" + lineStringGET + fuel_type + status_code + ev_connector_type + access;
+            //Debug.WriteLine("LineString:" + LineString);
+            //Debug.WriteLine("Calling DoE for chargers along route...");
+
             // Collect response
-            PostHTTPRequestAsync(callNearestRoute, LineString, "2.0");
+            PostHTTPRequestAsync(callNearestRoute, lineStringPOST, param, "2.0");
 
             return chargersAlongRoute;
         }
