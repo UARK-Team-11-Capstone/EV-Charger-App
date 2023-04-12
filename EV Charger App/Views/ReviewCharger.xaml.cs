@@ -19,13 +19,13 @@ namespace EV_Charger_App.Views
 
         App app;
 
-        string chargerID;
+        string chargerName;
 
-		public ReviewCharger (App app, string id)
+		public ReviewCharger (App app, string name)
 		{
 			InitializeComponent ();
             this.app = app;
-            this.chargerID = id;
+            this.chargerName = name;
 		}
         
         private async void OnSubmitButtonClicked(object sender, EventArgs e)
@@ -38,9 +38,9 @@ namespace EV_Charger_App.Views
             string email = GetUserFromToken();
 
             //I need some way of getting the charger ID
-            string chargerID = "";
+            string chargerName = "";
 
-            app.database.InsertRecord("Reviews", new string[4] { chargerID, email, rating.ToString(), comment });
+            app.database.InsertRecord("Reviews", new string[4] { chargerName, email, rating.ToString(), comment });
 
             //await App.Database.SaveReviewAsync(rating, comment);
 

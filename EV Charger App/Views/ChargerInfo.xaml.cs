@@ -15,18 +15,29 @@ namespace EV_Charger_App.Views
 
         App app;
 
-        string chargerID = "";
+        string chargerName = "";
 
-        public ChargerInfo(App app)
+        string address = "";
+
+        string updated = "";
+
+        string accessibility = "";
+
+        public ChargerInfo(App app, string[] chargerInfo)
         {
             InitializeComponent();
             this.app = app;
+
+            chargerName = chargerInfo[0];
+            address = chargerInfo[1];
+            updated = chargerInfo[2];
+            accessibility = chargerInfo[3];
 
             Title = "Charger Information";
 
             var nameLabel = new Label
             {
-                Text = "Name of Charger",
+                Text = chargerName,
                 FontSize = Device.GetNamedSize(NamedSize.Large, typeof(Label)),
                 FontAttributes = FontAttributes.Bold,
                 Margin = new Thickness(10),
@@ -34,19 +45,19 @@ namespace EV_Charger_App.Views
 
             var addressLabel = new Label
             {
-                Text = "Address of Charger",
+                Text = address,
                 Margin = new Thickness(10),
             };
 
             var updatedLabel = new Label
             {
-                Text = "Last Updated",
+                Text = updated,
                 Margin = new Thickness(10),
             };
 
             var accessibilityLabel = new Label
             {
-                Text = "Accessibility information",
+                Text = accessibility,
                 Margin = new Thickness(10),
             };
 
@@ -94,7 +105,7 @@ namespace EV_Charger_App.Views
                         CornerRadius=10,
                         Command = new Command(async () =>
                         {
-                            await Navigation.PushAsync(new ReviewCharger(app, chargerID));
+                            await Navigation.PushAsync(new ReviewCharger(app, chargerName));
                         })
 
                     },
