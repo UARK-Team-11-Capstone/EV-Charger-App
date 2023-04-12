@@ -341,6 +341,7 @@ namespace EV_Charger_App
                         {
                             var chargerPin = new Pin()
                             {                                                                
+                                Tag = charger.id,
                                 Type = PinType.Place,
                                 Label = charger.station_name,
                                 Icon = (Device.RuntimePlatform == Device.Android) ? BitmapDescriptorFactory.FromBundle("Charger-Icon-Green.png") : BitmapDescriptorFactory.FromView(new Image() { Source = "Charger-Icon-Green.png", WidthRequest = 10, HeightRequest = 10, Aspect = Aspect.AspectFit }),
@@ -352,6 +353,7 @@ namespace EV_Charger_App
                         {
                             var chargerPin = new Pin()
                             {
+                                Tag = charger.id,
                                 Type = PinType.Place,
                                 Label = charger.station_name,
                                 Icon = (Device.RuntimePlatform == Device.Android) ? BitmapDescriptorFactory.FromBundle("Charger-Icon-Yellow.png") : BitmapDescriptorFactory.FromView(new Image() { Source = "Charger-Icon-Yellow.png", WidthRequest = 10, HeightRequest = 10, Aspect = Aspect.AspectFit }),
@@ -363,6 +365,7 @@ namespace EV_Charger_App
                         {
                             var chargerPin = new Pin()
                             {
+                                Tag = charger.id,
                                 Type = PinType.Place,
                                 Label = charger.station_name,
                                 Icon = (Device.RuntimePlatform == Device.Android) ? BitmapDescriptorFactory.FromBundle("Charger-Icon-Red.png") : BitmapDescriptorFactory.FromView(new Image() { Source = "Charger-Icon-Red.png", WidthRequest = 10, HeightRequest = 10, Aspect = Aspect.AspectFit }),
