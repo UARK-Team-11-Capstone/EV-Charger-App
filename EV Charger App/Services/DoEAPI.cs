@@ -36,10 +36,11 @@ namespace EV_Charger_App.Services
 
         Root chargersAlongRoute;
         Root previousResults;
-        public DoEAPI()
+        public DoEAPI(string key)
         {
             chargersAlongRoute = new Root();
             previousResults = new Root();
+            api_key = key;
         }
       
         public async void HTTPRequestAsync(string parameters, string callType)
