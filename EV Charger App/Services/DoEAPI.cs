@@ -38,7 +38,7 @@ namespace EV_Charger_App.Services
         Root previousResults;
         Root CHARGER_LIST;
         bool writeToFile;
-        public DoEAPI()
+        public DoEAPI(string key)
         {
             writeToFile = false;
             CHARGER_LIST = new Root();
