@@ -19,7 +19,10 @@ namespace EV_Charger_App.Views
 			InitializeComponent ();
             this.app = app;
             this.chargerName = name;
-		}
+
+            //Updates the Charger Name field
+            ChargerNames.Text = chargerName;
+        }
         
         private async void OnSubmitButtonClicked(object sender, EventArgs e)
         {
@@ -28,10 +31,7 @@ namespace EV_Charger_App.Views
             String comment = CommentEditor.Text;
 
             // Save the review to the database
-            string email = GetUserFromToken();
-
-            //I need some way of getting the charger ID
-            string chargerName = "";
+            string email = GetUserFromToken();  
 
             app.database.InsertRecord("Reviews", new string[4] { chargerName, email, rating.ToString(), comment });
 
