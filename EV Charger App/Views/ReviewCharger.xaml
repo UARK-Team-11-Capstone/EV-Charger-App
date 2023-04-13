@@ -10,6 +10,10 @@
             <Label Text="Select a Rating:" TextColor="#3D3935" />
             <Slider x:Name="RatingSlider" Minimum="0" Maximum="5" Value="1" MinimumTrackColor="#F0B323"  ThumbImageSource="yellowstar1.png" />
             <Label Text="{Binding Value, Source={x:Reference RatingSlider}, StringFormat='Rating: {0:F0}'}" TextColor="#3D3935"/>
+            <StackLayout Orientation="Horizontal">
+                <Image Source="wheelchair.png"/>
+                <CheckBox Color="Black"/>
+            </StackLayout>
             <Label Text="Leave a Comment:"  TextColor="#3D3935"/>
             <Editor x:Name="CommentEditor" TextColor="#3D3935" HeightRequest="100" />
             <Button Text="Submit" BackgroundColor="#0072CE" CornerRadius="10" Clicked="OnSubmitButtonClicked" />
