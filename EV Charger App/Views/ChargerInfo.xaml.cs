@@ -237,8 +237,8 @@ namespace EV_Charger_App.Views
 
                 var reviewStars = new Image
                 {
-                    Source = "five_star.png",
-                    Margin = new Thickness(5)
+                    Source = "five_star_10.png",
+                    Margin = new Thickness(10, 0, 5,0)
                 };
 
                 var dateLabel = new Label
