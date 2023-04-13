@@ -1,8 +1,11 @@
-﻿using System;
+﻿using Android.OS;
+using System;
 using System.Collections.Generic;
 
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+using Debug = System.Diagnostics.Debug;
+
 
 namespace EV_Charger_App.Views
 {
@@ -26,23 +29,31 @@ namespace EV_Charger_App.Views
         
         private async void OnSubmitButtonClicked(object sender, EventArgs e)
         {
-            // Get the selected rating and comment
-            int rating = (int)RatingSlider.Value;
-            String comment = CommentEditor.Text;
-
-            // Save the review to the database
-            string email = GetUserFromToken();
-
-            if(email == "")
+            try
             {
-                return;
+                // Get the selected rating and comment
+                int rating = (int)RatingSlider.Value;
+                String comment = CommentEditor.Text;
+
+                // Save the review to the database
+                string email = GetUserFromToken();
+
+                if(email == "")
+                {
+                    return;
+                }
+
+                string currentDate = DateTime.Now.ToString("MM-dd-yyyy");
+
+                app.database.InsertRecord("Reviews", new string[5] { chargerName, email, rating.ToString(), comment, currentDate });
             }
+            catch(NullReferenceException exception)
+            {
+                Debug.WriteLine(exception.Message);
+                await DisplayAlert("Error", "Your review could not be processed. Try again later.", "OK");
 
-
-            string currentDate = DateTime.Now.ToString("MM-dd-yyyy");
-
-
-            app.database.InsertRecord("Reviews", new string[5] { chargerName, email, rating.ToString(), comment, currentDate });
+                await Navigation.PushAsync(new MainPage(app));
+            }
 
             //await App.Database.SaveReviewAsync(rating, comment);
 
@@ -61,11 +72,15 @@ namespace EV_Charger_App.Views
 
             string token = app.session.getToken();
 
+            Debug.WriteLine("Client Side User Token: " + token);
+
             string query = "SELECT * FROM Users WHERE sessionToken = '" + token + "'";
 
             List<Object[]> data = app.database.GetQueryRecords(query);
 
             email = data[0][0].ToString();
+
+            Debug.WriteLine("Returning Email: " + email);
 
             return email;
         }
