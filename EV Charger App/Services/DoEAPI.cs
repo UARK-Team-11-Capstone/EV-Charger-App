@@ -33,7 +33,7 @@ namespace EV_Charger_App.Services
 
         Root chargersAlongRoute;
         Root previousResults;
-        Root CHARGER_LIST;
+        public Root CHARGER_LIST;
         bool writeToFile;
         Location prevRequest;
         double prevRequestRadius;
@@ -308,6 +308,20 @@ namespace EV_Charger_App.Services
             // Collect response
             HTTPRequestAsync(param, callId);
         }
-        
+
+        public FuelStation GetFuelStation(string stationName)
+        {
+            foreach(FuelStation station in CHARGER_LIST.fuel_stations) 
+            { 
+                if(station.station_name == stationName)
+                {
+                    return station;
+                }
+            }
+
+            Debug.WriteLine("Could not find station");
+
+            return new FuelStation();
+        }
     }
 }

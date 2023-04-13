@@ -49,12 +49,32 @@ namespace EV_Charger_App.Services
             connection = null;
         }
 
-        public void Query(String query)
+        public float GetChargerRating(string chargerName)
         {
-            if (Connect())
-            {
+            int sum = 0;
+            int count = 0;
 
+            string query = "SELECT * FROM Reviews WHERE chargerName = '" + chargerName + "'";
+
+            using (MySqlCommand command = new MySqlCommand(query, connection))
+            {
+                using (MySqlDataReader reader = command.ExecuteReader())
+                {
+                    while(reader.Read())
+                    {
+                        sum += reader.GetInt32(2);
+                        count++;
+                    }
+                }
             }
+
+            //To prevent dividing by zero in the case no queries are found
+            if (count == 0)
+            {
+                count++;
+            }
+
+            return sum / count;
         }
 
         //Inserts a full record into the database

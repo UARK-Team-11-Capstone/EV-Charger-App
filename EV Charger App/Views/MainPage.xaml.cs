@@ -215,13 +215,30 @@ namespace EV_Charger_App
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------
-        // Overload functions for if the user double clicks on an info card
+        // Overload functions for if the user long clicks on an info card
         //-----------------------------------------------------------------------------------------------------------------------------
         private async void Map_InfoWindowLongClicked(object sender, InfoWindowLongClickedEventArgs e)
         {
-            await Navigation.PushAsync(new ReviewCharger(app, ""));
+            Debug.WriteLine(e.Pin.Label);
+            await Navigation.PushAsync(new ChargerInfo(app, GetChargerInfo(e.Pin.Label)));
 
         }
+
+        //Function to get charger information to pass to charger information page
+        string[] GetChargerInfo(string chargerName)
+        {
+            FuelStation charger = doe.GetFuelStation(chargerName);
+
+            string address = charger.street_address + " " + charger.city + ", " + charger.state;
+            string updatedAt = charger.updated_at.ToString();
+            string accessibility = charger.access_days_time;
+
+            string rating = app.database.GetChargerRating(chargerName) + "";
+
+            return new string[4] { chargerName, address, updatedAt, accessibility };
+        }
+
+        
 
         //-----------------------------------------------------------------------------------------------------------------------------
         // Responds on a camera moved action
