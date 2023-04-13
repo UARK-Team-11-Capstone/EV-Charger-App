@@ -34,6 +34,7 @@ namespace EV_Charger_App.Views
                 Text = chargerName,
                 FontSize = Device.GetNamedSize(NamedSize.Large, typeof(Label)),
                 FontAttributes = FontAttributes.Bold,
+                HorizontalTextAlignment = TextAlignment.Center,
                 Margin = new Thickness(5),
             };
 
