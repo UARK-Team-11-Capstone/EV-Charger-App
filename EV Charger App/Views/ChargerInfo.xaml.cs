@@ -59,7 +59,7 @@ namespace EV_Charger_App.Views
                 Text = app.database.GetChargerRating(chargerName) + "",
                 FontSize = Device.GetNamedSize(NamedSize.Large, typeof(Label)),
                 FontAttributes = FontAttributes.Bold,
-                Margin = new Thickness(5),
+                Margin = new Thickness(70, 0, 0 ,0),
                 HorizontalOptions = LayoutOptions.Center,
                 HorizontalTextAlignment = TextAlignment.Center,
 
@@ -70,7 +70,7 @@ namespace EV_Charger_App.Views
 
             var totalStars = new Image { 
                 Source = starImage,
-                HorizontalOptions = LayoutOptions.Center
+                Margin = new Thickness(5, 0, 0, 0),
             };
 
             var addressText = new Label
