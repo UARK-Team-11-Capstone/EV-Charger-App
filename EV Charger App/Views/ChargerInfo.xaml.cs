@@ -122,8 +122,6 @@ namespace EV_Charger_App.Views
                 Text = " Reviews:",
                 Margin = new Thickness(5),
                 FontAttributes = FontAttributes.Bold,
-                //HorizontalOptions= LayoutOptions.Center,
-
             };
 
             //GM specific hex color used for the text 
@@ -149,46 +147,7 @@ namespace EV_Charger_App.Views
                     updatedLabel,
                     accessibilityText,
                     accessibilityLabel,
-                    /*new StackLayout
-                    {
-                        Orientation = StackOrientation.Horizontal, // Set the orientation to Horizontal
-                        Children =
-                        {
-                            addressText,
-                            addressLabel,
-                        }
-                    },
-                    new StackLayout
-                    {
-                        Orientation = StackOrientation.Horizontal, // Set the orientation to Horizontal
-                        Children =
-                        {
-                            updatedText,
-                            updatedLabel,
-                        }
-                    },
-                    new StackLayout
-                    {
-                        Orientation = StackOrientation.Horizontal, // Set the orientation to Horizontal
-                        Children =
-                        {
-                            accessibilityText,
-                            accessibilityLabel,
-                        }
-                    },*/
                     reviewsText,
-                    /*
-                    new StackLayout
-                    {
-                        Orientation = StackOrientation.Horizontal, // Set the orientation to Horizontal
-                        Children =
-                        {
-                            reviewStars,
-                            emailLabel,
-                        }
-                    },
-                    commentsLabel,
-                    */
                 }
             };
 
@@ -221,8 +180,7 @@ namespace EV_Charger_App.Views
                     },
                 }
             };
-
-            
+                     
 
             var mainLayout = new StackLayout
             {
