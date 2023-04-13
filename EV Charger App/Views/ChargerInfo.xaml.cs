@@ -1,5 +1,8 @@
-﻿using Xamarin.Forms;
+﻿using Android.Media.Audiofx;
+using System.Collections.Generic;
+using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+using Debug = System.Diagnostics.Debug;
 
 namespace EV_Charger_App.Views
 {
@@ -17,6 +20,8 @@ namespace EV_Charger_App.Views
 
         string accessibility = "";
 
+        StackLayout infoLayout;
+
         public ChargerInfo(App app, string[] chargerInfo)
         {
             InitializeComponent();
@@ -32,6 +37,14 @@ namespace EV_Charger_App.Views
             var nameLabel = new Label
             {
                 Text = chargerName,
+                FontSize = Device.GetNamedSize(NamedSize.Large, typeof(Label)),
+                FontAttributes = FontAttributes.Bold,
+                Margin = new Thickness(5),
+            };
+
+            var avgStars = new Label
+            {
+                Text = app.database.GetChargerRating(chargerName) + "",
                 FontSize = Device.GetNamedSize(NamedSize.Large, typeof(Label)),
                 FontAttributes = FontAttributes.Bold,
                 Margin = new Thickness(5),
@@ -92,6 +105,7 @@ namespace EV_Charger_App.Views
             };
 
             //Review Labels
+            /*
             var emailLabel = new Label
             {
                 Text = "email@uark.edu",
@@ -101,6 +115,7 @@ namespace EV_Charger_App.Views
             var reviewStars = new Image
             {
                 Source = "newfive_star.png",
+                Margin = new Thickness(5)
             };
 
             var commentsLabel = new Label
@@ -108,6 +123,7 @@ namespace EV_Charger_App.Views
                 Text = "LOTS OF RANDOM WORDS",
                 Margin = new Thickness(10,0,0,0),
             };
+            */
 
             //GM specific hex color used for the text 
             string hexColor = "#3D3935";
@@ -119,7 +135,7 @@ namespace EV_Charger_App.Views
             updatedLabel.TextColor = GMBlack;
             accessibilityLabel.TextColor = GMBlack;
 
-            var infoLayout = new StackLayout
+            infoLayout = new StackLayout
             {
                 Children =
                 {
@@ -162,16 +178,18 @@ namespace EV_Charger_App.Views
                         }
                     },
                     reviewsText,
+                    /*
                     new StackLayout
                     {
                         Orientation = StackOrientation.Horizontal, // Set the orientation to Horizontal
                         Children =
                         {
-                            emailLabel,
                             reviewStars,
+                            emailLabel,
                         }
                     },
-                    commentsLabel,                    
+                    commentsLabel,
+                    */
                 }
             };
 
@@ -205,6 +223,8 @@ namespace EV_Charger_App.Views
                 }
             };
 
+            
+
             var mainLayout = new StackLayout
             {
                 Children =
@@ -215,6 +235,58 @@ namespace EV_Charger_App.Views
             };
 
             Content = mainLayout;
+
+            PopulateReviews();
+        }
+
+
+        void PopulateReviews()
+        {
+            Debug.WriteLine("Populating Reviews");
+            List<object[]> reviews = app.database.GetQueryRecords("SELECT * FROM Reviews WHERE chargerName = '" + chargerName + "'");
+
+            foreach (object[] review in reviews)
+            {
+                string email = review[1].ToString();
+                string rating = review[2].ToString();
+                string comment = review[3].ToString();
+
+                Debug.WriteLine(email + " " + rating + comment);
+
+
+                //Review Labels
+                var emailLabel = new Label
+                {
+                    Text = email,
+                    Margin = new Thickness(10, 0, 5, 0),
+                };
+
+                var reviewStars = new Image
+                {
+                    Source = "newfive_star.png",
+                    Margin = new Thickness(5)
+                };
+
+                var commentsLabel = new Label
+                {
+                    Text = comment,
+                    Margin = new Thickness(10, 0, 0, 0),
+                };
+
+                var reviewHeader = new StackLayout
+                {
+                    Orientation = StackOrientation.Horizontal, // Set the orientation to Horizontal
+                    Children =
+                        {
+                            reviewStars,
+                            emailLabel,
+                        }
+                };
+                
+                infoLayout.Children.Add(reviewHeader);
+                infoLayout.Children.Add(commentsLabel);
+                
+            }
         }
     }
 }
