@@ -63,7 +63,7 @@ namespace EV_Charger_App.Views
             };
 
 
-
+            starImage = setStarImage(bigStars, rating);
 
             var totalStars = new Image { Source = starImage };
 
