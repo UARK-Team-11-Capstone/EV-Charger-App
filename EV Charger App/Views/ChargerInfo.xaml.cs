@@ -47,41 +47,50 @@ namespace EV_Charger_App.Views
             {
                 Text = " Address: ",
                 FontAttributes = FontAttributes.Bold,
-                Margin = new Thickness(5),
+                Margin = new Thickness(5, 5, 0, 0),
+                HorizontalTextAlignment = TextAlignment.Center,
             };
 
             var addressLabel = new Label
             {
                 Text = address,
-                Margin = new Thickness(5),
+                Margin = new Thickness(5,0,0,5),
+                HorizontalTextAlignment = TextAlignment.Center,
             };
 
             var updatedText = new Label
             {
                 Text = " Last Updated: ",
                 FontAttributes = FontAttributes.Bold,
-                Margin = new Thickness(5),
+                Margin = new Thickness(5, 5, 0, 0),
                 VerticalOptions= LayoutOptions.Center,
+                HorizontalTextAlignment = TextAlignment.Center,
+
             };
 
             var updatedLabel = new Label
             {
                 Text = updated,
-                Margin = new Thickness(5),
+                Margin = new Thickness(5, 0, 0, 5),
+                HorizontalTextAlignment = TextAlignment.Center,
             };
 
             var accessibilityText = new Label
             {
                 Text = " Accessibility: ",
                 FontAttributes = FontAttributes.Bold,
-                Margin = new Thickness(5),
+                Margin = new Thickness(5, 5, 0, 0),
                 VerticalOptions = LayoutOptions.Center,
+                HorizontalTextAlignment = TextAlignment.Center,
+
             };
 
             var accessibilityLabel = new Label
             {
                 Text = accessibility,
-                Margin = new Thickness(5),
+                Margin = new Thickness(5, 0, 0, 5),
+                HorizontalTextAlignment = TextAlignment.Center,
+
             };
 
             var reviewsText = new Label
@@ -90,6 +99,7 @@ namespace EV_Charger_App.Views
                 Margin = new Thickness(5),
                 FontAttributes = FontAttributes.Bold,
                 //HorizontalOptions= LayoutOptions.Center,
+
             };
 
             //Review Labels
@@ -126,16 +136,13 @@ namespace EV_Charger_App.Views
                 {
                     nameLabel,
                     totalStars,
-                    new StackLayout
-                    {
-                        Orientation = StackOrientation.Horizontal, // Set the orientation to Horizontal
-                        Children =
-                        {
-                            addressText,
-                            addressLabel,
-                        }
-                    },
-                    new StackLayout
+                    addressText,
+                    addressLabel,
+                    updatedText,
+                    updatedLabel,
+                    accessibilityText,
+                    accessibilityLabel,
+                    /*new StackLayout
                     {
                         Orientation = StackOrientation.Horizontal, // Set the orientation to Horizontal
                         Children =
@@ -161,7 +168,7 @@ namespace EV_Charger_App.Views
                             accessibilityText,
                             accessibilityLabel,
                         }
-                    },
+                    },*/
                     reviewsText,
                     new StackLayout
                     {
