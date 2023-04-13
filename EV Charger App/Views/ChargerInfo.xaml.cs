@@ -60,12 +60,18 @@ namespace EV_Charger_App.Views
                 FontSize = Device.GetNamedSize(NamedSize.Large, typeof(Label)),
                 FontAttributes = FontAttributes.Bold,
                 Margin = new Thickness(5),
+                HorizontalOptions = LayoutOptions.Center,
+                HorizontalTextAlignment = TextAlignment.Center,
+
             };
 
 
             starImage = setStarImage(bigStars, rating);
 
-            var totalStars = new Image { Source = starImage };
+            var totalStars = new Image { 
+                Source = starImage,
+                HorizontalOptions = LayoutOptions.Center
+            };
 
             var addressText = new Label
             {
