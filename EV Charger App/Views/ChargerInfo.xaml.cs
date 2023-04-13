@@ -40,25 +40,79 @@ namespace EV_Charger_App.Views
                 Text = chargerName,
                 FontSize = Device.GetNamedSize(NamedSize.Large, typeof(Label)),
                 FontAttributes = FontAttributes.Bold,
-                Margin = new Thickness(10),
+                Margin = new Thickness(5),
+            };
+
+            var totalStars = new Image 
+            { 
+                Source = "newfive_star.png",
+            };
+
+            var addressText = new Label
+            {
+                Text = " Address: ",
+                FontAttributes = FontAttributes.Bold,
+                Margin = new Thickness(5),
             };
 
             var addressLabel = new Label
             {
                 Text = address,
-                Margin = new Thickness(10),
+                Margin = new Thickness(5),
+            };
+
+            var updatedText = new Label
+            {
+                Text = " Last Updated: ",
+                FontAttributes = FontAttributes.Bold,
+                Margin = new Thickness(5),
+                VerticalOptions= LayoutOptions.Center,
             };
 
             var updatedLabel = new Label
             {
                 Text = updated,
-                Margin = new Thickness(10),
+                Margin = new Thickness(5),
+            };
+
+            var accessibilityText = new Label
+            {
+                Text = " Accessibility: ",
+                FontAttributes = FontAttributes.Bold,
+                Margin = new Thickness(5),
+                VerticalOptions = LayoutOptions.Center,
             };
 
             var accessibilityLabel = new Label
             {
                 Text = accessibility,
-                Margin = new Thickness(10),
+                Margin = new Thickness(5),
+            };
+
+            var reviewsText = new Label
+            {
+                Text = " Reviews:",
+                Margin = new Thickness(5),
+                FontAttributes = FontAttributes.Bold,
+                //HorizontalOptions= LayoutOptions.Center,
+            };
+
+            //Review Labels
+            var emailLabel = new Label
+            {
+                Text = "email@uark.edu",
+                Margin = new Thickness(10, 0, 5, 0),
+            };
+
+            var reviewStars = new Image
+            {
+                Source = "newfive_star.png",
+            };
+
+            var commentsLabel = new Label
+            {
+                Text = "LOTS OF RANDOM WORDS",
+                Margin = new Thickness(10,0,0,0),
             };
 
             //GM specific hex color used for the text 
@@ -76,9 +130,54 @@ namespace EV_Charger_App.Views
                 Children =
                 {
                     nameLabel,
-                    addressLabel,
-                    updatedLabel,
-                    accessibilityLabel,
+                    totalStars,
+                    new StackLayout
+                    {
+                        Orientation = StackOrientation.Horizontal, // Set the orientation to Horizontal
+                        Children =
+                        {
+                            addressText,
+                            addressLabel,
+                        }
+                    },
+                    new StackLayout
+                    {
+                        Orientation = StackOrientation.Horizontal, // Set the orientation to Horizontal
+                        Children =
+                        {
+                            addressText,
+                            addressLabel,
+                        }
+                    },
+                    new StackLayout
+                    {
+                        Orientation = StackOrientation.Horizontal, // Set the orientation to Horizontal
+                        Children =
+                        {
+                            updatedText,
+                            updatedLabel,
+                        }
+                    },
+                    new StackLayout
+                    {
+                        Orientation = StackOrientation.Horizontal, // Set the orientation to Horizontal
+                        Children =
+                        {
+                            accessibilityText,
+                            accessibilityLabel,
+                        }
+                    },
+                    reviewsText,
+                    new StackLayout
+                    {
+                        Orientation = StackOrientation.Horizontal, // Set the orientation to Horizontal
+                        Children =
+                        {
+                            emailLabel,
+                            reviewStars,
+                        }
+                    },
+                    commentsLabel,                    
                 }
             };
 
