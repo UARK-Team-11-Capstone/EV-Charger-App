@@ -33,6 +33,11 @@ namespace EV_Charger_App.Views
             // Save the review to the database
             string email = GetUserFromToken();
 
+            if(email == "")
+            {
+                return;
+            }
+
 
             string currentDate = DateTime.Now.ToString("MM-dd-yyyy");
 
