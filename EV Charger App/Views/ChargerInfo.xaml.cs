@@ -134,13 +134,22 @@ namespace EV_Charger_App.Views
             updatedLabel.TextColor = GMBlack;
             accessibilityLabel.TextColor = GMBlack;
 
+            var ratingHeader = new StackLayout
+            {
+                Orientation = StackOrientation.Horizontal,
+                Children =
+                {
+                    avgStars, 
+                    totalStars
+                }
+            };
+
             infoLayout = new StackLayout
             {
                 Children =
                 {
                     nameLabel,
-                    avgStars,
-                    totalStars,
+                    ratingHeader,
                     addressText,
                     addressLabel,
                     updatedText,
