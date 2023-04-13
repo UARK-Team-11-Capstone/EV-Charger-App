@@ -1,6 +1,4 @@
-﻿using Android.Net.Wifi.Aware;
-using Android.OS;
-using MySqlConnector;
+﻿using MySqlConnector;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,7 +30,7 @@ namespace EV_Charger_App.Services
                     string connectionString = string.Format("Server={0}; database={1}; UID={2}; password={3}", endpoint, databaseName, username, password);
 
                     connection = new MySqlConnection(connectionString);
-                    
+
                     connection.Open();
                 }
 
@@ -177,7 +175,7 @@ namespace EV_Charger_App.Services
         {
             int recordCount = 0;
 
-            if(Connect())
+            if (Connect())
             {
                 using (MySqlCommand command = new MySqlCommand(query, connection))
                 {
@@ -215,7 +213,7 @@ namespace EV_Charger_App.Services
         {
             string key = "";
 
-            if(Connect())
+            if (Connect())
             {
                 string query = "SELECT * FROM APIKeys WHERE KeyName = 'Google API Key'";
 
@@ -223,7 +221,7 @@ namespace EV_Charger_App.Services
                 {
                     using (MySqlDataReader reader = command.ExecuteReader())
                     {
-                        if(reader.Read())
+                        if (reader.Read())
                         {
                             key = reader.GetString(1);
                         }

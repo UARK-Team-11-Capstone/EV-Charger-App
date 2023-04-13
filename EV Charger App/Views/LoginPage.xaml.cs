@@ -1,10 +1,5 @@
-﻿using EV_Charger_App.Services;
-using MySqlConnector;
+﻿using MySqlConnector;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -19,7 +14,7 @@ namespace EV_Charger_App.Views
         public LoginPage(App app)
         {
             InitializeComponent();
-            this.app = app; 
+            this.app = app;
         }
 
         async private void LoginToCreate(object sender, EventArgs e)
@@ -41,7 +36,7 @@ namespace EV_Charger_App.Views
             String email = emailInput.Text;
             String password = passwordInput.Text;
 
-            if(!string.IsNullOrWhiteSpace(email) && !string.IsNullOrWhiteSpace(password))
+            if (!string.IsNullOrWhiteSpace(email) && !string.IsNullOrWhiteSpace(password))
             {
                 //Check if credentials are valid
                 if (CredentialsValid(email, password))

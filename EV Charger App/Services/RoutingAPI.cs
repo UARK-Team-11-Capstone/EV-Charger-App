@@ -1,25 +1,15 @@
-﻿using System.Net.Http;
-using System;
-using Xamarin.Essentials;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
-using System.Diagnostics;
-using EV_Charger_App.ViewModels;
-using GoogleApi;
+﻿using GoogleApi.Entities.Maps.Common;
 using GoogleApi.Entities.Maps.Directions.Request;
 using GoogleApi.Entities.Maps.Directions.Response;
-using GoogleApi.Entities.Search.Common;
-using GoogleApi.Entities.Maps.Common;
-using GoogleApi.Entities.Interfaces;
-using Xamarin.Forms.GoogleMaps;
+using System.Threading.Tasks;
 
 namespace EV_Charger_App.Services
 {
     public class RoutingAPI
     {
         private readonly string apiKey = "AIzaSyAg3OyUuTc-u3Q28HD3D3PGErkVDv0fTkc";
-        
-        
+
+
         public RoutingAPI()
         {
 

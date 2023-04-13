@@ -1,10 +1,5 @@
 ﻿using MySqlConnector;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -19,7 +14,7 @@ namespace EV_Charger_App.Views
         public CreateAccountPage(App app)
         {
             InitializeComponent();
-            this.app = app; 
+            this.app = app;
         }
 
         async private void CreateToLogin(object sender, EventArgs e)
@@ -35,10 +30,10 @@ namespace EV_Charger_App.Views
             string email = emailInputCreate.Text;
             string password = passwordInputCreate.Text;
 
-            if(!string.IsNullOrWhiteSpace(email) && !string.IsNullOrWhiteSpace(password))
+            if (!string.IsNullOrWhiteSpace(email) && !string.IsNullOrWhiteSpace(password))
             {
                 //Check if email already exists in database
-                if(UserExists(email))
+                if (UserExists(email))
                 {
                     return;
                 }

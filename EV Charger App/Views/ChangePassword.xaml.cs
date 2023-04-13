@@ -1,10 +1,5 @@
-﻿using Android.OS;
-using MySqlConnector;
+﻿using MySqlConnector;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -81,14 +76,14 @@ namespace EV_Charger_App.Views
             string hashedPassword = app.database.HashPassword(currentPassword);
 
             Debug.WriteLine("Token: " + token);
-            Debug.WriteLine("Hashed Password: " +  hashedPassword);
+            Debug.WriteLine("Hashed Password: " + hashedPassword);
 
             string query = "SELECT * FROM Users WHERE password = @password AND sessionToken = @token";
 
             MySqlParameter tokenParam = new MySqlParameter("@token", token);
             MySqlParameter passwordParam = new MySqlParameter("@password", hashedPassword);
 
-            
+
             return app.database.RecordExists(query, passwordParam, tokenParam);
         }
 

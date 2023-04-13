@@ -1,11 +1,8 @@
-﻿using GoogleApi.Entities.Maps.Common;
-using GoogleApi.Entities.Maps.Directions.Response;
+﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using Newtonsoft.Json;
-using Xamarin.Forms.GoogleMaps;
 using System.Linq;
-using static GoogleApi.GoogleMaps;
+using Xamarin.Forms.GoogleMaps;
 
 namespace EV_Charger_App.ViewModels
 {

@@ -1,9 +1,5 @@
 ﻿using EV_Charger_App.Services;
-using EV_Charger_App.Views;
-using System;
 using Xamarin.Forms;
-using Xamarin.Forms.Xaml;
-using GoogleApi;
 using Debug = System.Diagnostics.Debug;
 
 
@@ -20,12 +16,7 @@ namespace EV_Charger_App
             Debug.WriteLine("App Initialized");
 
             database = new Database();
-            /*
-            DependencyService.Register<MockDataStore>();
-            MainPage = new AppShell();
-            */
-
-            MainPage = new NavigationPage(new LoginPage(this));
+            MainPage = new NavigationPage(new MainPage(this));
 
         }
 

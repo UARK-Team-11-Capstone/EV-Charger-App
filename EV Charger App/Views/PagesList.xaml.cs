@@ -1,23 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
 namespace EV_Charger_App.Views
 {
-	[XamlCompilation(XamlCompilationOptions.Compile)]
-	public partial class PagesList : ContentPage
-	{
+    [XamlCompilation(XamlCompilationOptions.Compile)]
+    public partial class PagesList : ContentPage
+    {
         App app;
-		public PagesList (App app)
-		{
-			InitializeComponent ();
+        public PagesList(App app)
+        {
+            InitializeComponent();
             this.app = app;
-		}
+        }
 
         async private void MapScreen(object sender, EventArgs e)
         {

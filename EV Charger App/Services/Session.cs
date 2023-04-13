@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Security.Cryptography;
-using System.Security.Principal;
 
 namespace EV_Charger_App.Services
 {
@@ -50,7 +47,7 @@ namespace EV_Charger_App.Services
 
         public bool TokenValid(string tokenInQuestion)
         {
-            if(tokenInQuestion == TokenToString(token))
+            if (tokenInQuestion == TokenToString(token))
             {
                 return true;
             }

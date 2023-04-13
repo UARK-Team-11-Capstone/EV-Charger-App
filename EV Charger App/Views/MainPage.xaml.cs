@@ -1,25 +1,25 @@
-﻿using System;
+﻿using EV_Charger_App.Services;
+using EV_Charger_App.ViewModels;
+using EV_Charger_App.Views;
+using GoogleApi.Entities.Common;
+using GoogleApi.Entities.Maps.Common;
+using GoogleApi.Entities.Maps.Directions.Response;
+using GoogleApi.Entities.Places.Common;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics.Metrics;
+using System.Linq;
+using System.Net.NetworkInformation;
+using System.Threading.Tasks;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 using Xamarin.Forms.GoogleMaps;
-using System.Linq;
-using EV_Charger_App.ViewModels;
-using System.Threading.Tasks;
-using EV_Charger_App.Views;
-using EV_Charger_App.Services;
-using GoogleApi.Entities.Common;
-using System.Collections.Generic;
-using GoogleApi.Entities.Maps.Common;
+using Address = GoogleApi.Entities.Common.Address;
+using Debug = System.Diagnostics.Debug;
 using Distance = Xamarin.Forms.GoogleMaps.Distance;
 using Location = Xamarin.Essentials.Location;
-using Debug = System.Diagnostics.Debug;
-using GoogleApi.Entities.Places.Common;
-using Android.Locations;
-using Address = GoogleApi.Entities.Common.Address;
-using static Android.Icu.Text.Transliterator;
+using Math = System.Math;
 using Position = Xamarin.Forms.GoogleMaps.Position;
-using GoogleApi.Entities.Interfaces;
-using GoogleApi.Entities.Maps.Directions.Response;
 
 namespace EV_Charger_App
 {
@@ -34,11 +34,16 @@ namespace EV_Charger_App
         GooglePlacesApi googlePlacesApi;
         List<Prediction> prediction;
         SearchBar lastChanged;
-        String lastAddress;
+        FunctionThrottler throttle;
+        List<Cluster> clusterList;
+        string lastAddress;
         bool chargerRouting;
         private int chargePercentage;
         private int maxRange;
         private int rechargeMileage;
+        bool overrideLoading;
+        private double clusteringThreshold;
+
         public MainPage(App app)
         {
             InitializeComponent();
@@ -62,10 +67,13 @@ namespace EV_Charger_App
             routeAPI = new RoutingAPI();
             googlePlacesApi = new GooglePlacesApi(app.database.GetGoogleAPIKey());
             prediction = new List<Prediction>();
+            throttle = new FunctionThrottler(new TimeSpan(0, 0, 3));     
+            overrideLoading = false;
             chargePercentage = 100;
             maxRange = 1;
             rechargeMileage = 5;
             chargerRouting = false;
+            clusteringThreshold = 2;
         }
 
         private void ChargerRoutingClicked(object sender, EventArgs e)
@@ -128,7 +136,7 @@ namespace EV_Charger_App
                     // Take coordinates from previousLocation
                     Coordinate latlng = new Coordinate(previousLocation.Latitude, previousLocation.Longitude);
                     // Send API call based on text and location
-                    var response = await googlePlacesApi.AutoComplete(e.NewTextValue, latlng, GetVisibleRadius(map.CameraPosition.Zoom));
+                    var response = await googlePlacesApi.AutoComplete(e.NewTextValue, latlng,  GetVisibleRadius(map.CameraPosition.Zoom));
                     prediction = (List<Prediction>)response.Predictions;
                     List<string> result = new List<string>();
 
@@ -156,7 +164,8 @@ namespace EV_Charger_App
                     list.IsVisible = false;
                 }
             }
-            catch (Exception ex) {
+            catch (System.Exception ex)
+            {
                 Debug.WriteLine("Error calling autocomplete: " + ex.Message);
             }
         }
@@ -198,7 +207,8 @@ namespace EV_Charger_App
                 listView.IsVisible = false;
                 lastAddress = locationName;
 
-            } catch (Exception ex)
+            }
+            catch (System.Exception ex)
             {
                 Debug.WriteLine("Error in Tapping Handler: " + $"{ex.Message}");
             }
@@ -219,7 +229,11 @@ namespace EV_Charger_App
         private void Map_CameraChanged(object sender, CameraChangedEventArgs e)
         {
             CameraPosition pos = e.Position;
-            DynamicChargerLoadingAsync(pos);
+            // Check to see if the function is allowed to run
+            if (!throttle.CanExecute() || overrideLoading == true)
+            {
+                DynamicChargerLoadingAsync(pos);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------
@@ -238,9 +252,9 @@ namespace EV_Charger_App
                     MapType = MapType.Street,
                     IsEnabled = true
                 };
-                
-                map.MoveToRegion(MapSpan.FromCenterAndRadius(new Position(latitude,longitude), Distance.FromMiles(1000)));
-                
+
+                map.MoveToRegion(MapSpan.FromCenterAndRadius(new Position(latitude, longitude), Distance.FromMiles(1000)));
+
                 // Call the track location function
                 TrackLocation();
 
@@ -263,7 +277,7 @@ namespace EV_Charger_App
                 lblInfo.IsVisible = false;
 
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 lblInfo.Text = ex.Message.ToString();
                 ContentMap.IsVisible = false;
@@ -275,130 +289,322 @@ namespace EV_Charger_App
         //-----------------------------------------------------------------------------------------------------------------------------
         // Update the location of the users pin every 5 seconds
         //-----------------------------------------------------------------------------------------------------------------------------
-        async void TrackLocation()
+        public async void TrackLocation()
         {
-            // Intialization
-            previousLocation = await Geolocation.GetLocationAsync(new GeolocationRequest(GeolocationAccuracy.Default, TimeSpan.FromMinutes(1)));
-            map.MoveToRegion(MapSpan.FromCenterAndRadius(new Position(previousLocation.Latitude, previousLocation.Longitude), Distance.FromMiles(1)));
-
-            var locationPin = new Pin()
+            try
             {
-                Type = PinType.Place,
-                Label = "Current Location",
-                //Icon = BitmapDescriptorFactory.FromView(new Image() { Source = "Location-Dot.png", Scale = .25}),
-                Position = new Position(Convert.ToDouble(previousLocation.Latitude), Convert.ToDouble(previousLocation.Longitude)),
-            };
-            map.Pins.Add(locationPin);
+                // Intialization
+                previousLocation = await Geolocation.GetLocationAsync(new GeolocationRequest(GeolocationAccuracy.Default, TimeSpan.FromMinutes(1)));
+                map.MoveToRegion(MapSpan.FromCenterAndRadius(new Position(previousLocation.Latitude, previousLocation.Longitude), Xamarin.Forms.GoogleMaps.Distance.FromMiles(1)));
+                Debug.WriteLine("Current location found...");
 
-            // Call DoE API to get nearest chargers in a radius relative to the camera zoom level
-            double alt = map.CameraPosition.Zoom;
-            double radius = GetVisibleRadius(alt);
-            doe.getNearestCharger(previousLocation.Latitude.ToString(), previousLocation.Longitude.ToString(), radius.ToString());
-
-            while (true)
-            {
-                // Retrieve the current location of the user
-                var loc = await Geolocation.GetLocationAsync(new GeolocationRequest(GeolocationAccuracy.Default, TimeSpan.FromMinutes(1)));
-                // Only move if location has changed
-                if (loc != previousLocation)
+                var locationPin = new Pin()
                 {
-                    // Find the current location pin and adjust the location
-                    Pin currLoc = map.Pins.First(Pin => Pin.Label == "Current Location");
-                    currLoc.Position = new Position(Convert.ToDouble(loc.Latitude), Convert.ToDouble(loc.Longitude));
+                    Type = PinType.Place,
+                    Label = "Current Location",
+                    //Icon = BitmapDescriptorFactory.FromView(new Image() { Source = "Location-Dot.png", Scale = .25}),
+                    Position = new Position(Convert.ToDouble(previousLocation.Latitude), Convert.ToDouble(previousLocation.Longitude)),
+                };
+                Debug.WriteLine("Adding location pin to the map...");
+                map.Pins.Add(locationPin);
 
+                while (true)
+                {
+                    //Debug.WriteLine("Checking current location...");
+                    // Retrieve the current location of the user
+                    var loc = await Geolocation.GetLocationAsync(new GeolocationRequest(GeolocationAccuracy.Default, TimeSpan.FromMinutes(1)));
+                    // Only move if location has changed
+                    if (loc != previousLocation)
+                    {
+                        // Find the current location pin and adjust the location
+                        Pin currLoc = map.Pins.First(Pin => Pin.Label == "Current Location");
+                        currLoc.Position = new Position(Convert.ToDouble(loc.Latitude), Convert.ToDouble(loc.Longitude));
+
+                    }
+                    // Set previousLocation to the current location
+                    previousLocation = loc;
+
+                    // Wait two seconds
+                    await Task.Delay(2000);
                 }
-                // Set previousLocation to the current location
-                previousLocation = loc;
-
-                // Wait two seconds
-                await Task.Delay(2000);
-
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Error tracking location: " + ex.Message);
             }
         }
-
         //-----------------------------------------------------------------------------------------------------------------------------
         // Load chargers based on the camera position asynchronously 
         //-----------------------------------------------------------------------------------------------------------------------------
         public void DynamicChargerLoadingAsync(CameraPosition pos)
         {
+            Debug.WriteLine("Dynamically loading chargers...");
             double lat = pos.Target.Latitude;
             double lng = pos.Target.Longitude;
-            // Get the current DateTime object
-            DateTime currentDate = DateTime.Now;
 
-            if (previousLocation != null && pos != null)
+            try
             {
-                // Call DoE API to get nearest chargers in a radius relative to the camera zoom level
-                double alt = pos.Zoom;
-                double radius = GetVisibleRadius(alt);
-                doe.getNearestCharger(lat.ToString(), lng.ToString(), radius.ToString());
-
-                // Load the nearby chargers on startup
-                List<FuelStation> chargers = doe.LoadChargers();
-                if (chargers != null)
+                if (previousLocation != null && pos != null)
                 {
-                    foreach (var charger in chargers)
+                    // Call DoE API to get nearest chargers in a radius relative to the camera zoom level
+                    double alt = pos.Zoom;
+                    double radius = GetVisibleRadius(alt);
+                    doe.getNearestCharger(lat.ToString(), lng.ToString(), radius.ToString());
+                    // Load the nearby chargers on startup
+                    List<FuelStation> chargers = doe.LoadChargers();
+
+                    // Null protection
+                    if (chargers == null)
                     {
-                        // Get the difference in last updated for the charger and assign green, yellow, or red status based on this
-                        DateTime chargerDate = charger.updated_at;
-                        TimeSpan difference = currentDate - chargerDate;
+                        return;
+                    }
 
-                        string chargerIconName = "";
+                    // If the radius of our view is more than 150 miles, cluster our chargers
+                    if (radius > 150)
+                    {
+                        Debug.WriteLine("Radius larger than 150, proceeding to cluster...");
+                        // Clear the map of old pins to optimize for clusters
+                        map.Pins.Clear();
 
-                        if(difference.TotalDays < 7)
+                        // Call function to update global clusterList
+                        ClusterFuelStations(chargers);
+
+                        Debug.WriteLine("Cluster list size: " + clusterList.Count);
+                        if (clusterList != null)
                         {
-                            chargerIconName = "Charger-Icon-Green.png";
-                        }
-                        else if(difference.TotalDays < 31)
-                        {
-                            chargerIconName = "Charger-Icon-Yellow.png";
+                            // Iterate through clusters and create pins
+                            foreach (var cluster in clusterList)
+                            {
+                                if (cluster.fuel_stations != null)
+                                {
+                                    // If this is just a cluster of one, meaning one charger, then make a normal pin
+                                    if (cluster.fuel_stations.Count == 1)
+                                    {
+                                        map.Pins.Add(CreatePin(cluster.fuel_stations.FirstOrDefault()));
+                                    }
+                                    else // Otherwise treat this like a cluster and create an overall pin
+                                    {
+                                        var clusterPin = new Pin()
+                                        {
+                                            Tag = cluster.Id,
+                                            Type = PinType.SearchResult,
+                                            Label = "",
+                                            Icon = (Device.RuntimePlatform == Device.Android) ? BitmapDescriptorFactory.FromBundle("Charger-Icon.png") : BitmapDescriptorFactory.FromView(new Image() { Source = "Charger-Icon.png", WidthRequest = 10, HeightRequest = 10, Aspect = Aspect.AspectFit }),
+                                            Position = new Position(cluster.position.Latitude, cluster.position.Longitude),
+                                        };
+                                        map.Pins.Add(clusterPin);
+                                    }
+                                }
+                                else
+                                {
+                                    continue;
+                                }
+                            }
+                            Debug.WriteLine("Done adding clusters to map...");
                         }
                         else
                         {
-                            chargerIconName = "Charger-Icon-Red.png";
+                            Debug.WriteLine("ClusterList was null");
                         }
-
-                        var chargerPin = new Pin()
+                    }
+                    else // Normal situation where the visible radius is less than 150 miles, make pins for all chargers in the visible radius
+                    {
+                        if (chargers != null)
                         {
-                            Tag = charger.id,
-                            Type = PinType.Place,
-                            Label = charger.station_name,
-                            Icon = (Device.RuntimePlatform == Device.Android) ? BitmapDescriptorFactory.FromBundle(chargerIconName) : BitmapDescriptorFactory.FromView(new Image() { Source = "Charger-Icon-Green.png", WidthRequest = 10, HeightRequest = 10, Aspect = Aspect.AspectFit }),
-                            Position = new Position(Convert.ToDouble(charger.latitude), Convert.ToDouble(charger.longitude)),
-                        };
+                            if (clusterList == null)
+                            {
+                                foreach (var charger in chargers)
+                                {
+                                    map.Pins.Add(CreatePin(charger));
+                                }
+                            }
+                            else
+                            {
+                                List<FuelStation> added = new List<FuelStation>();
+                                // Clear clusters if they are present in the current view
+                                for (int i = 0; i < map.Pins.Count - 1; i++)
+                                {                                    
+                                    // Calculate the distance between the cluster and the center of the visible area
+                                    double distance = Location.CalculateDistance(new Location(lat, lng), new Location(map.Pins[i].Position.Latitude, map.Pins[i].Position.Longitude), DistanceUnits.Miles);
+                                    if (map.Pins[i].Type == PinType.SearchResult && distance <= radius)
+                                    {
+                                        // Use lat and long as an identifier to find the cluster from the cluster list
+                                        Cluster cluster = clusterList.Find(x => x.Id == (int)map.Pins[i].Tag);
 
-                        map.Pins.Add(chargerPin);
+                                        // Remove cluster icon and then add back the chargers from the cluster to the map
+                                        map.Pins.Remove(map.Pins[i]);
+                                        foreach (var charger in cluster.fuel_stations)
+                                        {
+                                            
+                                            map.Pins.Add(CreatePin(charger));
+                                            added.Add(charger);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        continue;
+                                    }                                    
+                                }
+
+                                // Ignore duplicates
+                                added.AddRange(added.Except(chargers));
+                                foreach(var charger in added)
+                                {
+                                    map.Pins.Add(CreatePin(charger));
+                                }
+                                
+
+                            }
+                        }
                     }
                 }
             }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error loading chargers: {ex}");
+            }
+        }
+        
+        //-----------------------------------------------------------------------------------------------------------------------------
+        // Given a FuelStation create a map pin
+        //-----------------------------------------------------------------------------------------------------------------------------
+        public Pin CreatePin(FuelStation fs)
+        {
+            try
+            {
+                // Get the current DateTime object
+                DateTime currentDate = DateTime.Now;
+                // Get the difference in last updated for the charger and assign green, yellow, or red status based on this
+                DateTime chargerDate = fs.updated_at;
+                TimeSpan difference = currentDate - chargerDate;
+
+                string chargerIconName = "";
+
+                if (difference.TotalDays < 7)
+                {
+                    chargerIconName = "Charger-Icon-Green.png";
+                }
+                else if (difference.TotalDays < 31)
+                {
+                    chargerIconName = "Charger-Icon-Yellow.png";
+                }
+                else
+                {
+                    chargerIconName = "Charger-Icon-Red.png";
+                }
+
+                var chargerPin = new Pin()
+                {
+                    Tag = fs.id,
+                    Type = PinType.Place,
+                    Label = fs.station_name,
+                    Icon = (Device.RuntimePlatform == Device.Android) ? BitmapDescriptorFactory.FromBundle(chargerIconName) : BitmapDescriptorFactory.FromView(new Image() { Source = chargerIconName, WidthRequest = 10, HeightRequest = 10, Aspect = Aspect.AspectFit }),
+                    Position = new Position(Convert.ToDouble(fs.latitude), Convert.ToDouble(fs.longitude)),
+                };
+
+                return chargerPin;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Error creating pin: " + ex.Message);
+            }
+
+            return null;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------
+        // Given a list of FuelStations cluster those that are within a quarter-mile radius and return
+        //-----------------------------------------------------------------------------------------------------------------------------
+        public void ClusterFuelStations(List<FuelStation> fuelStations)
+        {
+            try
+            {
+                Debug.WriteLine("Clustering chargers...");
+                
+                if (fuelStations != null)
+                {
+                    foreach (var fuelStation in fuelStations)
+                    {
+                        bool isClustered = false;
+
+                        if (clusterList != null)
+                        {
+                            // Iterate through existing clusters
+                            foreach (var cluster in clusterList)
+                            {
+                                double distance = Location.CalculateDistance(fuelStation.latitude, fuelStation.longitude, cluster.position.Latitude, cluster.position.Longitude, DistanceUnits.Miles);
+
+                                if (distance <= clusteringThreshold)
+                                {
+                                    // Add fuel station to existing cluster
+                                    cluster.AddFuelStation(fuelStation);
+                                    isClustered = true;
+                                    break; // No need to check other clusters
+                                }
+                            }
+
+                            if (!isClustered)
+                            {
+                                // Create a new cluster for the fuel station
+                                Cluster newCluster = new Cluster(fuelStation.latitude, fuelStation.longitude);
+                                newCluster.AddFuelStation(fuelStation);
+                                newCluster.Id = clusterList.Count;
+                                clusterList.Add(newCluster);                                
+                            }
+                        }
+                        else
+                        {
+                            // Create a new cluster for the fuel station
+                            Cluster newCluster = new Cluster(fuelStation.latitude, fuelStation.longitude);
+                            newCluster.AddFuelStation(fuelStation);
+                            newCluster.Id = 0;
+                            clusterList = new List<Cluster>{newCluster};
+                        }                        
+                    }
+
+                }                
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Error clustering: " + ex.Message);
+            }
+
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------
         // Find the relative radius of the camera view
         //-----------------------------------------------------------------------------------------------------------------------------
-        public static double GetVisibleRadius(double zoomLevel)
+        public double GetVisibleRadius(double zoomLevel)
         {
-            // Based on pixel five
-            int screenWidth = 1080;
-            int screenHeight = 2340;
-            double mapAspectRatio = screenHeight / screenWidth;
+            try
+            {
+                // Based on pixel five
+                int screenWidth = 1080;
+                int screenHeight = 2340;
+                double mapAspectRatio = screenHeight / screenWidth;
 
-            // Calculate the dimensions of the visible area in pixels
-            double visibleWidth = screenWidth;
-            double visibleHeight = screenWidth / mapAspectRatio;
+                // Calculate the dimensions of the visible area in pixels
+                double visibleWidth = screenWidth;
+                double visibleHeight = screenWidth / mapAspectRatio;
 
-            // Calculate the visible area in meters using the Mercator projection
-            double metersPerPixel = 156543.03392 * Math.Cos(0) / Math.Pow(2, zoomLevel);
-            double visibleWidthMeters = visibleWidth * metersPerPixel;
-            double visibleHeightMeters = visibleHeight * metersPerPixel;
+                // Calculate the visible area in meters using the Mercator projection
+                double metersPerPixel = 156543.03392 * Math.Cos(0) / Math.Pow(2, zoomLevel);
+                double visibleWidthMeters = visibleWidth * metersPerPixel;
+                double visibleHeightMeters = visibleHeight * metersPerPixel;
 
-            // Calculate the visible radius in miles
-            double visibleAreaMeters = Math.PI * visibleWidthMeters * visibleHeightMeters;
-            double visibleRadiusMiles = Math.Sqrt(visibleAreaMeters) / 1609.344;
+                // Calculate the visible radius in miles
+                double visibleAreaMeters = Math.PI * visibleWidthMeters * visibleHeightMeters;
+                double visibleRadiusMiles = Math.Sqrt(visibleAreaMeters) / 1609.344;
 
-            return visibleRadiusMiles;
-        }
-
+                return visibleRadiusMiles;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Error getting visible radius: " + ex.Message);
+            }
+            return 0;
+        }        
+              
         //-----------------------------------------------------------------------------------------------------------------------------
         // Call Directions API to get a route between two different locations
         //-----------------------------------------------------------------------------------------------------------------------------
@@ -430,7 +636,7 @@ namespace EV_Charger_App
             {
                 // Call function to determine which chargers along the route we are going to use
                 List<FuelStation> finalRouteChargers = await GetChargingStationsAlongRouteAsync(positions, originAdd, destinationAdd);
-                List<Position> finalRoute = new List<Position>();                
+                List<Position> finalRoute = new List<Position>();
                 FuelStation prev = new FuelStation();
 
                 Debug.WriteLine("Chargers found along route, creating route...");
@@ -446,12 +652,12 @@ namespace EV_Charger_App
                         DirectionsResponse response = new DirectionsResponse();
 
                         // If we are getting the first set of points from origin to the first charger
-                        if (charger == finalRouteChargers.First())
+                        if (charger == finalRouteChargers.FirstOrDefault())
                         {
                             // Call the routing api between the origin and charger locationEx
                             response = await routeAPI.GetRouteAsync(origin, chargerLocationEx);
                         }
-                        else if (charger == finalRouteChargers.Last())
+                        else if (charger == finalRouteChargers.LastOrDefault())
                         {
                             // Call the routing api between the charger and the destination
                             response = await routeAPI.GetRouteAsync(chargerLocationEx, destination);
@@ -538,9 +744,9 @@ namespace EV_Charger_App
                 List<Position> pos = new List<Position>();
 
                 Position prev = new Position();
-                foreach(var ps in positions)
+                foreach (var ps in positions)
                 {
-                    if(ps == positions.First())
+                    if (ps == positions.First())
                     {
                         prev = ps;
                         continue;
@@ -548,7 +754,6 @@ namespace EV_Charger_App
                     else
                     {
                         double dist = Location.CalculateDistance(new Location(prev.Latitude, prev.Longitude), new Location(ps.Latitude, ps.Longitude), DistanceUnits.Miles);
-                        //Debug.WriteLine("Distance between chargers: " + dist);
                         // If the distance between two points is less than 5 miles we don't need that point
                         if (dist > 2)
                         {
@@ -562,14 +767,14 @@ namespace EV_Charger_App
                         }
                     }
                 }
-                
+
                 // If we ended up with only one charging station make sure we at least have two points for the request
-                if(pos.Count < 2)
+                if (pos.Count < 2)
                 {
                     pos.Add(positions.Last());
                 }
 
-                Debug.WriteLine("Calling to get chargers along route with position points: (" + pos.First().Latitude + ", " + pos.First().Longitude + ") " + "(" + pos.Last().Latitude + ", " + pos.Last().Longitude + ")" );
+                Debug.WriteLine("Calling to get chargers along route with position points: (" + pos.First().Latitude + ", " + pos.First().Longitude + ") " + "(" + pos.Last().Latitude + ", " + pos.Last().Longitude + ")");
                 // Using the position data get list of chargers along the route from DoE
                 Root chargersAlongRoute = doe.getChargersAlongRoute(pos, "2");
                 int numChargers = (int)distance / rechargeMileage;
@@ -590,7 +795,7 @@ namespace EV_Charger_App
                         // Find the first charger
                         if (finalRouteChargers.Count == 0)
                         {
-                            
+
                             // Find the distance between the origin and the first charger in the list
                             double dist = Location.CalculateDistance(originLocationLoc, new Location(charger.latitude, charger.longitude), DistanceUnits.Miles);
                             if (dist >= rechargeMileage)
@@ -609,7 +814,7 @@ namespace EV_Charger_App
                                 Debug.WriteLine("Added middle chargerg to final route charging");
                                 finalRouteChargers.Add(charger);
                             }
-                        }                        
+                        }
                     }
                     Debug.WriteLine("Num chargers on Route: " + finalRouteChargers.Count);
                     return finalRouteChargers;
@@ -674,6 +879,5 @@ namespace EV_Charger_App
         {
             await Navigation.PushAsync(new PagesList(app));
         }
-
     }
 }

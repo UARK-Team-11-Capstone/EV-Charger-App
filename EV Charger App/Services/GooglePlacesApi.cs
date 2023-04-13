@@ -1,26 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Android.App;
-using GoogleApi;
+﻿using GoogleApi;
 using GoogleApi.Entities.Common;
-using GoogleApi.Entities.Maps.Common;
 using GoogleApi.Entities.Maps.Directions.Request;
 using GoogleApi.Entities.Maps.Directions.Response;
 using GoogleApi.Entities.Places.AutoComplete.Request;
 using GoogleApi.Entities.Places.AutoComplete.Response;
+using System;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading.Tasks;
 using Xamarin.Essentials;
 using Location = Xamarin.Essentials.Location;
 
 namespace EV_Charger_App.Services
 {
-   public class GooglePlacesApi
+    public class GooglePlacesApi
     {
         private static string apiKey;
-        public GooglePlacesApi(string key) 
+        public GooglePlacesApi(string key)
         {
             apiKey = key;
         }
@@ -36,7 +32,7 @@ namespace EV_Charger_App.Services
                 Radius = radius
             };
 
-            var autoCompleteResponse = await GooglePlaces.AutoComplete.QueryAsync(autoCompleteRequest); 
+            var autoCompleteResponse = await GooglePlaces.AutoComplete.QueryAsync(autoCompleteRequest);
 
             return autoCompleteResponse;
 
@@ -46,11 +42,11 @@ namespace EV_Charger_App.Services
         {
             var directions = new DirectionsRequest()
             {
-                Key= apiKey
+                Key = apiKey
             };
 
             var directionsResponse = await GoogleMaps.Directions.QueryAsync(directions);
-            
+
             return directionsResponse;
         }
 
@@ -63,7 +59,7 @@ namespace EV_Charger_App.Services
             {
                 if (!string.IsNullOrWhiteSpace(address))
                 {
-                    var locations = await Geocoding.GetLocationsAsync(address);                   
+                    var locations = await Geocoding.GetLocationsAsync(address);
                     return locations.FirstOrDefault();
                 }
             }

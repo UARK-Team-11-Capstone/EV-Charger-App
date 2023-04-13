@@ -1,33 +1,26 @@
-﻿using Android;
-using Android.Content.Res;
-using Android.Graphics;
-using Android.Widget;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
 namespace EV_Charger_App.Views
 {
-	[XamlCompilation(XamlCompilationOptions.Compile)]
-	public partial class ReviewCharger : ContentPage
-	{
+    [XamlCompilation(XamlCompilationOptions.Compile)]
+    public partial class ReviewCharger : ContentPage
+    {
 
         App app;
 
         string chargerID;
 
-		public ReviewCharger (App app, string id)
-		{
-			InitializeComponent ();
+        public ReviewCharger(App app, string id)
+        {
+            InitializeComponent();
             this.app = app;
             this.chargerID = id;
-		}
-        
+        }
+
         private async void OnSubmitButtonClicked(object sender, EventArgs e)
         {
             // Get the selected rating and comment
