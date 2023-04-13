@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using Debug = System.Diagnostics.Debug;
+using System;
+using System.Linq.Expressions;
 
 namespace EV_Charger_App.Views
 {
@@ -19,7 +21,11 @@ namespace EV_Charger_App.Views
         string updated = "";
 
         string accessibility = "";
+        
+        int rating;
 
+        string starImage;
+        
         StackLayout infoLayout;
 
         public ChargerInfo(App app, string[] chargerInfo)
@@ -31,6 +37,8 @@ namespace EV_Charger_App.Views
             address = chargerInfo[1];
             updated = chargerInfo[2];
             accessibility = chargerInfo[3];
+
+            rating = (int)Math.Round(app.database.GetChargerRating(chargerName));
 
             Title = "Charger Information";
 
@@ -51,10 +59,30 @@ namespace EV_Charger_App.Views
                 Margin = new Thickness(5),
             };
 
-            var totalStars = new Image 
-            { 
-                Source = "newfive_star.png",
-            };
+
+            switch (rating)
+            {
+                case 5:
+                    starImage = "five_star_20";
+                    break;
+                case 4:
+                    starImage = "four_star_20";
+                    break;
+                case 3:
+                    starImage = "three_star_20";
+                    break;
+                case 2:
+                    starImage = "two_star_20";
+                    break;
+                case 1:
+                    starImage = "one_star_20";
+                    break;
+                default:
+                    starImage = "zero_star_20";
+                    break;
+            }
+
+            var totalStars = new Image { Source = starImage };
 
             var addressText = new Label
             {
@@ -271,7 +299,7 @@ namespace EV_Charger_App.Views
 
                 var reviewStars = new Image
                 {
-                    Source = "newfive_star.png",
+                    Source = "five_star.png",
                     Margin = new Thickness(5)
                 };
 

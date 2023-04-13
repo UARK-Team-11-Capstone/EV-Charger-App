@@ -17,13 +17,6 @@ namespace EV_Charger_App.Views
             this.app = app;
         }
 
-        async private void ListClicked(object sender, EventArgs e)
-        {
-            await Navigation.PushAsync(new PagesList(app));
-        }
-
-
-
         //This is the function called when the save button is clicked
         async private void SaveSettings(object sender, EventArgs e)
         {
