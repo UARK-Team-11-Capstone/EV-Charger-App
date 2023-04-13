@@ -29,9 +29,9 @@ namespace EV_Charger_App.Views
         StackLayout infoLayout;
 
         string[] bigStars = new string[6] { "zero_star_20" , "one_star_20" , "two_star_20" , "three_star_20" , "four_star_20" , "five_star_20" };
-        string[] smallStars;
+        string[] smallStars = new string[6] { "zero_star_10" , "one_star_10" , "two_star_10" , "three_star_10" , "four_star_10" , "five_star_10" };
 
-        public ChargerInfo(App app, string[] chargerInfo)
+    public ChargerInfo(App app, string[] chargerInfo)
         {
             InitializeComponent();
             this.app = app;
@@ -230,10 +230,17 @@ namespace EV_Charger_App.Views
 
             foreach (object[] review in reviews)
             {
+                string individualstarImage;
+
                 string email = review[1].ToString();
                 string rating = review[2].ToString();
                 string comment = review[3].ToString();
                 string date = review[4].ToString();
+
+                int ratingValue = Int32.Parse(rating);
+
+                individualstarImage = setStarImage(smallStars, ratingValue);
+
 
                 Debug.WriteLine(email + " " + rating + comment);
 
@@ -245,10 +252,10 @@ namespace EV_Charger_App.Views
                     Margin = new Thickness(10, 0, 5, 0),
                 };
 
-                var reviewStars = new Image
-                {
-                    Source = "five_star_10.png",
-                    Margin = new Thickness(10, 0, 5,0)
+                var reviewStars = new Image 
+                { 
+                    Source = individualstarImage,
+                    Margin = new Thickness(10, 0, 5, 0)
                 };
 
                 var dateLabel = new Label
