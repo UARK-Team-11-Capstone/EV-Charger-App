@@ -139,30 +139,7 @@ namespace EV_Charger_App.Views
                 Text = " Reviews:",
                 Margin = new Thickness(5),
                 FontAttributes = FontAttributes.Bold,
-                //HorizontalOptions= LayoutOptions.Center,
-
             };
-
-            //Review Labels
-            /*
-            var emailLabel = new Label
-            {
-                Text = "email@uark.edu",
-                Margin = new Thickness(10, 0, 5, 0),
-            };
-
-            var reviewStars = new Image
-            {
-                Source = "newfive_star.png",
-                Margin = new Thickness(5)
-            };
-
-            var commentsLabel = new Label
-            {
-                Text = "LOTS OF RANDOM WORDS",
-                Margin = new Thickness(10,0,0,0),
-            };
-            */
 
             //GM specific hex color used for the text 
             string hexColor = "#3D3935";
@@ -186,46 +163,7 @@ namespace EV_Charger_App.Views
                     updatedLabel,
                     accessibilityText,
                     accessibilityLabel,
-                    /*new StackLayout
-                    {
-                        Orientation = StackOrientation.Horizontal, // Set the orientation to Horizontal
-                        Children =
-                        {
-                            addressText,
-                            addressLabel,
-                        }
-                    },
-                    new StackLayout
-                    {
-                        Orientation = StackOrientation.Horizontal, // Set the orientation to Horizontal
-                        Children =
-                        {
-                            updatedText,
-                            updatedLabel,
-                        }
-                    },
-                    new StackLayout
-                    {
-                        Orientation = StackOrientation.Horizontal, // Set the orientation to Horizontal
-                        Children =
-                        {
-                            accessibilityText,
-                            accessibilityLabel,
-                        }
-                    },*/
                     reviewsText,
-                    /*
-                    new StackLayout
-                    {
-                        Orientation = StackOrientation.Horizontal, // Set the orientation to Horizontal
-                        Children =
-                        {
-                            reviewStars,
-                            emailLabel,
-                        }
-                    },
-                    commentsLabel,
-                    */
                 }
             };
 
@@ -258,8 +196,7 @@ namespace EV_Charger_App.Views
                     },
                 }
             };
-
-            
+                     
 
             var mainLayout = new StackLayout
             {
