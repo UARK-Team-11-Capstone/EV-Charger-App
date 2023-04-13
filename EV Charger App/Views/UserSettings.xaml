@@ -20,6 +20,11 @@
                             <Label Text="    Change Password" VerticalOptions="CenterAndExpand" FontSize="Body" TextColor="#3D3935"/>
                         </StackLayout>
                     </ViewCell>
+                    <ViewCell x:Name="Logout" Tapped="LogoutTapped">
+                        <StackLayout >
+                            <Label Text="    Logout" VerticalOptions="CenterAndExpand" FontSize="Body" TextColor="#3D3935"/>
+                        </StackLayout>
+                    </ViewCell>
                 </TableSection>
             </TableRoot>
         </TableView>

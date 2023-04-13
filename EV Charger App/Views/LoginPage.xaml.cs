@@ -14,6 +14,7 @@ namespace EV_Charger_App.Views
         public LoginPage(App app)
         {
             InitializeComponent();
+            NavigationPage.SetHasBackButton(this, false);
             this.app = app;
         }
 

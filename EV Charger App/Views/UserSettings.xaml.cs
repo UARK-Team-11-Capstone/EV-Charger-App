@@ -35,6 +35,12 @@ namespace EV_Charger_App.Views
             await Navigation.PushAsync(new ChangePassword(app));
         }
 
+        async private void LogoutTapped(object sender, EventArgs e)
+        {
+            await Navigation.PushAsync(new LoginPage(app));
+        }
+
+
 
     }
 }
