@@ -32,12 +32,12 @@
                         Tapped="ReviewChargers"/>
                 </Label.GestureRecognizers>
             </Label>
-            <Label Text="Charger Info" HorizontalOptions="Center" TextColor="Blue" FontSize="Large">
+            <!--Label Text="Charger Info" HorizontalOptions="Center" TextColor="Blue" FontSize="Large">
                 <Label.GestureRecognizers>
                     <TapGestureRecognizer
                         Tapped="ChargerInformation"/>
                 </Label.GestureRecognizers>
-            </Label>
+            </Label-->
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

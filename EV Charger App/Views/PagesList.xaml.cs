@@ -38,10 +38,10 @@ namespace EV_Charger_App.Views
         {
             await Navigation.PushAsync(new ReviewCharger(app, ""));
         }
-        async private void ChargerInformation(object sender, EventArgs e)
+        /*async private void ChargerInformation(object sender, EventArgs e)
         {
             await Navigation.PushAsync(new ChargerInfo(app, new string[0]));
-        }
+        }*/
 
         //This gets called when you click the menu bar on the ribbon
         // Will send the user to the page containing a list of pages
