@@ -31,9 +31,13 @@ namespace EV_Charger_App.Views
             String comment = CommentEditor.Text;
 
             // Save the review to the database
-            string email = GetUserFromToken();  
+            string email = GetUserFromToken();
 
-            app.database.InsertRecord("Reviews", new string[4] { chargerName, email, rating.ToString(), comment });
+
+            string currentDate = DateTime.Now.ToString("MM-dd-yyyy");
+
+
+            app.database.InsertRecord("Reviews", new string[5] { chargerName, email, rating.ToString(), comment, currentDate });
 
             //await App.Database.SaveReviewAsync(rating, comment);
 
