@@ -56,16 +56,22 @@ namespace EV_Charger_App.Services
 
             string query = "SELECT * FROM Reviews WHERE chargerName = '" + chargerName + "'";
 
-            using (MySqlCommand command = new MySqlCommand(query, connection))
+            if (Connect())
             {
-                using (MySqlDataReader reader = command.ExecuteReader())
+                using (MySqlCommand command = new MySqlCommand(query, connection))
                 {
-                    while(reader.Read())
+                    using (MySqlDataReader reader = command.ExecuteReader())
                     {
-                        sum += reader.GetInt32(2);
-                        count++;
+                        while (reader.Read())
+                        {
+                            sum += reader.GetInt32(2);
+                            count++;
+                        }
                     }
                 }
+
+                Disconnect();
+
             }
 
             //To prevent dividing by zero in the case no queries are found
@@ -82,8 +88,8 @@ namespace EV_Charger_App.Services
         {
             if (Connect())
             {
-                // Build the value placeholders of the SQL query
-                string valuePlaceholders = string.Join(",", recordValues.Select(r => $"@{Guid.NewGuid()}"));
+                // Create placeholders for values in the query
+                string valuePlaceholders = string.Join(",", Enumerable.Range(0, recordValues.Length).Select(i => $"@value{i}"));
 
                 // Build the full SQL query
                 string query = $"INSERT INTO {tableName} VALUES ({valuePlaceholders})";
@@ -92,14 +98,22 @@ namespace EV_Charger_App.Services
                 List<MySqlParameter> parameters = new List<MySqlParameter>();
                 for (int i = 0; i < recordValues.Length; i++)
                 {
-                    parameters.Add(new MySqlParameter($"@{i}", recordValues[i]));
+                    parameters.Add(new MySqlParameter($"@value{i}", recordValues[i]));
                 }
 
-                MySqlCommand command = new MySqlCommand(query, connection);
-                command.Parameters.AddRange(parameters.ToArray());
-                command.ExecuteNonQuery();
+                // Create and execute the command
+                using (MySqlCommand command = new MySqlCommand(query, connection))
+                {
+                    command.Parameters.AddRange(parameters.ToArray());
+                    Debug.WriteLine("Inserting Record: " + command.CommandText);
+                    command.ExecuteNonQuery();
+                }
+
+                Disconnect();
             }
         }
+
+
 
 
         //Inserts a record with only the specified column values
@@ -127,6 +141,9 @@ namespace EV_Charger_App.Services
                     command.Parameters.AddRange(parameters.ToArray());
                     command.ExecuteNonQuery();
                 }
+
+                Disconnect();
+
             }
         }
 
@@ -161,7 +178,12 @@ namespace EV_Charger_App.Services
                     command.Parameters.AddRange(parameters.ToArray());
                     command.ExecuteNonQuery();
                 }
+
+                Disconnect();
+
             }
+
+
         }
 
 
@@ -185,6 +207,9 @@ namespace EV_Charger_App.Services
 
                     results.Add(record);
                 }
+
+                Disconnect();
+
             }
 
             return results;
@@ -214,6 +239,9 @@ namespace EV_Charger_App.Services
                         }
                     }
                 }
+
+                Disconnect();
+
             }
 
             // Return true if any records were found, false otherwise
@@ -247,6 +275,9 @@ namespace EV_Charger_App.Services
                         }
                     }
                 }
+
+                Disconnect();
+
             }
 
             Debug.WriteLine("Google API Key: " + key);
@@ -272,6 +303,9 @@ namespace EV_Charger_App.Services
                         }
                     }
                 }
+
+                Disconnect();
+
             }
 
             Debug.WriteLine("DOE API Key: " + key);

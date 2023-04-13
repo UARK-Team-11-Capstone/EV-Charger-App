@@ -1,4 +1,5 @@
 ﻿using EV_Charger_App.Services;
+using EV_Charger_App.Views;
 using Xamarin.Forms;
 using Debug = System.Diagnostics.Debug;
 
@@ -10,13 +11,15 @@ namespace EV_Charger_App
         public Database database;
         public Session session;
 
+        
+
         public App()
         {
             InitializeComponent();
             Debug.WriteLine("App Initialized");
 
             database = new Database();
-            MainPage = new NavigationPage(new MainPage(this));
+            MainPage = new NavigationPage(new LoginPage(this));
 
         }
 

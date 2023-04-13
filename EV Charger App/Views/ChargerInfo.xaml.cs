@@ -286,6 +286,7 @@ namespace EV_Charger_App.Views
                 string email = review[1].ToString();
                 string rating = review[2].ToString();
                 string comment = review[3].ToString();
+                string date = review[4].ToString();
 
                 Debug.WriteLine(email + " " + rating + comment);
 
@@ -303,6 +304,12 @@ namespace EV_Charger_App.Views
                     Margin = new Thickness(5)
                 };
 
+                var dateLabel = new Label
+                {
+                    Text = date,
+                    Margin = new Thickness(10, 0, 5, 0)
+                };
+
                 var commentsLabel = new Label
                 {
                     Text = comment,
@@ -316,6 +323,7 @@ namespace EV_Charger_App.Views
                         {
                             reviewStars,
                             emailLabel,
+                            dateLabel
                         }
                 };
                 
