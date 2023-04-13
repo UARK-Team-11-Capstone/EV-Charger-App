@@ -28,6 +28,9 @@ namespace EV_Charger_App.Views
         
         StackLayout infoLayout;
 
+        string[] bigStars = new string[6] { "zero_star_20" , "one_star_20" , "two_star_20" , "three_star_20" , "four_star_20" , "five_star_20" };
+        string[] smallStars;
+
         public ChargerInfo(App app, string[] chargerInfo)
         {
             InitializeComponent();
@@ -60,27 +63,7 @@ namespace EV_Charger_App.Views
             };
 
 
-            switch (rating)
-            {
-                case 5:
-                    starImage = "five_star_20";
-                    break;
-                case 4:
-                    starImage = "four_star_20";
-                    break;
-                case 3:
-                    starImage = "three_star_20";
-                    break;
-                case 2:
-                    starImage = "two_star_20";
-                    break;
-                case 1:
-                    starImage = "one_star_20";
-                    break;
-                default:
-                    starImage = "zero_star_20";
-                    break;
-            }
+
 
             var totalStars = new Image { Source = starImage };
 
@@ -143,27 +126,6 @@ namespace EV_Charger_App.Views
 
             };
 
-            //Review Labels
-            /*
-            var emailLabel = new Label
-            {
-                Text = "email@uark.edu",
-                Margin = new Thickness(10, 0, 5, 0),
-            };
-
-            var reviewStars = new Image
-            {
-                Source = "newfive_star.png",
-                Margin = new Thickness(5)
-            };
-
-            var commentsLabel = new Label
-            {
-                Text = "LOTS OF RANDOM WORDS",
-                Margin = new Thickness(10,0,0,0),
-            };
-            */
-
             //GM specific hex color used for the text 
             string hexColor = "#3D3935";
             Color GMBlack = Color.FromHex(hexColor);
@@ -179,6 +141,7 @@ namespace EV_Charger_App.Views
                 Children =
                 {
                     nameLabel,
+                    avgStars,
                     totalStars,
                     addressText,
                     addressLabel,
@@ -275,6 +238,32 @@ namespace EV_Charger_App.Views
             PopulateReviews();
         }
 
+        string setStarImage(string[] starOptions, int rating)
+        {
+            switch (rating)
+            {
+                case 5:
+                    starImage = starOptions[5];
+                    break;
+                case 4:
+                    starImage = starOptions[4];
+                    break;
+                case 3:
+                    starImage = starOptions[3];
+                    break;
+                case 2:
+                    starImage = starOptions[2];
+                    break;
+                case 1:
+                    starImage = starOptions[1];
+                    break;
+                default:
+                    starImage = starOptions[0];
+                    break;
+            }
+
+            return starImage;
+        }
 
         void PopulateReviews()
         {
