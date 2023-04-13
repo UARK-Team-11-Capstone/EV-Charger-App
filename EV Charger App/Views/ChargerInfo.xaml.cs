@@ -56,7 +56,7 @@ namespace EV_Charger_App.Views
 
             var avgStars = new Label
             {
-                Text = app.database.GetChargerRating(chargerName) + "",
+                Text = app.database.GetChargerRating(chargerName).ToString("0.0"),
                 FontSize = Device.GetNamedSize(NamedSize.Large, typeof(Label)),
                 FontAttributes = FontAttributes.Bold,
                 Margin = new Thickness(5),
@@ -139,6 +139,7 @@ namespace EV_Charger_App.Views
             addressLabel.TextColor = GMBlack;
             updatedLabel.TextColor = GMBlack;
             accessibilityLabel.TextColor = GMBlack;
+            avgStars.TextColor = GMBlack;
 
             var ratingHeader = new StackLayout
             {
