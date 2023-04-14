@@ -12,7 +12,7 @@
             <Label Text="{Binding Value, Source={x:Reference RatingSlider}, StringFormat='Rating: {0:F0}'}" TextColor="#3D3935"/>
             <StackLayout Orientation="Horizontal">
                 <Image Source="wheelchair.png"/>
-                <CheckBox Color="Black"/>
+                <CheckBox x:Name="Accessible" Color="Black"/>
             </StackLayout>
             <Label Text="Leave a Comment:"  TextColor="#3D3935"/>
             <Editor x:Name="CommentEditor" TextColor="#3D3935" HeightRequest="100" />

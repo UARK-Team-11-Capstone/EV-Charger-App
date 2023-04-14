@@ -1,4 +1,5 @@
 ﻿using Android.OS;
+using MySqlConnector;
 using System;
 using System.Collections.Generic;
 
@@ -15,7 +16,7 @@ namespace EV_Charger_App.Views
 
         App app;
 
-        string chargerName;
+        string chargerName = "";
 
 		public ReviewCharger (App app, string name)
 		{
@@ -35,6 +36,9 @@ namespace EV_Charger_App.Views
                 int rating = (int)RatingSlider.Value;
                 String comment = CommentEditor.Text;
 
+                bool a = Accessible.IsChecked;
+
+
                 // Save the review to the database
                 string email = GetUserFromToken();
 
@@ -45,7 +49,14 @@ namespace EV_Charger_App.Views
 
                 string currentDate = DateTime.Now.ToString("MM-dd-yyyy");
 
-                app.database.InsertRecord("Reviews", new string[5] { chargerName, email, rating.ToString(), comment, currentDate });
+                if(UserReviewed())
+                {
+                    app.database.ExecuteRawNonQuery("UPDATE Reviews SET rating=" + rating + ", comment='" + comment + "', date='" + currentDate + "', access=" + a + " WHERE chargerName='" + chargerName + "' and comment='" + comment + "'");
+                }
+                else
+                {
+                    app.database.InsertRecord("Reviews", new string[6] { chargerName, email, rating.ToString(), comment, currentDate, a.ToString() });
+                }
             }
             catch(NullReferenceException exception)
             {
@@ -83,6 +94,18 @@ namespace EV_Charger_App.Views
             Debug.WriteLine("Returning Email: " + email);
 
             return email;
+        }
+
+        bool UserReviewed()
+        {
+            string email = GetUserFromToken();
+
+            string query = "SELECT * FROM Reviews WHERE userEmail = @email and chargerName = @chargerName";
+
+            MySqlParameter emailParam = new MySqlParameter("@email", email);
+            MySqlParameter chargerParam = new MySqlParameter("@chargerName", chargerName);
+
+            return app.database.RecordExists(query, emailParam, chargerParam);
         }
 
     }
