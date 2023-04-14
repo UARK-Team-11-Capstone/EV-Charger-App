@@ -85,6 +85,10 @@ namespace EV_Charger_App.Views
             return email;
         }
 
+        private void wheelchairClicked(object sender, CheckedChangedEventArgs e)
+        {
+            //Write code that states the wheelchair was clicked
+        }
     }
 
 
