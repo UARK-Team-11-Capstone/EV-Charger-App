@@ -90,7 +90,7 @@ namespace EV_Charger_App.Services
                 count++;
             }
 
-            return sum / count;
+            return (float)sum / count;
         }
 
         //Inserts a full record into the database

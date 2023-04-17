@@ -33,7 +33,7 @@ namespace EV_Charger_App.Views
             try
             {
                 // Get the selected rating and comment
-                int rating = (int)RatingSlider.Value;
+                int rating = (int)Math.Round(RatingSlider.Value);
                 String comment = CommentEditor.Text;
 
                 bool a = Accessible.IsChecked;
@@ -73,7 +73,8 @@ namespace EV_Charger_App.Views
 
             // Show a confirmation message
             await DisplayAlert("Thank you", "Your review has been submitted.", "OK");
-
+            
+            await Navigation.PushAsync(new MainPage(app));
 
             // Reset the form
             RatingSlider.Value = 1;
