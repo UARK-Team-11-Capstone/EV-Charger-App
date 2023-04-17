@@ -51,7 +51,10 @@ namespace EV_Charger_App.Views
 
                 if(UserReviewed())
                 {
-                    app.database.ExecuteRawNonQuery("UPDATE Reviews SET rating=" + rating + ", comment='" + comment + "', date='" + currentDate + "', access=" + a + " WHERE chargerName='" + chargerName + "' and comment='" + comment + "'");
+                    //Delete old review and insert new one since it is easier
+                    string query = "DELETE FROM Reviews WHERE chargerName='" + chargerName + "' AND userEmail='" + email + "';";
+                    app.database.ExecuteRawNonQuery(query);
+                    app.database.InsertRecord("Reviews", new string[6] { chargerName, email, rating.ToString(), comment, currentDate, a.ToString() });
                 }
                 else
                 {
@@ -70,6 +73,7 @@ namespace EV_Charger_App.Views
 
             // Show a confirmation message
             await DisplayAlert("Thank you", "Your review has been submitted.", "OK");
+
 
             // Reset the form
             RatingSlider.Value = 1;

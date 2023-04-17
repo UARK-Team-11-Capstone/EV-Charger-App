@@ -31,7 +31,7 @@ namespace EV_Charger_App.Views
         string[] bigStars = new string[6] { "zero_star_20" , "one_star_20" , "two_star_20" , "three_star_20" , "four_star_20" , "five_star_20" };
         string[] smallStars = new string[6] { "zero_star_10" , "one_star_10" , "two_star_10" , "three_star_10" , "four_star_10" , "five_star_10" };
 
-    public ChargerInfo(App app, string[] chargerInfo)
+        public ChargerInfo(App app, string[] chargerInfo)
         {
             InitializeComponent();
             this.app = app;
