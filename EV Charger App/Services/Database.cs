@@ -346,5 +346,43 @@ namespace EV_Charger_App.Services
             return Regex.IsMatch(password, @"^[a-zA-Z0-9]{8}$");
         }
 
+        public string GetAccessibilityInfo(string chargerName)
+        {
+            int count = 0;
+            int sum = 0;
+            string query = "SELECT * FROM Reviews WHERE chargerName = '" + chargerName + "'";
+
+            if (Connect())
+            {
+                using (MySqlCommand command = new MySqlCommand(query, connection))
+                {
+                    using (MySqlDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            sum += reader.GetInt32(5);
+                            count++;
+                        }
+                    }
+                }
+
+                Disconnect();
+
+            }
+
+            float avg = (float)sum/ count;
+            Debug.WriteLine("[GetAccessibilityInfo] Average: " + avg);
+
+            if(avg >= .75)
+            {
+                return "1";
+            }
+            else
+            {
+                return "0";
+            }
+            
+        }
+
     }
 }

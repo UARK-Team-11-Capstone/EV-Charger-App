@@ -62,11 +62,14 @@ namespace EV_Charger_App.Services
 
             string address = charger.street_address + " " + charger.city + ", " + charger.state;
             string updatedAt = charger.updated_at.ToString();
-            string accessibility = charger.access_days_time;
+            string available = charger.access_days_time;
 
             string rating = app.database.GetChargerRating(chargerName) + "";
+            string accessible = app.database.GetAccessibilityInfo(chargerName);
 
-            return new string[4] { chargerName, address, updatedAt, accessibility };
+            Debug.WriteLine("[GetChargerInfo] Accessible? : " + accessible);
+
+            return new string[6] { chargerName, address, updatedAt, available, rating, accessible };
         }
 
         public async void HTTPRequestAsync(string parameters, string callType)

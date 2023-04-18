@@ -20,9 +20,11 @@ namespace EV_Charger_App.Views
 
         string updated = "";
 
-        string accessibility = "";
+        string availability = "";
         
         int rating;
+
+        string accessible = "";
 
         string starImage;
         
@@ -34,14 +36,18 @@ namespace EV_Charger_App.Views
         public ChargerInfo(App app, string[] chargerInfo)
         {
             InitializeComponent();
+            Debug.WriteLine("[ChargerInfo] Creating charger info page");
             this.app = app;
 
             chargerName = chargerInfo[0];
             address = chargerInfo[1];
             updated = chargerInfo[2];
-            accessibility = chargerInfo[3];
+            availability = chargerInfo[3];
+            Debug.WriteLine("[ChargerInfo] chargerInfo[4] : " + chargerInfo[4]);
+            rating = (int)Math.Round(float.Parse(chargerInfo[4]));
+            Debug.WriteLine("[ChargerInfo] chargerInfo[5] : " + chargerInfo[5]);
 
-            rating = (int)Math.Round(app.database.GetChargerRating(chargerName));
+            accessible = chargerInfo[5];
 
             Title = "Charger Information";
 
@@ -105,9 +111,9 @@ namespace EV_Charger_App.Views
                 HorizontalTextAlignment = TextAlignment.Center,
             };
 
-            var accessibilityText = new Label
+            var availabilityText = new Label
             {
-                Text = " Accessibility: ",
+                Text = " Availability: ",
                 FontAttributes = FontAttributes.Bold,
                 Margin = new Thickness(5, 5, 0, 0),
                 VerticalOptions = LayoutOptions.Center,
@@ -115,13 +121,24 @@ namespace EV_Charger_App.Views
 
             };
 
-            var accessibilityLabel = new Label
+            var availabilityLabel = new Label
             {
-                Text = accessibility,
+                Text = availability,
                 Margin = new Thickness(5, 0, 0, 5),
                 HorizontalTextAlignment = TextAlignment.Center,
 
             };
+
+            Image wheelchairIcon = new Image();
+
+            if(accessible == "1")
+            {
+                wheelchairIcon = new Image
+                {
+                    Source = "wheelchair.png",
+                    Margin = new Thickness(5, 0, 0, 0),
+                };
+            }          
 
             var reviewsText = new Label
             {
@@ -138,7 +155,7 @@ namespace EV_Charger_App.Views
             nameLabel.TextColor = GMBlack;
             addressLabel.TextColor = GMBlack;
             updatedLabel.TextColor = GMBlack;
-            accessibilityLabel.TextColor = GMBlack;
+            availabilityLabel.TextColor = GMBlack;
             avgStars.TextColor = GMBlack;
 
             var ratingHeader = new StackLayout
@@ -161,8 +178,9 @@ namespace EV_Charger_App.Views
                     addressLabel,
                     updatedText,
                     updatedLabel,
-                    accessibilityText,
-                    accessibilityLabel,
+                    availabilityText,
+                    availabilityLabel,
+                    wheelchairIcon,
                     reviewsText,
                 }
             };
