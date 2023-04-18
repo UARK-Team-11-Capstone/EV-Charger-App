@@ -219,6 +219,7 @@ namespace EV_Charger_App.Services
 
             }
 
+            Debug.WriteLine("[GetQueryRecords] Num of Records Found: " + results.Count);
             return results;
         }
 

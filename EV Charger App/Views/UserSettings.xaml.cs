@@ -1,5 +1,6 @@
 ﻿using System;
-
+using System.Collections.Generic;
+using System.Security.Principal;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -15,6 +16,18 @@ namespace EV_Charger_App.Views
         {
             InitializeComponent();
             this.app = app;
+
+            string token = app.session.getToken();
+
+            List<object[]> userInformation = app.database.GetQueryRecords("SELECT * FROM Users WHERE sessionToken = '" + token + "'");
+
+            string email = userInformation[0][0].ToString();
+            string name = userInformation[0][2].ToString();
+            string vehicle = userInformation[0][3].ToString();
+
+            NameTypeCell.Text = name;
+            EmailTypeCell.Text = email;
+            VehicleTypeCell.Text = vehicle;
         }
 
         //This is the function called when the save button is clicked

@@ -8,9 +8,9 @@
         <TableView Intent="Settings" >
             <TableRoot>
                 <TableSection>
-                    <EntryCell Label="Name" Placeholder="John Doe" LabelColor="#3D3935"/>
-                    <EntryCell Label="Email" Placeholder="jdoe@uark.edu" LabelColor="#3D3935"/>
-                    <EntryCell Label="Vehicle Type" Placeholder="Bolt" LabelColor="#3D3935"/>
+                    <EntryCell x:Name="NameTypeCell" Label="Name"  LabelColor="#3D3935" Placeholder="{Binding NameTypePlaceholder}"/>
+                    <EntryCell x:Name="EmailTypeCell" Label="Email" LabelColor="#3D3935" Placeholder="{Binding EmailTypePlaceholder}"/>
+                    <EntryCell x:Name="VehicleTypeCell" Label="Vehicle Type" LabelColor="#3D3935" Placeholder="{Binding VehicleTypePlaceholder}" />
 
                     <ViewCell x:Name="Password" Tapped="ChangePasswordTapped">
                         <StackLayout >
