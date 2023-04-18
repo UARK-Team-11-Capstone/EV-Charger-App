@@ -65,29 +65,41 @@ namespace EV_Charger_App.ViewModels
         public double latitude { get; set; }
         public double longitude { get; set; }
         public string city { get; set; }
-        public object intersection_directions { get; set; }
-        public object plus4 { get; set; }
         public string state { get; set; }
         public string street_address { get; set; }
         public string zip { get; set; }
         public string country { get; set; }
-        public List<string> ev_connector_types { get; set; }
-        public object ev_dc_fast_num { get; set; }
-        public object ev_level1_evse_num { get; set; }
-        public int ev_level2_evse_num { get; set; }
+        public List<string> ev_connector_types { get; set; }        
         public string ev_network { get; set; }
-        public string ev_network_web { get; set; }
-        public object ev_other_evse { get; set; }
         public object ev_pricing { get; set; }
-        public object ev_renewable_source { get; set; }
         public object access_days_time_fr { get; set; }
-        public object intersection_directions_fr { get; set; }
-        public object bd_blends_fr { get; set; }
-        public string groups_with_access_code_fr { get; set; }
         public object ev_pricing_fr { get; set; }
-        public EvNetworkIds ev_network_ids { get; set; }
-        public double distance { get; set; }
-        public double distance_km { get; set; }
+
+        public override string ToString()
+        {
+            return $"{access_code}, {access_days_time}, {access_detail_code}, {cards_accepted}, {date_last_confirmed}, {expected_date}, {fuel_type_code}, {groups_with_access_code}, {id}, {open_date}, {owner_type_code}, {status_code}, {restricted_access}, {station_name}, {station_phone}, {updated_at}, {facility_type}, {geocode_status}, {latitude}, {longitude}, {city}, {state}, {street_address}, {zip}, {country}, {ev_network}, {ev_pricing}, {access_days_time_fr}, {ev_pricing_fr}";
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null || GetType() != obj.GetType())
+            {
+                return false;
+            }
+
+            FuelStation other = (FuelStation)obj;
+            // compare all properties
+            return station_name == other.station_name                                    
+                   && id == other.id;
+        }
+        public override int GetHashCode()
+        {
+            int hashCode = 17;
+            hashCode = hashCode * 23 + station_name.GetHashCode();
+            hashCode = hashCode * 23 + id.GetHashCode();
+                      
+            return hashCode;
+        }
     }
 
     public class HY

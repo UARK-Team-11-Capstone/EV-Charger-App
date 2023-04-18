@@ -5,6 +5,7 @@ using GoogleApi.Entities.Common;
 using GoogleApi.Entities.Maps.Common;
 using GoogleApi.Entities.Maps.Directions.Response;
 using GoogleApi.Entities.Places.Common;
+using Javax.Security.Auth;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Metrics;
@@ -41,6 +42,7 @@ namespace EV_Charger_App
         private int chargePercentage;
         private int maxRange;
         private int rechargeMileage;
+        private int clusterDistance;
         bool overrideLoading;
         private double clusteringThreshold;
 
@@ -74,6 +76,7 @@ namespace EV_Charger_App
             rechargeMileage = 5;
             chargerRouting = false;
             clusteringThreshold = 2;
+            clusterDistance = 50;
         }
 
         private void ChargerRoutingClicked(object sender, EventArgs e)
@@ -270,6 +273,7 @@ namespace EV_Charger_App
                     IsEnabled = true
                 };
 
+                // Move map over USA
                 map.MoveToRegion(MapSpan.FromCenterAndRadius(new Position(latitude, longitude), Distance.FromMiles(1000)));
 
                 // Call the track location function
@@ -356,18 +360,20 @@ namespace EV_Charger_App
         public void DynamicChargerLoadingAsync(CameraPosition pos)
         {
             Debug.WriteLine("Dynamically loading chargers...");
-            double lat = pos.Target.Latitude;
-            double lng = pos.Target.Longitude;
-
+            
             try
             {
                 if (previousLocation != null && pos != null)
                 {
+                    double lat = pos.Target.Latitude;
+                    double lng = pos.Target.Longitude;
+                    
                     // Call DoE API to get nearest chargers in a radius relative to the camera zoom level
                     double alt = pos.Zoom;
                     double radius = GetVisibleRadius(alt);
                     doe.getNearestCharger(lat.ToString(), lng.ToString(), radius.ToString());
-                    // Load the nearby chargers on startup
+                    
+                    // Grab CHARGER_LIST from the DoEAPI class
                     List<FuelStation> chargers = doe.LoadChargers();
 
                     // Null protection
@@ -377,9 +383,9 @@ namespace EV_Charger_App
                     }
 
                     // If the radius of our view is more than 150 miles, cluster our chargers
-                    if (radius > 150)
+                    if (radius > clusterDistance)
                     {
-                        Debug.WriteLine("Radius larger than 150, proceeding to cluster...");
+                        Debug.WriteLine("Radius larger than clusterDistance, proceeding to cluster...");
                         // Clear the map of old pins to optimize for clusters
                         map.Pins.Clear();
 
@@ -425,54 +431,39 @@ namespace EV_Charger_App
                         }
                     }
                     else // Normal situation where the visible radius is less than 150 miles, make pins for all chargers in the visible radius
-                    {
-                        if (chargers != null)
-                        {
-                            if (clusterList == null)
+                    {                                               
+                        Debug.WriteLine("Declustering clusters back to chargers...");
+                        // Clear clusters if they are present in the current view
+                        for (int i = 0; i < map.Pins.Count - 1; i++)
+                        {                                    
+                            // Calculate the distance between the cluster and the center of the visible area
+                            double distance = Location.CalculateDistance(new Location(lat, lng), new Location(map.Pins[i].Position.Latitude, map.Pins[i].Position.Longitude), DistanceUnits.Miles);
+                            if (map.Pins[i].Type == PinType.SearchResult && distance <= radius)
                             {
-                                foreach (var charger in chargers)
-                                {
-                                    map.Pins.Add(CreatePin(charger));
+                                // Use lat and long as an identifier to find the cluster from the cluster list
+                                Cluster cluster = clusterList.Find(x => x.Id == (int)map.Pins[i].Tag);
+
+                                // Remove cluster icon and then add back the chargers from the cluster to the map
+                                map.Pins.Remove(map.Pins[i]);
+                                foreach (var charger in cluster.fuel_stations)
+                                {                                            
+                                    map.Pins.Add(CreatePin(charger));                                       
                                 }
+                                // Remove cluster that we just declustered
+                                clusterList.Remove(cluster);
                             }
                             else
                             {
-                                List<FuelStation> added = new List<FuelStation>();
-                                // Clear clusters if they are present in the current view
-                                for (int i = 0; i < map.Pins.Count - 1; i++)
-                                {                                    
-                                    // Calculate the distance between the cluster and the center of the visible area
-                                    double distance = Location.CalculateDistance(new Location(lat, lng), new Location(map.Pins[i].Position.Latitude, map.Pins[i].Position.Longitude), DistanceUnits.Miles);
-                                    if (map.Pins[i].Type == PinType.SearchResult && distance <= radius)
-                                    {
-                                        // Use lat and long as an identifier to find the cluster from the cluster list
-                                        Cluster cluster = clusterList.Find(x => x.Id == (int)map.Pins[i].Tag);
-
-                                        // Remove cluster icon and then add back the chargers from the cluster to the map
-                                        map.Pins.Remove(map.Pins[i]);
-                                        foreach (var charger in cluster.fuel_stations)
-                                        {
-                                            
-                                            map.Pins.Add(CreatePin(charger));
-                                            added.Add(charger);
-                                        }
-                                    }
-                                    else
-                                    {
-                                        continue;
-                                    }                                    
-                                }
-
-                                // Ignore duplicates
-                                added.AddRange(added.Except(chargers));
-                                foreach(var charger in added)
-                                {
-                                    map.Pins.Add(CreatePin(charger));
-                                }
-                                
-
-                            }
+                                continue;
+                            }                                    
                         }
+
+                        Debug.WriteLine("Adding " + doe.NEW_CHARGERS.fuel_stations.Count + " new chargers to the map...");
+                        // Add any new chargers that we recieved from the DoE
+                        foreach(var charger in doe.NEW_CHARGERS.fuel_stations)
+                        {
+                            map.Pins.Add(CreatePin(charger));
+                        }                                                                              
                     }
                 }
             }

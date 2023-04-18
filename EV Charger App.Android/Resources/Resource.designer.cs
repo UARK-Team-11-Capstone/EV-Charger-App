@@ -14,7 +14,7 @@ namespace EV_Charger_App.Droid
 {
 	
 	
-	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Xamarin.Android.Build.Tasks", "13.2.0.93")]
+	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Xamarin.Android.Build.Tasks", "13.1.0.5")]
 	public partial class Resource
 	{
 		
@@ -16916,22 +16916,19 @@ namespace EV_Charger_App.Droid
 			public const int wheelchair = 2131165368;
 			
 			// aapt resource value: 0x7F0700B9
-			public const int wheelchair1 = 2131165369;
+			public const int xamarin_logo = 2131165369;
 			
 			// aapt resource value: 0x7F0700BA
-			public const int xamarin_logo = 2131165370;
+			public const int yellowstar = 2131165370;
 			
 			// aapt resource value: 0x7F0700BB
-			public const int yellowstar = 2131165371;
+			public const int yellowstar1 = 2131165371;
 			
 			// aapt resource value: 0x7F0700BC
-			public const int yellowstar1 = 2131165372;
+			public const int zero_star_10 = 2131165372;
 			
 			// aapt resource value: 0x7F0700BD
-			public const int zero_star_10 = 2131165373;
-			
-			// aapt resource value: 0x7F0700BE
-			public const int zero_star_20 = 2131165374;
+			public const int zero_star_20 = 2131165373;
 			
 			static Drawable()
 			{
