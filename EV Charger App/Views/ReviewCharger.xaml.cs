@@ -1,4 +1,5 @@
 ﻿using Android.OS;
+using MySqlConnector;
 using System;
 using System.Collections.Generic;
 
@@ -15,7 +16,7 @@ namespace EV_Charger_App.Views
 
         App app;
 
-        string chargerName;
+        string chargerName = "";
 
 		public ReviewCharger (App app, string name)
 		{
@@ -32,8 +33,11 @@ namespace EV_Charger_App.Views
             try
             {
                 // Get the selected rating and comment
-                int rating = (int)RatingSlider.Value;
+                int rating = (int)Math.Round(RatingSlider.Value);
                 String comment = CommentEditor.Text;
+
+                bool a = Accessible.IsChecked;
+
 
                 // Save the review to the database
                 string email = GetUserFromToken();
@@ -45,7 +49,17 @@ namespace EV_Charger_App.Views
 
                 string currentDate = DateTime.Now.ToString("MM-dd-yyyy");
 
-                app.database.InsertRecord("Reviews", new string[5] { chargerName, email, rating.ToString(), comment, currentDate });
+                if(UserReviewed())
+                {
+                    //Delete old review and insert new one since it is easier
+                    string query = "DELETE FROM Reviews WHERE chargerName='" + chargerName + "' AND userEmail='" + email + "';";
+                    app.database.ExecuteRawNonQuery(query);
+                    app.database.InsertRecord("Reviews", new string[6] { chargerName, email, rating.ToString(), comment, currentDate, a.ToString() });
+                }
+                else
+                {
+                    app.database.InsertRecord("Reviews", new string[6] { chargerName, email, rating.ToString(), comment, currentDate, a.ToString() });
+                }
             }
             catch(NullReferenceException exception)
             {
@@ -59,6 +73,8 @@ namespace EV_Charger_App.Views
 
             // Show a confirmation message
             await DisplayAlert("Thank you", "Your review has been submitted.", "OK");
+            
+            await Navigation.PushAsync(new MainPage(app));
 
             // Reset the form
             RatingSlider.Value = 1;
@@ -85,10 +101,18 @@ namespace EV_Charger_App.Views
             return email;
         }
 
-        private void wheelchairClicked(object sender, CheckedChangedEventArgs e)
+        bool UserReviewed()
         {
-            //Write code that states the wheelchair was clicked
+            string email = GetUserFromToken();
+
+            string query = "SELECT * FROM Reviews WHERE userEmail = @email and chargerName = @chargerName";
+
+            MySqlParameter emailParam = new MySqlParameter("@email", email);
+            MySqlParameter chargerParam = new MySqlParameter("@chargerName", chargerName);
+
+            return app.database.RecordExists(query, emailParam, chargerParam);
         }
+
     }
 
 

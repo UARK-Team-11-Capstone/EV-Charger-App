@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using static Android.Hardware.Camera;
 using Debug = System.Diagnostics.Debug;
 
 
@@ -49,6 +50,15 @@ namespace EV_Charger_App.Services
             connection = null;
         }
 
+        public void ExecuteRawNonQuery(string query)
+        {
+            if(Connect())
+            {
+                MySqlCommand command = new MySqlCommand(query, connection);
+                command.ExecuteNonQuery();
+            }
+        }
+
         public float GetChargerRating(string chargerName)
         {
             int sum = 0;
@@ -80,7 +90,7 @@ namespace EV_Charger_App.Services
                 count++;
             }
 
-            return sum / count;
+            return (float)sum / count;
         }
 
         //Inserts a full record into the database
@@ -112,9 +122,6 @@ namespace EV_Charger_App.Services
                 Disconnect();
             }
         }
-
-
-
 
         //Inserts a record with only the specified column values
         public void InsertRecordSpecific(string tableName, string[] columnNames, string[] recordValues)

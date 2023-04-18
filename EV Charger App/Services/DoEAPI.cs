@@ -13,6 +13,7 @@ using System.Linq;
 using System.Net.Http;
 using Xamarin.Essentials;
 using Xamarin.Forms.GoogleMaps;
+using static Android.Telephony.CarrierConfigManager;
 using Location = Xamarin.Essentials.Location;
 
 namespace EV_Charger_App.Services
@@ -44,7 +45,9 @@ namespace EV_Charger_App.Services
         Location prevRequest;
         double prevRequestRadius;
 
-        public DoEAPI(string key)
+        App app;
+
+        public DoEAPI(App app, string key)
         {
             writeToFile = false;
             NEW_CHARGERS = new Root();
@@ -54,6 +57,23 @@ namespace EV_Charger_App.Services
             api_key = key;
             prevRequest = new Location();
             prevRequestRadius = 0.0;
+
+            this.app = app;
+        }
+
+
+        //Function to get charger information to pass to charger information page
+        public string[] GetChargerInfo(string chargerName)
+        {
+            FuelStation charger = GetFuelStation(chargerName);
+
+            string address = charger.street_address + " " + charger.city + ", " + charger.state;
+            string updatedAt = charger.updated_at.ToString();
+            string accessibility = charger.access_days_time;
+
+            string rating = app.database.GetChargerRating(chargerName) + "";
+
+            return new string[4] { chargerName, address, updatedAt, accessibility };
         }
 
         public async void HTTPRequestAsync(string parameters, string callType)

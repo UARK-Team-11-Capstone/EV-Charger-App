@@ -65,7 +65,7 @@ namespace EV_Charger_App
             searchResultsListView.ItemTapped += (sender, e) => ListItemTapped(sender, e, searchResultsListView, searchBar);
 
             this.app = app;
-            doe = new DoEAPI(app.database.GetDOEAPIKey());
+            doe = new DoEAPI(app, app.database.GetDOEAPIKey());
             routeAPI = new RoutingAPI();
             googlePlacesApi = new GooglePlacesApi(app.database.GetGoogleAPIKey());
             prediction = new List<Prediction>();
@@ -223,23 +223,9 @@ namespace EV_Charger_App
         private async void Map_InfoWindowLongClicked(object sender, InfoWindowLongClickedEventArgs e)
         {
             Debug.WriteLine(e.Pin.Label);
-            await Navigation.PushAsync(new ChargerInfo(app, GetChargerInfo(e.Pin.Label)));
-
+            await Navigation.PushAsync(new ChargerInfo(app, doe.GetChargerInfo(e.Pin.Label)));
         }
 
-        //Function to get charger information to pass to charger information page
-        string[] GetChargerInfo(string chargerName)
-        {
-            FuelStation charger = doe.GetFuelStation(chargerName);
-
-            string address = charger.street_address + " " + charger.city + ", " + charger.state;
-            string updatedAt = charger.updated_at.ToString();
-            string accessibility = charger.access_days_time;
-
-            string rating = app.database.GetChargerRating(chargerName) + "";
-
-            return new string[4] { chargerName, address, updatedAt, accessibility };
-        }
 
         
 

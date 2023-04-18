@@ -32,7 +32,7 @@ namespace EV_Charger_App.Views
 
         async private void ReviewChargers(object sender, EventArgs e)
         {
-            await Navigation.PushAsync(new ReviewCharger(app, ""));
+            //await Navigation.PushAsync(new ReviewCharger(app, ""));
         }
         /*async private void ChargerInformation(object sender, EventArgs e)
         {
