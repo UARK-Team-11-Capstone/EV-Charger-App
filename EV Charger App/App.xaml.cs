@@ -9,9 +9,7 @@ namespace EV_Charger_App
     public partial class App : Application
     {
         public Database database;
-        public Session session;
-
-        
+        public Session session;               
 
         public App()
         {
@@ -19,8 +17,7 @@ namespace EV_Charger_App
             Debug.WriteLine("App Initialized");
 
             database = new Database();
-            MainPage = new NavigationPage(new LoginPage(this));
-
+            MainPage = new NavigationPage(new LoginPage(this));            
         }
 
         protected override void OnStart()

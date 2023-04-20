@@ -44,6 +44,10 @@ namespace EV_Charger_App.ViewModels
 
     public class FuelStation
     {
+        public enum ColorStatus
+        {
+            Green, Yellow, Red
+        }
         public string access_code { get; set; }
         public string access_days_time { get; set; }
         public object access_detail_code { get; set; }
@@ -74,6 +78,8 @@ namespace EV_Charger_App.ViewModels
         public object ev_pricing { get; set; }
         public object access_days_time_fr { get; set; }
         public object ev_pricing_fr { get; set; }
+        public double distanceFromUser { get; set; }
+        public ColorStatus colorStatus { get; set; }
 
         public override string ToString()
         {

@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms" 
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:local="clr-namespace:EV_Charger_App.Views"
+             x:Class="EV_Charger_App.Views.ChargerListPage">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <local:ColorStatusConverter x:Key="ColorStatusConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
+    <ContentPage.Content>
+        <StackLayout>
+            <Label Text="Charging Stations" HorizontalOptions="Center" VerticalOptions="Center" TextColor="Black" FontSize="20" FontAttributes="Bold" Margin="10"/>
+            <ListView x:Name="fuelStationsListView"                      
+                      HasUnevenRows="True"
+                      SeparatorVisibility="None"
+                      Margin="10">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <ViewCell >
+                            <StackLayout Padding="10" BackgroundColor="{Binding colorStatus, Converter={StaticResource ColorStatusConverter}}">
+                            <Label x:Name="StationNames" Text="{Binding station_name}" FontAttributes="Bold" TextColor ="Black" FontSize="18"/>
+                            <Label Text="{Binding distanceFromUser, StringFormat='{0:F2} m away'}"  TextColor ="Black" FontSize="16"/>
+                            </StackLayout>
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>

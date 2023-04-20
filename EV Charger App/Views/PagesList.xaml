@@ -3,9 +3,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              BackgroundColor="#F0F3F5"
              x:Class="EV_Charger_App.Views.PagesList">
-    <ContentPage.ToolbarItems>
-        <ToolbarItem IconImageSource="menubar1.png" Clicked="ListClicked"/>
-    </ContentPage.ToolbarItems>
     <ContentPage.Content>
         <StackLayout>
             <Label Text="Map Screen" HorizontalOptions="Center" TextColor="Blue" FontSize="Large">
@@ -30,6 +27,12 @@
                 <Label.GestureRecognizers>
                     <TapGestureRecognizer
                         Tapped="ReviewChargers"/>
+                </Label.GestureRecognizers>
+            </Label>
+            <Label Text="Charger List" HorizontalOptions="Center" TextColor="Blue" FontSize="Large">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer
+                        Tapped="ChargerList"/>
                 </Label.GestureRecognizers>
             </Label>
             <!--Label Text="Charger Info" HorizontalOptions="Center" TextColor="Blue" FontSize="Large">

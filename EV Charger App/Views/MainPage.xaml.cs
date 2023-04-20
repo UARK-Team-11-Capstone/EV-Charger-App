@@ -1,16 +1,14 @@
-﻿using EV_Charger_App.Services;
+﻿using Android.Speech.Tts;
+using EV_Charger_App.Services;
 using EV_Charger_App.ViewModels;
 using EV_Charger_App.Views;
 using GoogleApi.Entities.Common;
 using GoogleApi.Entities.Maps.Common;
 using GoogleApi.Entities.Maps.Directions.Response;
 using GoogleApi.Entities.Places.Common;
-using Javax.Security.Auth;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Metrics;
 using System.Linq;
-using System.Net.NetworkInformation;
 using System.Threading.Tasks;
 using Xamarin.Essentials;
 using Xamarin.Forms;
@@ -29,7 +27,7 @@ namespace EV_Charger_App
         App app;
 
         Xamarin.Forms.GoogleMaps.Map map;
-        Location previousLocation;
+        
         DoEAPI doe;
         RoutingAPI routeAPI;
         GooglePlacesApi googlePlacesApi;
@@ -39,6 +37,7 @@ namespace EV_Charger_App
         List<Cluster> clusterList;
         string lastAddress;
         bool chargerRouting;
+        private Location previousLocation;
         private int chargePercentage;
         private int maxRange;
         private int rechargeMileage;
@@ -79,6 +78,19 @@ namespace EV_Charger_App
             clusterDistance = 50;
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------
+        // This gets called when you click the menu bar on the ribbon
+        // Will send the user to the page containing a list of pages
+        // (map screen link, login screen link, settings link)
+        //-----------------------------------------------------------------------------------------------------------------------------
+        async private void ListClicked(object sender, EventArgs e)
+        {
+            await Navigation.PushAsync(new PagesList(app, doe, this));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------
+        // Toggle Routing
+        //-----------------------------------------------------------------------------------------------------------------------------
         private void ChargerRoutingClicked(object sender, EventArgs e)
         {
             chargerRouting = !chargerRouting;
@@ -224,10 +236,7 @@ namespace EV_Charger_App
         {
             Debug.WriteLine(e.Pin.Label);
             await Navigation.PushAsync(new ChargerInfo(app, doe.GetChargerInfo(e.Pin.Label)));
-        }
-
-
-        
+        }      
 
         //-----------------------------------------------------------------------------------------------------------------------------
         // Responds on a camera moved action
@@ -294,6 +303,23 @@ namespace EV_Charger_App
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------
+        // To keep protection of user location call to get distance from a certain position to the user
+        //-----------------------------------------------------------------------------------------------------------------------------
+        public double GetDistanceFromUser(Location loc)
+        {
+            if(previousLocation != null && loc != null)
+            {
+                double distance = Location.CalculateDistance(previousLocation, loc, DistanceUnits.Miles);
+                return distance;
+            }
+            else
+            {
+                return double.NegativeInfinity;
+            }
+                 
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------
         // Update the location of the users pin every 5 seconds
         //-----------------------------------------------------------------------------------------------------------------------------
         public async void TrackLocation()
@@ -357,26 +383,17 @@ namespace EV_Charger_App
                     // Call DoE API to get nearest chargers in a radius relative to the camera zoom level
                     double alt = pos.Zoom;
                     double radius = GetVisibleRadius(alt);
-                    doe.getNearestCharger(lat.ToString(), lng.ToString(), radius.ToString());
-                    
-                    // Grab CHARGER_LIST from the DoEAPI class
-                    List<FuelStation> chargers = doe.LoadChargers();
-
-                    // Null protection
-                    if (chargers == null)
-                    {
-                        return;
-                    }
+                    doe.getNearestCharger(lat.ToString(), lng.ToString(), radius.ToString());                                        
 
                     // If the radius of our view is more than 150 miles, cluster our chargers
-                    if (radius > clusterDistance)
+                    if (radius > clusterDistance && doe.CHARGER_LIST.fuel_stations != null && doe.NEW_CHARGERS.fuel_stations != null)
                     {
                         Debug.WriteLine("Radius larger than clusterDistance, proceeding to cluster...");
                         // Clear the map of old pins to optimize for clusters
                         map.Pins.Clear();
 
                         // Call function to update global clusterList
-                        ClusterFuelStations(chargers);
+                        ClusterFuelStations(doe.CHARGER_LIST.fuel_stations);
 
                         Debug.WriteLine("Cluster list size: " + clusterList.Count);
                         if (clusterList != null)
@@ -416,8 +433,9 @@ namespace EV_Charger_App
                             Debug.WriteLine("ClusterList was null");
                         }
                     }
-                    else // Normal situation where the visible radius is less than 150 miles, make pins for all chargers in the visible radius
-                    {                                               
+                    else if(doe.CHARGER_LIST.fuel_stations != null && doe.NEW_CHARGERS.fuel_stations != null)
+                    {   // Normal situation where the visible radius is less than 150 miles, make pins for all chargers in the visible radius
+                                                                   
                         Debug.WriteLine("Declustering clusters back to chargers...");
                         // Clear clusters if they are present in the current view
                         for (int i = 0; i < map.Pins.Count - 1; i++)
@@ -449,7 +467,16 @@ namespace EV_Charger_App
                         foreach(var charger in doe.NEW_CHARGERS.fuel_stations)
                         {
                             map.Pins.Add(CreatePin(charger));
-                        }                                                                              
+                        }
+                           
+                        // If for some reason the map is empty
+                        if(map.Pins.Count == 1)
+                        {
+                            foreach(var charger in doe.CHARGER_LIST.fuel_stations)
+                            {
+                                map.Pins.Add(CreatePin(charger));
+                            }
+                        }
                     }
                 }
             }
@@ -466,25 +493,17 @@ namespace EV_Charger_App
         {
             try
             {
-                // Get the current DateTime object
-                DateTime currentDate = DateTime.Now;
-                // Get the difference in last updated for the charger and assign green, yellow, or red status based on this
-                DateTime chargerDate = fs.updated_at;
-                TimeSpan difference = currentDate - chargerDate;
-
-                string chargerIconName = "";
-
-                if (difference.TotalDays < 7)
-                {
+                String chargerIconName = "";
+                if (fs.colorStatus == FuelStation.ColorStatus.Green)
+                {                   
                     chargerIconName = "Charger-Icon-Green.png";
                 }
-                else if (difference.TotalDays < 31)
-                {
+                else if (fs.colorStatus == FuelStation.ColorStatus.Yellow)
+                {                   
                     chargerIconName = "Charger-Icon-Yellow.png";
                 }
                 else
-                {
-                    chargerIconName = "Charger-Icon-Red.png";
+                {   chargerIconName = "Charger-Icon-Red.png";
                 }
 
                 var chargerPin = new Pin()
@@ -862,16 +881,6 @@ namespace EV_Charger_App
             }
 
             return poly;
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------
-        //This gets called when you click the menu bar on the ribbon
-        // Will send the user to the page containing a list of pages
-        // (map screen link, login screen link, settings link)
-        //-----------------------------------------------------------------------------------------------------------------------------
-        async private void ListClicked(object sender, EventArgs e)
-        {
-            await Navigation.PushAsync(new UserSettings(app));
-        }
+        }        
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EV_Charger_App.Services;
+using System;
 
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -9,10 +10,14 @@ namespace EV_Charger_App.Views
     public partial class PagesList : ContentPage
     {
         App app;
-        public PagesList(App app)
+        DoEAPI doe;
+        MainPage main;
+        public PagesList(App app, DoEAPI doe, MainPage main)
         {
             InitializeComponent();
             this.app = app;
+            this.doe = doe;
+            this.main = main;
         }
 
         async private void MapScreen(object sender, EventArgs e)
@@ -30,6 +35,11 @@ namespace EV_Charger_App.Views
             await Navigation.PushAsync(new UserSettings(app));
         }
 
+        async private void ChargerList(object sender, EventArgs e)
+        {
+            await Navigation.PushAsync(new ChargerListPage(app, doe, main));
+        }
+
         async private void ReviewChargers(object sender, EventArgs e)
         {
             //await Navigation.PushAsync(new ReviewCharger(app, ""));
@@ -38,13 +48,6 @@ namespace EV_Charger_App.Views
         {
             await Navigation.PushAsync(new ChargerInfo(app, new string[0]));
         }*/
-
-        //This gets called when you click the menu bar on the ribbon
-        // Will send the user to the page containing a list of pages
-        // (map screen link, login screen link, settings link)
-        async private void ListClicked(object sender, EventArgs e)
-        {
-            await Navigation.PushAsync(new PagesList(app));
-        }
+     
     }
 }

@@ -23,14 +23,6 @@ namespace EV_Charger_App.Views
             await Navigation.PushAsync(new CreateAccountPage(app));
         }
 
-        //This gets called when you click the menu bar on the ribbon
-        // Will send the user to the page containing a list of pages
-        // (map screen link, login screen link, settings link)
-        async private void ListClicked(object sender, EventArgs e)
-        {
-            await Navigation.PushAsync(new PagesList(app));
-        }
-
         //This is the function called when the login button is clicked
         async private void SubmitLogin(object sender, EventArgs args)
         {

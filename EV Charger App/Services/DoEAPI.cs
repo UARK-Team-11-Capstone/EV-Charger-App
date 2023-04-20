@@ -42,8 +42,6 @@ namespace EV_Charger_App.Services
         public Root CHARGER_LIST;
         public Root NEW_CHARGERS;
         bool writeToFile;
-        Location prevRequest;
-        double prevRequestRadius;
 
         App app;
 
@@ -55,8 +53,6 @@ namespace EV_Charger_App.Services
             chargersAlongRoute = new Root();
             previousResults = new Root();
             api_key = key;
-            prevRequest = new Location();
-            prevRequestRadius = 0.0;
 
             this.app = app;
         }
@@ -87,7 +83,6 @@ namespace EV_Charger_App.Services
             try
             {
                 string URL = requestURL + callType + api_param + parameters;
-                //Debug.WriteLine(URL);
 
                 HttpResponseMessage response = await client.GetAsync(URL);
                 if (response.IsSuccessStatusCode)
@@ -167,20 +162,28 @@ namespace EV_Charger_App.Services
                 // Add toggle for whether or not we want to store in a file
                 if (writeToFile == false)
                 {
-                    // Grab result
-                    Debug.WriteLine(response);
+                    // Grab result                    
                     var result = JsonConvert.DeserializeObject<Root>(response);
                     if (result != null)
-                    {                       
-                        int count = 0;
-                        foreach (var charger in result.fuel_stations)
+                    {
+                        // If getting chargers for a route add to chargersAlongRoute list
+                        if (callType == callNearestRoute)
                         {
-                            count++;
+                            if (chargersAlongRoute.fuel_stations == null)
+                            {
+                                chargersAlongRoute.fuel_stations = new List<FuelStation>(result.fuel_stations);
+                            }
+                            else
+                            {
+                                chargersAlongRoute.fuel_stations.Clear();
+                                chargersAlongRoute.fuel_stations.AddRange(result.fuel_stations);
+                                SetStatus(chargersAlongRoute.fuel_stations);
+                            }
                         }
-                        
                         // If the app is initializing both will be null and both should be intialized with same values
-                        if(NEW_CHARGERS.fuel_stations == null && CHARGER_LIST.fuel_stations == null)
-                        {                            
+                        if (NEW_CHARGERS.fuel_stations == null && CHARGER_LIST.fuel_stations == null)
+                        {
+                            SetStatus(result.fuel_stations);
                             CHARGER_LIST.fuel_stations = new List<FuelStation>(result.fuel_stations);
                             NEW_CHARGERS.fuel_stations = new List<FuelStation>(result.fuel_stations);
                         }
@@ -191,14 +194,12 @@ namespace EV_Charger_App.Services
                             // Reset NEW_CHARGERS for the new response and only add new chargers to the CHARGER_LIST
                             var list = result.fuel_stations.Except(CHARGER_LIST.fuel_stations);
                                 
-                            NEW_CHARGERS.fuel_stations.AddRange(list);                               
+                            NEW_CHARGERS.fuel_stations.AddRange(list);
+                            
+                            // Set the Green, Yellow, Red status of the new stations
+                            SetStatus(NEW_CHARGERS.fuel_stations);
                             CHARGER_LIST.fuel_stations.AddRange(NEW_CHARGERS.fuel_stations);
 
-                            // If getting chargers for a route add to chargersAlongRoute list
-                            if (callType == callNearestRoute)
-                            {
-                                chargersAlongRoute.fuel_stations = new List<FuelStation>(result.fuel_stations);
-                            }
                         }                        
                     }                   
                 }
@@ -248,6 +249,34 @@ namespace EV_Charger_App.Services
             catch (Exception ex)
             {
                 Debug.WriteLine("Error processing HTTP response: " + ex.Message);
+            }
+        }
+
+        public void SetStatus(List<FuelStation> list)
+        {
+            if(list != null)
+            {
+                foreach(var charger in list)
+                {
+                    // Get the current DateTime object
+                    DateTime currentDate = DateTime.Now;
+                    // Get the difference in last updated for the charger and assign green, yellow, or red status based on this
+                    DateTime chargerDate = charger.updated_at;
+                    TimeSpan difference = currentDate - chargerDate;
+
+                    if (difference.TotalDays < 7)
+                    {
+                        charger.colorStatus = FuelStation.ColorStatus.Green;                       
+                    }
+                    else if (difference.TotalDays < 31)
+                    {
+                        charger.colorStatus = FuelStation.ColorStatus.Yellow;                        
+                    }
+                    else
+                    {
+                        charger.colorStatus = FuelStation.ColorStatus.Red;
+                    }
+                }
             }
         }
         public List<FuelStation> LoadChargers()
@@ -345,9 +374,7 @@ namespace EV_Charger_App.Services
                       
             string param = "&latitude=" + latitude + "&longitude=" + longitude + "&radius=" + radius + fuel_type + status_code + ev_connector_type + access + limit;
             // Collect response
-            HTTPRequestAsync(param, callNearest);
-            prevRequest = loc;
-            prevRequestRadius = double.Parse(radius);
+            HTTPRequestAsync(param, callNearest);            
           
         }
 
