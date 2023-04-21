@@ -670,18 +670,13 @@ namespace EV_Charger_App
                             // Call the routing api between the origin and charger locationEx
                             response = await routeAPI.GetRouteAsync(origin, chargerLocationEx);
                         }
-                        else if (charger == finalRouteChargers.LastOrDefault())
-                        {
-                            // Call the routing api between the charger and the destination
-                            response = await routeAPI.GetRouteAsync(chargerLocationEx, destination);
-                        }
                         else
                         {
                             // Call the routing api between the previous charger and the current charger
                             string prevChargerStringAdd = prev.street_address + ", " + prev.city + ", " + prev.state + "," + prev.zip;
-                            Address prevChargerAddress = new Address(chargerStringAdd);
-                            LocationEx prevChargerLocationEx = new LocationEx(chargerAddress);
-                            response = await routeAPI.GetRouteAsync(chargerLocationEx, prevChargerLocationEx);
+                            Address prevChargerAddress = new Address(prevChargerStringAdd);
+                            LocationEx prevChargerLocationEx = new LocationEx(prevChargerAddress);
+                            response = await routeAPI.GetRouteAsync(prevChargerLocationEx, chargerLocationEx);
                         }
 
                         // If we get a valid reponse add it to the list
@@ -692,9 +687,24 @@ namespace EV_Charger_App
                             finalRoute.AddRange(DecodePolyline(response.Routes.First().OverviewPath.Points));
                         }
 
+                        if (charger == finalRouteChargers.LastOrDefault())
+                        {
+                            // Call the routing api between the charger and the destination
+                            response = await routeAPI.GetRouteAsync(chargerLocationEx, destination);
+                           
+                            if (response != null)
+                            {
+                                Debug.WriteLine("Adding adding final route");
+                                // Add the points to the finalRoute list
+                                finalRoute.AddRange(DecodePolyline(response.Routes.First().OverviewPath.Points));
+                            }
+                        }
+
                         // Keep track of the previous charger
                         prev = charger;
                     }
+
+
 
                     // Create actual polyline
                     var polyline = new Xamarin.Forms.GoogleMaps.Polyline
@@ -824,7 +834,7 @@ namespace EV_Charger_App
                             double dist = Location.CalculateDistance(new Location(finalRouteChargers.Last().latitude, finalRouteChargers.Last().longitude), new Location(charger.latitude, charger.longitude), DistanceUnits.Miles);
                             if (dist >= rechargeMileage)
                             {
-                                Debug.WriteLine("Added middle chargerg to final route charging");
+                                Debug.WriteLine("Added middle charger to final route charging");
                                 finalRouteChargers.Add(charger);
                             }
                         }
