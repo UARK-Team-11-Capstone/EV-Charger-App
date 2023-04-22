@@ -32,6 +32,7 @@ namespace EV_Charger_App.Views
         //This is the function called when the save button is clicked
         async private void SaveSettings(object sender, EventArgs e)
         {
+            app.session.setVehicleCharge((int)ChargeSlider.Value);
             await Navigation.PushAsync(new MainPage(app));
         }
 

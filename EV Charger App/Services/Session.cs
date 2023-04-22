@@ -8,6 +8,8 @@ namespace EV_Charger_App.Services
         private const int tokenLength = 16;
         private byte[] token;
 
+        int vehicleCharge = 100;
+
         public Session(string email, Database db)
         {
             token = GenerateToken();
@@ -73,6 +75,16 @@ namespace EV_Charger_App.Services
             }
 
             return false;
+        }
+
+        public void setVehicleCharge(int vehicleCharge)
+        {
+            this.vehicleCharge = vehicleCharge;
+        }
+
+        public int getVehicleCharge()
+        {
+            return vehicleCharge;
         }
 
     }

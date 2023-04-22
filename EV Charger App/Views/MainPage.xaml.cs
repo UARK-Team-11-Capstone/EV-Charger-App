@@ -47,6 +47,7 @@ namespace EV_Charger_App
             InitializeComponent();
 
             NavigationPage.SetHasNavigationBar(this, true);
+            NavigationPage.SetHasBackButton(this, false);
             LoadMapAsync(39.5, -98.35);
 
             #pragma warning disable CS0618 // Type or member is obsolete
@@ -71,7 +72,27 @@ namespace EV_Charger_App
 
             rechargeMileage = 50;
             maxRange = 200;
-            chargePercentage = 100;
+
+            ToolbarItem batteryItem = ToolbarItems.FirstOrDefault(item => item.ClassId == "batteryIcon");
+
+            int charge = app.session.getVehicleCharge();
+            
+            if(charge == 0)
+            {
+                batteryItem.IconImageSource = "Battery_Icon_0";
+            }
+            else if(charge > 0 && charge <= 25)
+            {
+                batteryItem.IconImageSource = "Battery_Icon_25";
+            }
+            else if(charge > 25 && charge <= 50)
+            {
+                batteryItem.IconImageSource = "Battery_Icon_50";
+            }
+            else if(charge > 50 && charge <= 75)
+            {
+                batteryItem.IconImageSource = "Battery_Icon_75";
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------
@@ -83,7 +104,7 @@ namespace EV_Charger_App
         //-----------------------------------------------------------------------------------------------------------------------------
         async private void ListClicked(object sender, EventArgs e)
         {
-            await Navigation.PushAsync(new PagesList(app, doe, this));
+            await Navigation.PushAsync(new UserSettings(app));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------
