@@ -22,12 +22,21 @@ namespace EV_Charger_App.ViewModels
             fuel_stations = new List<FuelStation>();
         }
 
+        /// <summary>
+        /// Add a charger to the cluster and update the average position
+        /// </summary>
+        /// <param name="fuelStation"></param>
         public void AddFuelStation(FuelStation fuelStation)
         {
             fuel_stations.Add(fuelStation);
             UpdatePosition(fuelStation.latitude, fuelStation.longitude);
         }
 
+        /// <summary>
+        /// Given a new coordinate update the average position of the cluster
+        /// </summary>
+        /// <param name="latitude"></param>
+        /// <param name="longitude"></param>
         private void UpdatePosition(double latitude, double longitude)
         {
             if (fuel_stations.Count == 1)
@@ -54,6 +63,12 @@ namespace EV_Charger_App.ViewModels
                 }
             }
         }
+
+        /// <summary>
+        /// Determine of given clusters are equivalent based on id, position, and charger list
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
         public override bool Equals(object obj)
         {
             if (obj == null || GetType() != obj.GetType())
@@ -67,6 +82,11 @@ namespace EV_Charger_App.ViewModels
                    && position == other.position
                    && fuel_stations == other.fuel_stations;
         }
+
+        /// <summary>
+        /// Returns hashcode for object
+        /// </summary>
+        /// <returns></returns>
         public override int GetHashCode()
         {
             int hashCode = 17;

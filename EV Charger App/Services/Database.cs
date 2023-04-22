@@ -21,6 +21,10 @@ namespace EV_Charger_App.Services
 
         private MySqlConnection connection;
 
+        /// <summary>
+        /// Connects to the database
+        /// </summary>
+        /// <returns></returns>
         public bool Connect()
         {
             try
@@ -43,11 +47,15 @@ namespace EV_Charger_App.Services
             }
         }
 
+        /// <summary>
+        /// Diconnects from the database
+        /// </summary>
         public void Disconnect()
         {
             connection?.Close();
             connection = null;
         }
+
 
         public void ExecuteRawNonQuery(string query)
         {
@@ -58,6 +66,11 @@ namespace EV_Charger_App.Services
             }
         }
 
+        /// <summary>
+        /// Returns float rating of charger given its name
+        /// </summary>
+        /// <param name="chargerName"></param>
+        /// <returns></returns>
         public float GetChargerRating(string chargerName)
         {
             int sum = 0;
@@ -92,7 +105,11 @@ namespace EV_Charger_App.Services
             return (float)sum / count;
         }
 
-        //Inserts a full record into the database
+        /// <summary>
+        /// Inserts a full record into the database
+        /// </summary>
+        /// <param name="tableName"></param>
+        /// <param name="recordValues"></param>
         public void InsertRecord(string tableName, string[] recordValues)
         {
             if (Connect())
@@ -122,7 +139,12 @@ namespace EV_Charger_App.Services
             }
         }
 
-        //Inserts a record with only the specified column values
+        /// <summary>
+        /// Inserts a record with only the specified column values
+        /// </summary>
+        /// <param name="tableName"></param>
+        /// <param name="columnNames"></param>
+        /// <param name="recordValues"></param>
         public void InsertRecordSpecific(string tableName, string[] columnNames, string[] recordValues)
         {
             if (Connect())
@@ -153,7 +175,14 @@ namespace EV_Charger_App.Services
             }
         }
 
-
+        /// <summary>
+        /// Updates the record in the database
+        /// </summary>
+        /// <param name="tableName"></param>
+        /// <param name="columnNames"></param>
+        /// <param name="columnValues"></param>
+        /// <param name="whereColumn"></param>
+        /// <param name="whereValue"></param>
         public void UpdateRecord(string tableName, string[] columnNames, string[] columnValues, string whereColumn, string whereValue)
         {
             if (Connect())
@@ -193,7 +222,11 @@ namespace EV_Charger_App.Services
         }
 
 
-        //Returns a list of array of objects, where each array of objects is a record, and each individual object in the array is a value in the record
+        /// <summary>
+        /// Returns a list of array of objects, where each array of objects is a record, and each individual object in the array is a value in the record
+        /// </summary>
+        /// <param name="query"></param>
+        /// <returns></returns>
         public List<object[]> GetQueryRecords(string query)
         {
             List<object[]> results = new List<object[]>();
@@ -222,7 +255,12 @@ namespace EV_Charger_App.Services
             return results;
         }
 
-        //This is a general purpose function to safely check if a record exists
+        /// <summary>
+        /// This is a general purpose function to safely check if a record exists
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="parameters"></param>
+        /// <returns></returns>
         public bool RecordExists(string query, params MySqlParameter[] parameters)
         {
             int recordCount = 0;
@@ -255,6 +293,11 @@ namespace EV_Charger_App.Services
             return recordCount > 0;
         }
 
+        /// <summary>
+        /// Hashes the given password and returns the hash
+        /// </summary>
+        /// <param name="password"></param>
+        /// <returns></returns>
         public string HashPassword(string password)
         {
             using (var sha256 = SHA256.Create())
@@ -264,6 +307,10 @@ namespace EV_Charger_App.Services
             }
         }
 
+        /// <summary>
+        /// Gets the API key from the database for the GoogleAPI
+        /// </summary>
+        /// <returns></returns>
         public string GetGoogleAPIKey()
         {
             string key = "";
@@ -292,6 +339,10 @@ namespace EV_Charger_App.Services
             return key;
         }
 
+        /// <summary>
+        /// Gets the API key from the database for the DoE API
+        /// </summary>
+        /// <returns></returns>
         public string GetDOEAPIKey()
         {
             string key = "";
@@ -320,7 +371,11 @@ namespace EV_Charger_App.Services
             return key;
         }
 
-        //Check if given email is valid
+        /// <summary>
+        /// Check if given email is valid
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
         public bool IsValidEmail(string email)
         {
             if (string.IsNullOrWhiteSpace(email))
@@ -339,7 +394,11 @@ namespace EV_Charger_App.Services
             }
         }
 
-        //Check if given password is valid
+        /// <summary>
+        /// Check if given password is valid
+        /// </summary>
+        /// <param name="password"></param>
+        /// <returns></returns>
         bool IsPasswordValid(string password)
         {
             // Check if password matches the pattern of 8 alphanumeric characters

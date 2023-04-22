@@ -3,6 +3,7 @@ using EV_Charger_App.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using ColorStatus = EV_Charger_App.ViewModels.FuelStation.ColorStatus;
@@ -33,11 +34,23 @@ namespace EV_Charger_App.Views
             // Sort the fuel stations by distance from the user
             listOfChargers.Sort((x, y) => x.distanceFromUser.CompareTo(y.distanceFromUser));
 
-            // Set the binding context for the frontend
-            fuelStationsListView.ItemsSource = listOfChargers;
-
+            if(listOfChargers.Count > 100)
+            {               
+                // Set the binding context for the frontend
+                fuelStationsListView.ItemsSource = listOfChargers.Take(100);
+            }
+            else
+            {
+                // Set the binding context for the frontend
+                fuelStationsListView.ItemsSource = listOfChargers;
+            }          
         }
 
+        /// <summary>
+        /// Handler for if a charger is selected from the scrolling list
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private async void OnFuelStationSelected(object sender, SelectedItemChangedEventArgs e)
         {
             if (e.SelectedItem == null)
@@ -53,7 +66,9 @@ namespace EV_Charger_App.Views
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
-    // Convert the color status of the charger into the colorstatus for the view cell
+    /// <summary>
+    /// Convert the color status of the charger into the colorstatus for the view cell
+    /// </summary>
     //-----------------------------------------------------------------------------------------------------------------------------
     public class ColorStatusConverter : IValueConverter
     {

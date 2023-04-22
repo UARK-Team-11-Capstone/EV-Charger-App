@@ -18,12 +18,21 @@ namespace EV_Charger_App.Views
             this.app = app;
         }
 
+        /// <summary>
+        /// Push the user from login page to create account page
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         async private void LoginToCreate(object sender, EventArgs e)
         {
             await Navigation.PushAsync(new CreateAccountPage(app));
         }
 
-        //This is the function called when the login button is clicked
+        /// <summary>
+        /// This is the function called when the login button is clicked
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
         async private void SubmitLogin(object sender, EventArgs args)
         {
             String email = emailInput.Text;
@@ -52,7 +61,12 @@ namespace EV_Charger_App.Views
 
         }
 
-        //Checks if the email and password inputted match an email and password combination in the database
+        /// <summary>
+        /// Checks if the email and password inputted match an email and password combination in the database
+        /// </summary>
+        /// <param name="email"></param>
+        /// <param name="password"></param>
+        /// <returns></returns>
         bool CredentialsValid(String email, String password)
         {
             string hashedPassword = app.database.HashPassword(password);

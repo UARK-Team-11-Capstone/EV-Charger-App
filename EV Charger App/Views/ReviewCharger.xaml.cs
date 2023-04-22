@@ -27,6 +27,11 @@ namespace EV_Charger_App.Views
             ChargerNames.Text = chargerName;
         }
 
+        /// <summary>
+        /// Submit the review to the database
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private async void OnSubmitButtonClicked(object sender, EventArgs e)
         {
             try
@@ -81,6 +86,10 @@ namespace EV_Charger_App.Views
 
         }
 
+        /// <summary>
+        /// Determine the user based on the token
+        /// </summary>
+        /// <returns></returns>
         string GetUserFromToken()
         {
             string email = "";
@@ -100,6 +109,10 @@ namespace EV_Charger_App.Views
             return email;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         bool UserReviewed()
         {
             string email = GetUserFromToken();

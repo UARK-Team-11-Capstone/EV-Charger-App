@@ -83,11 +83,21 @@ namespace EV_Charger_App.ViewModels
         public ColorStatus colorStatus { get; set; }
         public Position position { get; set; }
         public Xamarin.Essentials.Location location { get; set; }
+        
+        /// <summary>
+        /// ToString for FuelStation
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             return $" {station_name}, {id},  {updated_at}";
         }
 
+        /// <summary>
+        /// Determines if two FuelStation objects are equivalent based on name, address, and access code
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
         public override bool Equals(object obj)
         {
             if (obj == null || GetType() != obj.GetType())
@@ -101,6 +111,11 @@ namespace EV_Charger_App.ViewModels
                    && street_address == other.street_address
                    && access_code == other.access_code;
         }
+
+        /// <summary>
+        /// Returns hashcode of FuelStation object
+        /// </summary>
+        /// <returns></returns>
         public override int GetHashCode()
         {
             int hashCode = 17;
@@ -126,7 +141,6 @@ namespace EV_Charger_App.ViewModels
                    x.latitude == y.latitude &&
                    x.longitude == y.longitude &&
                    x.street_address == y.street_address;
-
         }
 
         public int GetHashCode(FuelStation obj)
