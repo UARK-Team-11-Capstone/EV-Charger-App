@@ -27,8 +27,7 @@ namespace EV_Charger_App
 
         Xamarin.Forms.GoogleMaps.Map map;
 
-        DoEAPI doe;
-        RoutingAPI routeAPI;
+        DoEAPI doe;        
         GooglePlacesApi googlePlacesApi;
         List<Prediction> prediction;
         SearchBar lastChanged;
@@ -50,9 +49,9 @@ namespace EV_Charger_App
             NavigationPage.SetHasNavigationBar(this, true);
             LoadMapAsync(39.5, -98.35);
 
-#pragma warning disable CS0618 // Type or member is obsolete
+            #pragma warning disable CS0618 // Type or member is obsolete
             map.CameraChanged += Map_CameraChangedAsync;
-#pragma warning restore CS0618 // Type or member is obsolete
+            #pragma warning restore CS0618 // Type or member is obsolete
 
             map.InfoWindowLongClicked += MapInfoWindowLongClicked;
             map.InfoWindowClicked += MapInfoWindowClicked;
@@ -64,8 +63,7 @@ namespace EV_Charger_App
 
             this.app = app;
             doe = new DoEAPI(app, app.database.GetDOEAPIKey());
-            mapPinHandler = new MapPinHandler(doe, this);
-            routeAPI = new RoutingAPI();
+            mapPinHandler = new MapPinHandler(doe, this);           
             googlePlacesApi = new GooglePlacesApi(app.database.GetGoogleAPIKey());
             prediction = new List<Prediction>();
             throttle = new FunctionThrottler(new TimeSpan(0, 0, 2));
@@ -74,10 +72,7 @@ namespace EV_Charger_App
             rechargeMileage = 50;
             maxRange = 200;
             chargePercentage = 100;
-
         }
-
-
 
         //-----------------------------------------------------------------------------------------------------------------------------
         /// <summary>
@@ -730,7 +725,7 @@ namespace EV_Charger_App
             LocationEx destination = new LocationEx(destinationAddress);
 
             // Call the routing api
-            var result = await routeAPI.GetRouteAsync(origin, destination);
+            var result = await googlePlacesApi.GetRouteAsync(origin, destination);
 
             if (result == null)
             {
@@ -768,7 +763,7 @@ namespace EV_Charger_App
                         if (charger == finalRouteChargers.FirstOrDefault())
                         {
                             // Call the routing api between the origin and charger locationEx
-                            response = await routeAPI.GetRouteAsync(origin, chargerLocationEx);
+                            response = await googlePlacesApi.GetRouteAsync(origin, chargerLocationEx);
                         }
                         else
                         {
@@ -776,7 +771,7 @@ namespace EV_Charger_App
                             string prevChargerStringAdd = prev.street_address + ", " + prev.city + ", " + prev.state + "," + prev.zip;
                             Address prevChargerAddress = new Address(prevChargerStringAdd);
                             LocationEx prevChargerLocationEx = new LocationEx(prevChargerAddress);
-                            response = await routeAPI.GetRouteAsync(prevChargerLocationEx, chargerLocationEx);
+                            response = await googlePlacesApi.GetRouteAsync(prevChargerLocationEx, chargerLocationEx);
                         }
 
                         // If we get a valid reponse add it to the list
@@ -790,7 +785,7 @@ namespace EV_Charger_App
                         if (charger == finalRouteChargers.LastOrDefault())
                         {
                             // Call the routing api between the charger and the destination
-                            response = await routeAPI.GetRouteAsync(chargerLocationEx, destination);
+                            response = await googlePlacesApi.GetRouteAsync(chargerLocationEx, destination);
 
                             if (response != null)
                             {

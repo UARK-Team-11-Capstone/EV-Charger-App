@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Xamarin.Forms;
 using Xamarin.Forms.GoogleMaps;
 using Location = Xamarin.Essentials.Location;
 
@@ -36,6 +37,7 @@ namespace EV_Charger_App.Services
         public Root CHARGER_LIST;
         public Root NEW_CHARGERS;
         private int requestThreshold;
+        bool routeCharging;
 
         App app;
 
@@ -50,6 +52,7 @@ namespace EV_Charger_App.Services
             this.app = app;
 
             requestThreshold = 200;
+            routeCharging = false;
         }
 
 
@@ -148,6 +151,11 @@ namespace EV_Charger_App.Services
             }
         }
 
+        /// <summary>
+        /// Process the JSON strings from DoE API calls
+        /// </summary>
+        /// <param name="response"></param>
+        /// <param name="callType"></param>
         public void ProcessResponse(string response, string callType)
         {
             try
@@ -159,9 +167,11 @@ namespace EV_Charger_App.Services
                     // If getting chargers for a route add to chargersAlongRoute list
                     if (callType == callNearestRoute)
                     {
+                        Debug.WriteLine("Chargers along route being processed...");
                         if (chargersAlongRoute.fuel_stations == null)
                         {
                             chargersAlongRoute.fuel_stations = new List<FuelStation>(result.fuel_stations);
+                            routeCharging = true;
                         }
                         else
                         {
@@ -200,6 +210,10 @@ namespace EV_Charger_App.Services
             }
         }
 
+        /// <summary>
+        /// Given a list of FuelStations determine the color status of each charger
+        /// </summary>
+        /// <param name="list"></param>
         public void SetStatus(List<FuelStation> list)
         {
             if (list != null)
@@ -230,6 +244,11 @@ namespace EV_Charger_App.Services
                 }
             }
         }
+
+        /// <summary>
+        /// Send HTTP request to DoE for chargers in a given zip code
+        /// </summary>
+        /// <param name="zipCode"></param>
         public void getAvailableChargersInZip(string zipCode)
         {
             // Parameter for this request
@@ -237,6 +256,12 @@ namespace EV_Charger_App.Services
             _ = HTTPRequestAsync(param, callDefault);
         }
 
+        /// <summary>
+        /// Send HTTP request to DoE given a LINESTRING and a distance from said linestring
+        /// </summary>
+        /// <param name="lineStringPOS"></param>
+        /// <param name="distance"></param>
+        /// <returns></returns>
         public Root getChargersAlongRoute(List<Position> lineStringPOS, string distance)
         {
             // Given a list of locations create a request for the DOE
@@ -269,6 +294,13 @@ namespace EV_Charger_App.Services
             return chargersAlongRoute;
         }
 
+        /// <summary>
+        /// Send an HTTP request to the DoE given a coordinate and a radius
+        /// </summary>
+        /// <param name="latitude"></param>
+        /// <param name="longitude"></param>
+        /// <param name="radius"></param>
+        /// <returns></returns>
         public async Task getNearestCharger(double latitude, double longitude, double radius)
         {
             if (radius < requestThreshold)
@@ -279,6 +311,10 @@ namespace EV_Charger_App.Services
             }
         }
 
+        /// <summary>
+        /// Send an HTTP request to the DoE given a charger ID
+        /// </summary>
+        /// <param name="id"></param>
         public void getStationByID(string id)
         {
             string param = "&id=" + id;
@@ -286,6 +322,11 @@ namespace EV_Charger_App.Services
             _ = HTTPRequestAsync(param, callId);
         }
 
+        /// <summary>
+        /// Get a charger given a name
+        /// </summary>
+        /// <param name="stationName"></param>
+        /// <returns></returns>
         public FuelStation GetFuelStation(string stationName)
         {
             foreach (FuelStation station in CHARGER_LIST.fuel_stations)

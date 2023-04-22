@@ -39,6 +39,12 @@ namespace EV_Charger_App.Services
             throttler = new FunctionThrottler(new TimeSpan(0, 0, 0, 1));
         }
 
+        /// <summary>
+        /// Given the position of the camera and radius of the view, cluster, decluster, and load chargers
+        /// </summary>
+        /// <param name="loc"></param>
+        /// <param name="radius"></param>
+        /// <returns></returns>
         public async Task LoadChargersAsync(Location loc, double radius)
         {
             try
@@ -153,6 +159,11 @@ namespace EV_Charger_App.Services
             }
         }
 
+        /// <summary>
+        /// Given a List<FuelStation> cluster chargers
+        /// </summary>
+        /// <param name="chargersToCluster"></param>
+        /// <returns></returns>
         public async Task ClusterChargers(List<FuelStation> chargersToCluster)
         {
             try
@@ -187,6 +198,12 @@ namespace EV_Charger_App.Services
             }
         }
 
+        /// <summary>
+        /// Update overall dictionary given a charger, pin, and cluster object
+        /// </summary>
+        /// <param name="charger"></param>
+        /// <param name="pin"></param>
+        /// <param name="cluster"></param>
         public void UpdateDictionary(FuelStation charger, Pin pin, Cluster cluster)
         {
             try

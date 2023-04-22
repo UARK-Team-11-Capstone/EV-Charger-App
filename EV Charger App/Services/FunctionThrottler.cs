@@ -17,7 +17,10 @@ namespace EV_Charger_App.Services
             this.stopwatch.Start();
         }
 
-        // Check if the function can be executed based on the throttle time
+        /// <summary>
+        /// Check if the function can be executed based on the throttle time
+        /// </summary>
+        /// <returns></returns>
         public bool CanExecute()
         {
             DateTime now = DateTime.Now;
@@ -35,7 +38,9 @@ namespace EV_Charger_App.Services
             return true; // Function can be executed
         }
 
-        // Reset the throttler
+        /// <summary>
+        /// Reset the throttler stopwatch
+        /// </summary>
         public void Reset()
         {
             stopwatch.Reset();

@@ -1,5 +1,6 @@
 ﻿using GoogleApi;
 using GoogleApi.Entities.Common;
+using GoogleApi.Entities.Maps.Common;
 using GoogleApi.Entities.Maps.Directions.Request;
 using GoogleApi.Entities.Maps.Directions.Response;
 using GoogleApi.Entities.Places.AutoComplete.Request;
@@ -21,6 +22,13 @@ namespace EV_Charger_App.Services
             apiKey = key;
         }
 
+        /// <summary>
+        /// Send request to Google API for autocomplete results given a coordinate and radius 
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="latlng"></param>
+        /// <param name="radius"></param>
+        /// <returns></returns>
         public async Task<PlacesAutoCompleteResponse> AutoComplete(string input, Coordinate latlng, double radius)
         {
 
@@ -38,21 +46,38 @@ namespace EV_Charger_App.Services
 
         }
 
-        public async Task<DirectionsResponse> Directions(string input, Coordinate latlng, double radius)
+        /// <summary>
+        /// Send request to Google Api for route resuls given a start and ending location
+        /// </summary>
+        /// <param name="origin"></param>
+        /// <param name="destination"></param>
+        /// <returns></returns>
+        public async Task<DirectionsResponse> GetRouteAsync(LocationEx origin, LocationEx destination)
         {
-            var directions = new DirectionsRequest()
+            var request = new DirectionsRequest
             {
+                Origin = origin,
+                Destination = destination,
                 Key = apiKey
             };
 
-            var directionsResponse = await GoogleMaps.Directions.QueryAsync(directions);
+            var response = await GoogleApi.GoogleMaps.Directions.QueryAsync(request);
 
-            return directionsResponse;
+            if (response.Status != GoogleApi.Entities.Common.Enums.Status.Ok)
+            {
+                // Handle error
+                return null;
+            }
+
+            return response;
+
         }
 
-        //-----------------------------------------------------------------------------------------------------------------------------
-        // Provided with an address get the coordinate location
-        //-----------------------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Given a string return a coordinate
+        /// </summary>
+        /// <param name="address"></param>
+        /// <returns></returns>
         public async Task<Location> GetLocationAsync(string address)
         {
             try
