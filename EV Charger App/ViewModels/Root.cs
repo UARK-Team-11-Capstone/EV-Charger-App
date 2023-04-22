@@ -73,7 +73,7 @@ namespace EV_Charger_App.ViewModels
         public string street_address { get; set; }
         public string zip { get; set; }
         public string country { get; set; }
-        public List<string> ev_connector_types { get; set; }        
+        public List<string> ev_connector_types { get; set; }
         public string ev_network { get; set; }
         public object ev_pricing { get; set; }
         public object access_days_time_fr { get; set; }
@@ -97,7 +97,7 @@ namespace EV_Charger_App.ViewModels
 
             FuelStation other = (FuelStation)obj;
             // compare all properties
-            return station_name == other.station_name                                    
+            return station_name == other.station_name
                    && street_address == other.street_address
                    && access_code == other.access_code;
         }
@@ -109,7 +109,7 @@ namespace EV_Charger_App.ViewModels
             hashCode = hashCode * 23 + access_code.GetHashCode();
             return hashCode;
         }
-        
+
     }
     public class FuelStationEqualityComparer : IEqualityComparer<FuelStation>
     {
@@ -126,7 +126,7 @@ namespace EV_Charger_App.ViewModels
                    x.latitude == y.latitude &&
                    x.longitude == y.longitude &&
                    x.street_address == y.street_address;
-                   
+
         }
 
         public int GetHashCode(FuelStation obj)
@@ -138,7 +138,7 @@ namespace EV_Charger_App.ViewModels
                 hash = hash * 23 + obj.station_name.GetHashCode();
                 hash = hash * 23 + obj.latitude.GetHashCode();
                 hash = hash * 23 + obj.longitude.GetHashCode();
-                hash = hash * 23 + obj.street_address.GetHashCode();              
+                hash = hash * 23 + obj.street_address.GetHashCode();
                 return hash;
             }
         }

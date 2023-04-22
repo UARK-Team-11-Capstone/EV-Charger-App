@@ -1,16 +1,11 @@
-﻿using Android.OS;
-using EV_Charger_App.Services;
+﻿using EV_Charger_App.Services;
 using EV_Charger_App.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Diagnostics;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
-
-using static EV_Charger_App.ViewModels.FuelStation;
 using ColorStatus = EV_Charger_App.ViewModels.FuelStation.ColorStatus;
-using Debug = System.Diagnostics.Debug;
 
 namespace EV_Charger_App.Views
 {
@@ -39,8 +34,8 @@ namespace EV_Charger_App.Views
             listOfChargers.Sort((x, y) => x.distanceFromUser.CompareTo(y.distanceFromUser));
 
             // Set the binding context for the frontend
-            fuelStationsListView.ItemsSource = listOfChargers;           
-            
+            fuelStationsListView.ItemsSource = listOfChargers;
+
         }
 
         private async void OnFuelStationSelected(object sender, SelectedItemChangedEventArgs e)
@@ -53,7 +48,7 @@ namespace EV_Charger_App.Views
             var selectedFuelStation = (FuelStation)e.SelectedItem;
 
             await Navigation.PushAsync(new ChargerInfo(app, doe.GetChargerInfo(selectedFuelStation.station_name)));
-            
+
         }
     }
 
@@ -68,12 +63,12 @@ namespace EV_Charger_App.Views
             {
                 switch (status)
                 {
-                    case ColorStatus.Green:                        
-                        return new Color(108,194,74);
+                    case ColorStatus.Green:
+                        return new Color(108, 194, 74);
                     case ColorStatus.Yellow:
-                        return new Color(240,179,35);
+                        return new Color(240, 179, 35);
                     case ColorStatus.Red:
-                        return new Color(227,82,5);
+                        return new Color(227, 82, 5);
                 }
             }
             return Color.Black;

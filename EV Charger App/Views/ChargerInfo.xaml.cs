@@ -1,10 +1,8 @@
-﻿using Android.Media.Audiofx;
+﻿using System;
 using System.Collections.Generic;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using Debug = System.Diagnostics.Debug;
-using System;
-using System.Linq.Expressions;
 
 namespace EV_Charger_App.Views
 {
@@ -21,17 +19,17 @@ namespace EV_Charger_App.Views
         string updated = "";
 
         string availability = "";
-        
+
         int rating;
 
         string accessible = "";
 
         string starImage;
-        
+
         StackLayout infoLayout;
 
-        string[] bigStars = new string[6] { "zero_star_20" , "one_star_20" , "two_star_20" , "three_star_20" , "four_star_20" , "five_star_20" };
-        string[] smallStars = new string[6] { "zero_star_10" , "one_star_10" , "two_star_10" , "three_star_10" , "four_star_10" , "five_star_10" };
+        string[] bigStars = new string[6] { "zero_star_20", "one_star_20", "two_star_20", "three_star_20", "four_star_20", "five_star_20" };
+        string[] smallStars = new string[6] { "zero_star_10", "one_star_10", "two_star_10", "three_star_10", "four_star_10", "five_star_10" };
 
         public ChargerInfo(App app, string[] chargerInfo)
         {
@@ -65,7 +63,7 @@ namespace EV_Charger_App.Views
                 Text = app.database.GetChargerRating(chargerName).ToString("0.0"),
                 FontSize = Device.GetNamedSize(NamedSize.Large, typeof(Label)),
                 FontAttributes = FontAttributes.Bold,
-                Margin = new Thickness(70, 0, 0 ,0),
+                Margin = new Thickness(70, 0, 0, 0),
                 HorizontalOptions = LayoutOptions.Center,
                 HorizontalTextAlignment = TextAlignment.Center,
 
@@ -74,7 +72,8 @@ namespace EV_Charger_App.Views
 
             starImage = setStarImage(bigStars, rating);
 
-            var totalStars = new Image { 
+            var totalStars = new Image
+            {
                 Source = starImage,
                 Margin = new Thickness(5, 0, 0, 0),
             };
@@ -90,7 +89,7 @@ namespace EV_Charger_App.Views
             var addressLabel = new Label
             {
                 Text = address,
-                Margin = new Thickness(5,0,0,5),
+                Margin = new Thickness(5, 0, 0, 5),
                 HorizontalTextAlignment = TextAlignment.Center,
             };
 
@@ -99,7 +98,7 @@ namespace EV_Charger_App.Views
                 Text = " Last Updated: ",
                 FontAttributes = FontAttributes.Bold,
                 Margin = new Thickness(5, 5, 0, 0),
-                VerticalOptions= LayoutOptions.Center,
+                VerticalOptions = LayoutOptions.Center,
                 HorizontalTextAlignment = TextAlignment.Center,
 
             };
@@ -131,14 +130,14 @@ namespace EV_Charger_App.Views
 
             Image wheelchairIcon = new Image();
 
-            if(accessible == "1")
+            if (accessible == "1")
             {
                 wheelchairIcon = new Image
                 {
                     Source = "wheelchair.png",
                     Margin = new Thickness(5, 0, 0, 0),
                 };
-            }          
+            }
 
             var reviewsText = new Label
             {
@@ -163,7 +162,7 @@ namespace EV_Charger_App.Views
                 Orientation = StackOrientation.Horizontal,
                 Children =
                 {
-                    avgStars, 
+                    avgStars,
                     totalStars
                 }
             };
@@ -214,7 +213,7 @@ namespace EV_Charger_App.Views
                     },
                 }
             };
-                     
+
 
             var mainLayout = new StackLayout
             {
@@ -286,8 +285,8 @@ namespace EV_Charger_App.Views
                     Margin = new Thickness(10, 0, 5, 0),
                 };
 
-                var reviewStars = new Image 
-                { 
+                var reviewStars = new Image
+                {
                     Source = individualstarImage,
                     Margin = new Thickness(10, 0, 5, 0)
                 };
@@ -314,10 +313,10 @@ namespace EV_Charger_App.Views
                             dateLabel
                         }
                 };
-                
+
                 infoLayout.Children.Add(reviewHeader);
                 infoLayout.Children.Add(commentsLabel);
-                
+
             }
         }
     }

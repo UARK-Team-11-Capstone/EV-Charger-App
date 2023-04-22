@@ -51,7 +51,7 @@ namespace EV_Charger_App.Services
 
         public void ExecuteRawNonQuery(string query)
         {
-            if(Connect())
+            if (Connect())
             {
                 MySqlCommand command = new MySqlCommand(query, connection);
                 command.ExecuteNonQuery();
@@ -370,10 +370,10 @@ namespace EV_Charger_App.Services
 
             }
 
-            float avg = (float)sum/ count;
+            float avg = (float)sum / count;
             Debug.WriteLine("[GetAccessibilityInfo] Average: " + avg);
 
-            if(avg >= .75)
+            if (avg >= .75)
             {
                 return "1";
             }
@@ -381,7 +381,7 @@ namespace EV_Charger_App.Services
             {
                 return "0";
             }
-            
+
         }
 
     }

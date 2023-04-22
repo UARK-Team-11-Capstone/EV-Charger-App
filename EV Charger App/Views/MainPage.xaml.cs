@@ -1,6 +1,4 @@
-﻿using Android.OS;
-using Android.Speech.Tts;
-using EV_Charger_App.Services;
+﻿using EV_Charger_App.Services;
 using EV_Charger_App.ViewModels;
 using EV_Charger_App.Views;
 using GoogleApi.Entities.Common;
@@ -11,7 +9,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Diagnostics;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 using Xamarin.Forms.GoogleMaps;
@@ -21,13 +18,6 @@ using Distance = Xamarin.Forms.GoogleMaps.Distance;
 using Location = Xamarin.Essentials.Location;
 using Math = System.Math;
 using Position = Xamarin.Forms.GoogleMaps.Position;
-using Trace = System.Diagnostics.Trace;
-using Java.Util;
-using Android.Telecom;
-using System.Text;
-using System.Collections;
-using Xamarin.Forms.Internals;
-using System.Net.NetworkInformation;
 
 namespace EV_Charger_App
 {
@@ -36,17 +26,17 @@ namespace EV_Charger_App
         App app;
 
         Xamarin.Forms.GoogleMaps.Map map;
-        
+
         DoEAPI doe;
         RoutingAPI routeAPI;
         GooglePlacesApi googlePlacesApi;
         List<Prediction> prediction;
         SearchBar lastChanged;
-        FunctionThrottler throttle;        
-        
+        FunctionThrottler throttle;
+
         string lastAddress;
         bool chargerRouting;
-        private Location previousLocation;      
+        private Location previousLocation;
         bool overrideLoading;
         MapPinHandler mapPinHandler;
         private int maxRange;
@@ -58,17 +48,18 @@ namespace EV_Charger_App
             InitializeComponent();
 
             NavigationPage.SetHasNavigationBar(this, true);
-            LoadMap(39.5, -98.35);
+            LoadMapAsync(39.5, -98.35);
 
 #pragma warning disable CS0618 // Type or member is obsolete
             map.CameraChanged += Map_CameraChangedAsync;
 #pragma warning restore CS0618 // Type or member is obsolete
 
-            map.InfoWindowLongClicked += Map_InfoWindowLongClicked;
+            map.InfoWindowLongClicked += MapInfoWindowLongClicked;
+            map.InfoWindowClicked += MapInfoWindowClicked;
 
             searchBar.TextChanged += (sender, e) => OnTextChanged(sender, e, searchResultsListView, searchBar);
             secondSearchBar.TextChanged += (sender, e) => OnTextChanged(sender, e, searchResultsListView, secondSearchBar);
-            secondSearchBar.PropertyChanged += SecondSearchBar_PropertyChanged;
+            secondSearchBar.PropertyChanged += SecondSearchBarPropertyChanged;
             searchResultsListView.ItemTapped += (sender, e) => ListItemTapped(sender, e, searchResultsListView, searchBar);
 
             this.app = app;
@@ -77,19 +68,23 @@ namespace EV_Charger_App
             routeAPI = new RoutingAPI();
             googlePlacesApi = new GooglePlacesApi(app.database.GetGoogleAPIKey());
             prediction = new List<Prediction>();
-            throttle = new FunctionThrottler(new TimeSpan(0, 0, 2));           
+            throttle = new FunctionThrottler(new TimeSpan(0, 0, 2));
             overrideLoading = false;
 
             rechargeMileage = 50;
             maxRange = 200;
             chargePercentage = 100;
-            
+
         }
 
+
+
         //-----------------------------------------------------------------------------------------------------------------------------
-        // This gets called when you click the menu bar on the ribbon
-        // Will send the user to the page containing a list of pages
-        // (map screen link, login screen link, settings link)
+        /// <summary>
+        /// Handler for menu bar button
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         //-----------------------------------------------------------------------------------------------------------------------------
         async private void ListClicked(object sender, EventArgs e)
         {
@@ -97,7 +92,11 @@ namespace EV_Charger_App
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------
-        // Toggle Routing
+        /// <summary>
+        /// Handler for the charger routing toggle button
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         //-----------------------------------------------------------------------------------------------------------------------------
         private void ChargerRoutingClicked(object sender, EventArgs e)
         {
@@ -105,7 +104,11 @@ namespace EV_Charger_App
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------
-        // Routing Button Clicked event handler
+        /// <summary>
+        /// Handler for when the routing button is tapped
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         //-----------------------------------------------------------------------------------------------------------------------------
         private async void OnButtonClicked(object sender, EventArgs e)
         {
@@ -124,9 +127,13 @@ namespace EV_Charger_App
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------
-        // Trigger if the second search bar becomes visible
+        /// <summary>
+        /// Handler that triggers if the second search bar becomes visible
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         //-----------------------------------------------------------------------------------------------------------------------------
-        private void SecondSearchBar_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private void SecondSearchBarPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             if (e.PropertyName == "IsVisible")
             {
@@ -148,7 +155,13 @@ namespace EV_Charger_App
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------
-        // If the text changes in the search bar send a query for an autocomplete
+        /// <summary>
+        /// Handler for if the text changes in a search bar
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        /// <param name="list"></param>
+        /// <param name="srchBar"></param>
         //-----------------------------------------------------------------------------------------------------------------------------
         private async void OnTextChanged(object sender, TextChangedEventArgs e, ListView list, SearchBar srchBar)
         {
@@ -159,7 +172,7 @@ namespace EV_Charger_App
                     // Take coordinates from previousLocation
                     Coordinate latlng = new Coordinate(previousLocation.Latitude, previousLocation.Longitude);
                     // Send API call based on text and location
-                    var response = await googlePlacesApi.AutoComplete(e.NewTextValue, latlng,  GetVisibleRadius(map.CameraPosition.Zoom));
+                    var response = await googlePlacesApi.AutoComplete(e.NewTextValue, latlng, GetVisibleRadius(map.CameraPosition.Zoom));
                     prediction = (List<Prediction>)response.Predictions;
                     List<string> result = new List<string>();
 
@@ -194,7 +207,13 @@ namespace EV_Charger_App
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------
-        // If user taps on item in prediction list move to that location
+        /// <summary>
+        /// Handler for if the user selects an autocomplete entry
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        /// <param name="listView"></param>
+        /// <param name="srchBar"></param>
         //-----------------------------------------------------------------------------------------------------------------------------
         private async void ListItemTapped(object sender, ItemTappedEventArgs e, ListView listView, SearchBar srchBar)
         {
@@ -231,23 +250,43 @@ namespace EV_Charger_App
                 lastAddress = locationName;
 
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 Debug.WriteLine("Error in Tapping Handler: " + $"{ex.Message}");
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------
-        // Overload functions for if the user long clicks on an info card
+        /// <summary>
+        ///  Overload functions for if the user long clicks on an info card
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         //-----------------------------------------------------------------------------------------------------------------------------
-        private async void Map_InfoWindowLongClicked(object sender, InfoWindowLongClickedEventArgs e)
+        private async void MapInfoWindowLongClicked(object sender, InfoWindowLongClickedEventArgs e)
         {
             Debug.WriteLine(e.Pin.Label);
             await Navigation.PushAsync(new ChargerInfo(app, doe.GetChargerInfo(e.Pin.Label)));
-        }      
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------
-        // Responds on a camera moved action
+        /// <summary>
+        ///  Overload functions for if the user clicks on an info card
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        //-----------------------------------------------------------------------------------------------------------------------------
+        private async void MapInfoWindowClicked(object sender, InfoWindowClickedEventArgs e)
+        {
+            await Navigation.PushAsync(new ChargerInfo(app, doe.GetChargerInfo(e.Pin.Label)));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Handler for camera position changed
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         //-----------------------------------------------------------------------------------------------------------------------------
         private async void Map_CameraChangedAsync(object sender, CameraChangedEventArgs e)
         {
@@ -262,9 +301,14 @@ namespace EV_Charger_App
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------
-        // Intialize the Google Map
+        /// <summary>
+        /// Initializes the map for the app given a cooridnate
+        /// </summary>
+        /// <param name="latitude"></param>
+        /// <param name="longitude"></param>
+        /// <returns></returns>
         //-----------------------------------------------------------------------------------------------------------------------------
-        public void LoadMap(double latitude, double longitude)
+        public async Task LoadMapAsync(double latitude, double longitude)
         {
             try
             {
@@ -280,6 +324,12 @@ namespace EV_Charger_App
 
                 // Move map over USA
                 map.MoveToRegion(MapSpan.FromCenterAndRadius(new Position(latitude, longitude), Distance.FromMiles(1000)));
+
+                // Intialization of user location
+                previousLocation = await Geolocation.GetLocationAsync(new GeolocationRequest(GeolocationAccuracy.Default, TimeSpan.FromMinutes(1)));
+                map.MoveToRegion(MapSpan.FromCenterAndRadius(new Position(previousLocation.Latitude, previousLocation.Longitude), Xamarin.Forms.GoogleMaps.Distance.FromMiles(1)));
+
+                CreatePin("Current Location", new Position(Convert.ToDouble(previousLocation.Latitude), Convert.ToDouble(previousLocation.Longitude)), DateTime.MinValue, "", PinType.Generic, null);
 
                 // Call the track location function
                 TrackLocation();
@@ -311,25 +361,18 @@ namespace EV_Charger_App
                 layoutContainer.IsVisible = false;
             }
         }
-        
+
         //-----------------------------------------------------------------------------------------------------------------------------
-        // Update the location of the users pin every 5 seconds
+        /// <summary>
+        /// Continuously checks to see if the users location has changed
+        /// </summary>
         //-----------------------------------------------------------------------------------------------------------------------------
         public async void TrackLocation()
         {
             try
             {
-                // Intialization
-                previousLocation = await Geolocation.GetLocationAsync(new GeolocationRequest(GeolocationAccuracy.Default, TimeSpan.FromMinutes(1)));
-                map.MoveToRegion(MapSpan.FromCenterAndRadius(new Position(previousLocation.Latitude, previousLocation.Longitude), Xamarin.Forms.GoogleMaps.Distance.FromMiles(1)));
-                Debug.WriteLine("Current location found...");
-               
-                CreatePin("Current Location", new Position(Convert.ToDouble(previousLocation.Latitude), Convert.ToDouble(previousLocation.Longitude)), DateTime.MinValue, "", PinType.Generic, null);
-                Debug.WriteLine("Adding location pin to the map...");                
-
                 while (true)
                 {
-                    //Debug.WriteLine("Checking current location...");
                     // Retrieve the current location of the user
                     var loc = await Geolocation.GetLocationAsync(new GeolocationRequest(GeolocationAccuracy.Default, TimeSpan.FromMinutes(1)));
                     // Only move if location has changed
@@ -350,9 +393,10 @@ namespace EV_Charger_App
             catch (Exception ex)
             {
                 Debug.WriteLine("Error tracking location: " + ex.Message);
+                TrackLocation();
             }
         }
-        
+
         //-----------------------------------------------------------------------------------------------------------------------------
         /// <summary>
         /// Get distance from the current location of the user on the map
@@ -389,10 +433,10 @@ namespace EV_Charger_App
                     if (result == false)
                     {
                         var pin = (Pin)cluster.BindingContext;
-                        result = map.Pins.Remove(map.Pins.First(x => x.Tag == x.Tag));                        
-                    }                    
+                        result = map.Pins.Remove(map.Pins.First(x => x.Tag == x.Tag));
+                    }
                     return result;
-                }               
+                }
             }
             catch (Exception ex)
             {
@@ -410,12 +454,12 @@ namespace EV_Charger_App
         public bool RemovePin(FuelStation charger)
         {
             try
-            {                               
+            {
                 if (charger != null)
-                {                    
+                {
                     bool result = map.Pins.Remove((Pin)charger.BindingContext);
                     return result;
-                }                
+                }
             }
             catch (Exception ex)
             {
@@ -433,15 +477,15 @@ namespace EV_Charger_App
         public bool RemovePin(Pin pin, PinEqualityComparer pinEqualityComparer)
         {
             try
-            {                                       
+            {
                 var pinToRemove = map.Pins.FirstOrDefault(p => pinEqualityComparer.Equals(p, pin));
                 if (pinToRemove != null)
-                {                   
-                    bool result =  map.Pins.Remove(pinToRemove);
+                {
+                    bool result = map.Pins.Remove(pinToRemove);
                     return result;
-                }               
+                }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Debug.WriteLine($"Error removing pin: " + ex.Message + ex.StackTrace);
             }
@@ -457,11 +501,11 @@ namespace EV_Charger_App
         public void RemovePin(List<Pin> pins, PinEqualityComparer pinEqualityComparer)
         {
             if (pins != null)
-            {                
+            {
                 foreach (var pin in pins)
                 {
                     RemovePin(pin, pinEqualityComparer);
-                }                
+                }
             }
         }
 
@@ -498,8 +542,8 @@ namespace EV_Charger_App
         public Pin CreatePin(string name, Position pos, DateTime time, string id, PinType type, PinEqualityComparer pinEqualityComparer)
         {
             try
-            {                                
-                string iconName = "";               
+            {
+                string iconName = "";
                 if (type == PinType.Place)
                 {
                     // Get the current DateTime object
@@ -570,7 +614,7 @@ namespace EV_Charger_App
                 {
                     return result;
                 }
-                                               
+
             }
             catch (Exception ex)
             {
@@ -633,7 +677,11 @@ namespace EV_Charger_App
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------
-        // Find the relative radius of the camera view
+        /// <summary>
+        /// Returns the radius of the users view based on the zoom level of the camera
+        /// </summary>
+        /// <param name="zoomLevel"></param>
+        /// <returns></returns>
         //-----------------------------------------------------------------------------------------------------------------------------
         public double GetVisibleRadius(double zoomLevel)
         {
@@ -664,10 +712,14 @@ namespace EV_Charger_App
                 Debug.WriteLine("Error getting visible radius: " + ex.Message);
             }
             return 0;
-        }        
-              
+        }
+
         //-----------------------------------------------------------------------------------------------------------------------------
-        // Call Directions API to get a route between two different locations
+        /// <summary>
+        /// Computes and displays route between a given origin and destination address
+        /// </summary>
+        /// <param name="originAdd"></param>
+        /// <param name="destinationAdd"></param>
         //-----------------------------------------------------------------------------------------------------------------------------
         public async void GetRoute(string originAdd, string destinationAdd)
         {
@@ -739,7 +791,7 @@ namespace EV_Charger_App
                         {
                             // Call the routing api between the charger and the destination
                             response = await routeAPI.GetRouteAsync(chargerLocationEx, destination);
-                           
+
                             if (response != null)
                             {
                                 Debug.WriteLine("Adding adding final route");
@@ -798,7 +850,13 @@ namespace EV_Charger_App
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------
-        // Determine which charging stations to route to given a start and end point
+        /// <summary>
+        /// Returns a list of charging stations and even intervals along a given route 
+        /// </summary>
+        /// <param name="positions"></param>
+        /// <param name="originAdd"></param>
+        /// <param name="destinationAdd"></param>
+        /// <returns></returns>
         //-----------------------------------------------------------------------------------------------------------------------------
         public async Task<List<FuelStation>> GetChargingStationsAlongRouteAsync(List<Position> positions, string originAdd, string destinationAdd)
         {
@@ -902,7 +960,11 @@ namespace EV_Charger_App
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------
-        // Draw the polyline onto the map
+        /// <summary>
+        /// Returns a List<Positions> given a string of endcoded points
+        /// </summary>
+        /// <param name="encodedPoints"></param>
+        /// <returns></returns>
         //-----------------------------------------------------------------------------------------------------------------------------
         public static List<Position> DecodePolyline(string encodedPoints)
         {
@@ -939,6 +1001,6 @@ namespace EV_Charger_App
             }
 
             return poly;
-        }        
+        }
     }
 }

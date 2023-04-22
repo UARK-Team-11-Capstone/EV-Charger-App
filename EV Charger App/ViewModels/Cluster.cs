@@ -1,22 +1,18 @@
-﻿using Android.OS;
-using System;
-using System.Diagnostics;
+﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using Xamarin.Forms.GoogleMaps;
-using Location = Xamarin.Essentials.Location;
 
 namespace EV_Charger_App.ViewModels
 {
     public class Cluster
-    {        
+    {
         public int distanceFromView { get; set; }
         public Guid id { get; private set; }
         public Pin pin { get; set; }
         public Position position { get; set; }
         public Xamarin.Essentials.Location location { get; set; }
-        public List<FuelStation> fuel_stations { get; set; }        
-        
+        public List<FuelStation> fuel_stations { get; set; }
+
         public object BindingContext { get; set; }
         public Cluster(double latitude, double longitude)
         {
@@ -52,7 +48,7 @@ namespace EV_Charger_App.ViewModels
                     double updatedLongitude = totalLongitude / fuel_stations.Count;
                     position = new Position(updatedLatitude, updatedLongitude);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     System.Diagnostics.Debug.WriteLine("Error setting cluster position: " + ex.Message);
                 }

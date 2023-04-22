@@ -1,20 +1,12 @@
-﻿using Android.App;
-using EV_Charger_App.ViewModels;
-using GoogleApi.Entities.Maps.Elevation.Response;
-using GoogleApi.Entities.Search.Common;
+﻿using EV_Charger_App.ViewModels;
 using Newtonsoft.Json;
-using Org.Apache.Http.Protocol;
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Xamarin.Essentials;
 using Xamarin.Forms.GoogleMaps;
-using static Android.Telephony.CarrierConfigManager;
 using Location = Xamarin.Essentials.Location;
 
 namespace EV_Charger_App.Services
@@ -48,7 +40,7 @@ namespace EV_Charger_App.Services
         App app;
 
         public DoEAPI(App app, string key)
-        {            
+        {
             NEW_CHARGERS = new Root();
             CHARGER_LIST = new Root();
             chargersAlongRoute = new Root();
@@ -80,7 +72,7 @@ namespace EV_Charger_App.Services
 
         public async Task HTTPRequestAsync(string parameters, string callType)
         {
-            
+
             try
             {
                 string URL = requestURL + callType + api_param + parameters;
@@ -126,7 +118,7 @@ namespace EV_Charger_App.Services
 
             // Create a FormUrlEncodedContent object to encode the request data
             var content = new FormUrlEncodedContent(requestData);
-            string cont = await content.ReadAsStringAsync();            
+            string cont = await content.ReadAsStringAsync();
 
             try
             {
@@ -140,7 +132,7 @@ namespace EV_Charger_App.Services
                     if (response.IsSuccessStatusCode)
                     {
                         // Read the response content as a string
-                        string responseContent = await response.Content.ReadAsStringAsync();                        
+                        string responseContent = await response.Content.ReadAsStringAsync();
                         ProcessResponse(responseContent, callNearestRoute);
                     }
                     else
@@ -159,7 +151,7 @@ namespace EV_Charger_App.Services
         public void ProcessResponse(string response, string callType)
         {
             try
-            {               
+            {
                 // Grab result                    
                 var result = JsonConvert.DeserializeObject<Root>(response);
                 if (result != null)
@@ -200,7 +192,7 @@ namespace EV_Charger_App.Services
 
                     }
                 }
-               
+
             }
             catch (Exception ex)
             {
@@ -210,9 +202,9 @@ namespace EV_Charger_App.Services
 
         public void SetStatus(List<FuelStation> list)
         {
-            if(list != null)
+            if (list != null)
             {
-                foreach(var charger in list)
+                foreach (var charger in list)
                 {
                     // Get the current DateTime object
                     DateTime currentDate = DateTime.Now;
@@ -222,11 +214,11 @@ namespace EV_Charger_App.Services
 
                     if (difference.TotalDays < 7)
                     {
-                        charger.colorStatus = FuelStation.ColorStatus.Green;                       
+                        charger.colorStatus = FuelStation.ColorStatus.Green;
                     }
                     else if (difference.TotalDays < 31)
                     {
-                        charger.colorStatus = FuelStation.ColorStatus.Yellow;                        
+                        charger.colorStatus = FuelStation.ColorStatus.Yellow;
                     }
                     else
                     {
@@ -237,7 +229,7 @@ namespace EV_Charger_App.Services
                     charger.location = new Location(charger.latitude, charger.longitude);
                 }
             }
-        }       
+        }
         public void getAvailableChargersInZip(string zipCode)
         {
             // Parameter for this request
@@ -271,20 +263,20 @@ namespace EV_Charger_App.Services
             lineStringGET += ")";
 
             string param = "&distance=2" + "&route=" + lineStringGET + fuel_type + status_code + ev_connector_type + access + limit;
-            
+
             // Collect response
             _ = PostHTTPRequestAsync(callNearestRoute, lineStringPOST, param, "2.0");
             return chargersAlongRoute;
         }
 
         public async Task getNearestCharger(double latitude, double longitude, double radius)
-        {   
-            if(radius < requestThreshold)
+        {
+            if (radius < requestThreshold)
             {
                 string param = "&latitude=" + latitude + "&longitude=" + longitude + "&radius=" + radius + fuel_type + status_code + ev_connector_type + access + limit;
                 // Collect response
                 await HTTPRequestAsync(param, callNearest);
-            }                              
+            }
         }
 
         public void getStationByID(string id)
@@ -296,9 +288,9 @@ namespace EV_Charger_App.Services
 
         public FuelStation GetFuelStation(string stationName)
         {
-            foreach(FuelStation station in CHARGER_LIST.fuel_stations) 
-            { 
-                if(station.station_name == stationName)
+            foreach (FuelStation station in CHARGER_LIST.fuel_stations)
+            {
+                if (station.station_name == stationName)
                 {
                     return station;
                 }

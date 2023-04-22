@@ -48,6 +48,6 @@ namespace EV_Charger_App.Views
         {
             await Navigation.PushAsync(new ChargerInfo(app, new string[0]));
         }*/
-     
+
     }
 }

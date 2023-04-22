@@ -1,5 +1,4 @@
-﻿using Android.OS;
-using MySqlConnector;
+﻿using MySqlConnector;
 using System;
 using System.Collections.Generic;
 
@@ -18,16 +17,16 @@ namespace EV_Charger_App.Views
 
         string chargerName = "";
 
-		public ReviewCharger (App app, string name)
-		{
-			InitializeComponent ();
+        public ReviewCharger(App app, string name)
+        {
+            InitializeComponent();
             this.app = app;
             this.chargerName = name;
 
             //Updates the Charger Name field
             ChargerNames.Text = chargerName;
         }
-        
+
         private async void OnSubmitButtonClicked(object sender, EventArgs e)
         {
             try
@@ -42,14 +41,14 @@ namespace EV_Charger_App.Views
                 // Save the review to the database
                 string email = GetUserFromToken();
 
-                if(email == "")
+                if (email == "")
                 {
                     return;
                 }
 
                 string currentDate = DateTime.Now.ToString("MM-dd-yyyy");
 
-                if(UserReviewed())
+                if (UserReviewed())
                 {
                     //Delete old review and insert new one since it is easier
                     string query = "DELETE FROM Reviews WHERE chargerName='" + chargerName + "' AND userEmail='" + email + "';";
@@ -61,7 +60,7 @@ namespace EV_Charger_App.Views
                     app.database.InsertRecord("Reviews", new string[6] { chargerName, email, rating.ToString(), comment, currentDate, a.ToString() });
                 }
             }
-            catch(NullReferenceException exception)
+            catch (NullReferenceException exception)
             {
                 Debug.WriteLine(exception.Message);
                 await DisplayAlert("Error", "Your review could not be processed. Try again later.", "OK");
@@ -73,7 +72,7 @@ namespace EV_Charger_App.Views
 
             // Show a confirmation message
             await DisplayAlert("Thank you", "Your review has been submitted.", "OK");
-            
+
             await Navigation.PushAsync(new MainPage(app));
 
             // Reset the form

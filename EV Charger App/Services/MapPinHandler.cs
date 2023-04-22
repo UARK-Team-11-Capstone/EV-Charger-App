@@ -1,18 +1,10 @@
-﻿using Android.OS;
-using EV_Charger_App.ViewModels;
-using GoogleApi.Entities.Search.Common;
-using Java.Util;
+﻿using EV_Charger_App.ViewModels;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Diagnostics.Metrics;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Xamarin.Essentials;
 using Xamarin.Forms.GoogleMaps;
-using static Android.Provider.MediaStore.Audio;
-using static Android.Provider.Telephony.Mms;
 using Debug = System.Diagnostics.Debug;
 using Location = Xamarin.Essentials.Location;
 
@@ -21,7 +13,7 @@ namespace EV_Charger_App.Services
     internal class MapPinHandler
     {
         MainPage main;
-        DoEAPI doe;        
+        DoEAPI doe;
         double clusteringThreshold;
         int clusterDistance;
 
@@ -31,12 +23,12 @@ namespace EV_Charger_App.Services
         List<Cluster> NEW_CLUSTERS;
         Dictionary<FuelStation, (Pin, Cluster)> CHARGER_PIN_CLUSTER_DICTIONARY;
         FunctionThrottler throttler;
-        
-        public MapPinHandler(DoEAPI doe, MainPage main) 
-        { 
+
+        public MapPinHandler(DoEAPI doe, MainPage main)
+        {
             this.doe = doe;
             this.main = main;
-                                
+
             clusteringThreshold = 2;
             clusterDistance = 50;
             CHARGER_PIN_CLUSTER_DICTIONARY = new Dictionary<FuelStation, (Pin, Cluster)>();
@@ -44,14 +36,14 @@ namespace EV_Charger_App.Services
             NEW_CLUSTERS = new List<Cluster>();
             pinEqualityComparer = new PinEqualityComparer();
             fuelStationEqualityComparer = new FuelStationEqualityComparer();
-            throttler = new FunctionThrottler(new TimeSpan(0,0,0,1));
+            throttler = new FunctionThrottler(new TimeSpan(0, 0, 0, 1));
         }
 
         public async Task LoadChargersAsync(Location loc, double radius)
         {
             try
             {
-                if(radius > 500) { return; }
+                if (radius > 500) { return; }
                 // Call the DoE to get chargers at the current location and given radius                
                 await doe.getNearestCharger(loc.Latitude, loc.Longitude, radius);
 
@@ -60,8 +52,8 @@ namespace EV_Charger_App.Services
                 // Add the new chargers to our overall dictionary
                 List<FuelStation> newChargers = doe.NEW_CHARGERS.fuel_stations;
                 var newChargerEntries = newChargers.ToDictionary(c => c, c => ((Pin)null, (Cluster)null), fuelStationEqualityComparer);
-                CHARGER_PIN_CLUSTER_DICTIONARY = CHARGER_PIN_CLUSTER_DICTIONARY.Concat(newChargerEntries.Where(x => !CHARGER_PIN_CLUSTER_DICTIONARY.Keys.Contains(x.Key))).ToDictionary(d => d.Key, d => d.Value);                
-                
+                CHARGER_PIN_CLUSTER_DICTIONARY = CHARGER_PIN_CLUSTER_DICTIONARY.Concat(newChargerEntries.Where(x => !CHARGER_PIN_CLUSTER_DICTIONARY.Keys.Contains(x.Key))).ToDictionary(d => d.Key, d => d.Value);
+
                 // Cluster
                 if (radius > clusterDistance)
                 {
@@ -78,7 +70,7 @@ namespace EV_Charger_App.Services
                         foreach (var charger in chargersToRemove)
                         {
                             main.RemovePin(charger);
-                        } 
+                        }
                     }
 
                     //Debug.WriteLine("Attempting to add cluster pins to map | " + CLUSTER_LIST.Count + " clusters");
@@ -114,10 +106,10 @@ namespace EV_Charger_App.Services
                 else // Decluster and add new chargers
                 {
                     foreach (var cluster in CLUSTER_LIST.ToList())
-                    {                                                
+                    {
                         double distance = Location.CalculateDistance(loc, cluster.location, DistanceUnits.Miles);
                         if (distance < radius)
-                        {               
+                        {
                             // Remove cluster pin from the map
                             bool result = main.RemovePin(cluster);
 
@@ -130,28 +122,28 @@ namespace EV_Charger_App.Services
                                 if (chargerPin != null)
                                 {
                                     UpdateDictionary(charger, chargerPin, null);
-                                }                                
+                                }
                             }
 
                             // Only remove the cluster if we successfully removed it
                             if (result == true)
                             {
                                 // Also remove object from CLUSTER_LIST
-                                CLUSTER_LIST.Remove(cluster);                               
-                            }                            
-                        }                        
+                                CLUSTER_LIST.Remove(cluster);
+                            }
+                        }
                     }
-                    
+
                     // Add new chargers to the map and update dictionary
                     foreach (var dictionaryEntry in CHARGER_PIN_CLUSTER_DICTIONARY.Where(x => x.Value.Item1 == null && x.Value.Item2 == null).ToList())
                     {
                         var chargerPin = main.CreatePin(dictionaryEntry.Key, pinEqualityComparer);
                         dictionaryEntry.Key.BindingContext = chargerPin;
-                        
+
                         if (chargerPin != null)
-                        {                            
+                        {
                             UpdateDictionary(dictionaryEntry.Key, chargerPin, null);
-                        }                        
+                        }
                     }
                 }
             }
@@ -164,7 +156,7 @@ namespace EV_Charger_App.Services
         public async Task ClusterChargers(List<FuelStation> chargersToCluster)
         {
             try
-            {                
+            {
                 foreach (var charger in chargersToCluster)
                 {
                     bool isClustered = false;
@@ -198,14 +190,14 @@ namespace EV_Charger_App.Services
         public void UpdateDictionary(FuelStation charger, Pin pin, Cluster cluster)
         {
             try
-            {               
+            {
                 CHARGER_PIN_CLUSTER_DICTIONARY[charger] = (pin, cluster);
             }
             catch (Exception ex)
             {
                 Debug.WriteLine("Error updating dictionary: " + ex.Message);
             }
-        }       
+        }
     }
 
     public class PinEqualityComparer : IEqualityComparer<Pin>
@@ -215,13 +207,13 @@ namespace EV_Charger_App.Services
 
         }
         public bool Equals(Pin x, Pin y)
-        {            
+        {
 
             if (x is null || y is null)
             {
                 return false;
             }
-            
+
             Debug.WriteLine($"Pin Comparison: {x.Label} == {y.Label} | {x.Position.Latitude} == {y.Position.Latitude} | {x.Position.Longitude} == {y.Position.Longitude} | {x.Tag} == {y.Tag}");
 
             return x.Label == y.Label
