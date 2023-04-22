@@ -11,6 +11,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Threading.Tasks;
 using Xamarin.Essentials;
 using Xamarin.Forms.GoogleMaps;
 using static Android.Telephony.CarrierConfigManager;
@@ -29,6 +30,7 @@ namespace EV_Charger_App.Services
         static string ev_connector_type = "&ev_connector_type=J1772";
         static string access = "&access=public";
         static string limit = "&limit=100";
+        string api_param = "api_key=";
 
         static string requestURL = "https://developer.nrel.gov/api/alt-fuel-stations/";
 
@@ -41,20 +43,21 @@ namespace EV_Charger_App.Services
         Root previousResults;
         public Root CHARGER_LIST;
         public Root NEW_CHARGERS;
-        bool writeToFile;
+        private int requestThreshold;
 
         App app;
 
         public DoEAPI(App app, string key)
-        {
-            writeToFile = false;
+        {            
             NEW_CHARGERS = new Root();
             CHARGER_LIST = new Root();
             chargersAlongRoute = new Root();
             previousResults = new Root();
             api_key = key;
-
+            api_param += key;
             this.app = app;
+
+            requestThreshold = 200;
         }
 
 
@@ -75,11 +78,9 @@ namespace EV_Charger_App.Services
             return new string[6] { chargerName, address, updatedAt, available, rating, accessible };
         }
 
-        public async void HTTPRequestAsync(string parameters, string callType)
+        public async Task HTTPRequestAsync(string parameters, string callType)
         {
-
-            string api_param = "api_key=" + api_key;
-
+            
             try
             {
                 string URL = requestURL + callType + api_param + parameters;
@@ -105,7 +106,7 @@ namespace EV_Charger_App.Services
             }
         }
 
-        public async void PostHTTPRequestAsync(string callType, string lineStringPOST, string getParam, string distance)
+        public async Task PostHTTPRequestAsync(string callType, string lineStringPOST, string getParam, string distance)
         {
 
             string api_param = "api_key=" + api_key;
@@ -144,7 +145,7 @@ namespace EV_Charger_App.Services
                     }
                     else
                     {
-                        HTTPRequestAsync(getParam, callNearestRoute);
+                        await HTTPRequestAsync(getParam, callNearestRoute);
                     }
 
                 }
@@ -158,93 +159,48 @@ namespace EV_Charger_App.Services
         public void ProcessResponse(string response, string callType)
         {
             try
-            {
-                // Add toggle for whether or not we want to store in a file
-                if (writeToFile == false)
+            {               
+                // Grab result                    
+                var result = JsonConvert.DeserializeObject<Root>(response);
+                if (result != null)
                 {
-                    // Grab result                    
-                    var result = JsonConvert.DeserializeObject<Root>(response);
-                    if (result != null)
-                    {
-                        // If getting chargers for a route add to chargersAlongRoute list
-                        if (callType == callNearestRoute)
-                        {
-                            if (chargersAlongRoute.fuel_stations == null)
-                            {
-                                chargersAlongRoute.fuel_stations = new List<FuelStation>(result.fuel_stations);
-                            }
-                            else
-                            {
-                                chargersAlongRoute.fuel_stations.Clear();
-                                chargersAlongRoute.fuel_stations.AddRange(result.fuel_stations);
-                                SetStatus(chargersAlongRoute.fuel_stations);
-                            }
-                        }
-                        // If the app is initializing both will be null and both should be intialized with same values
-                        if (NEW_CHARGERS.fuel_stations == null && CHARGER_LIST.fuel_stations == null)
-                        {
-                            SetStatus(result.fuel_stations);
-                            CHARGER_LIST.fuel_stations = new List<FuelStation>(result.fuel_stations);
-                            NEW_CHARGERS.fuel_stations = new List<FuelStation>(result.fuel_stations);
-                        }
-                        else
-                        {                                                        
-                            // Clear NEW_CHARGRES before adding response
-                            NEW_CHARGERS.fuel_stations.Clear();
-                            // Reset NEW_CHARGERS for the new response and only add new chargers to the CHARGER_LIST
-                            var list = result.fuel_stations.Except(CHARGER_LIST.fuel_stations);
-                                
-                            NEW_CHARGERS.fuel_stations.AddRange(list);
-                            
-                            // Set the Green, Yellow, Red status of the new stations
-                            SetStatus(NEW_CHARGERS.fuel_stations);
-                            CHARGER_LIST.fuel_stations.AddRange(NEW_CHARGERS.fuel_stations);
-
-                        }                        
-                    }                   
-                }
-                else
-                {
-                    // Copy data from HTTP request to a string
-                    string fileName = Path.Combine(Application.Context.FilesDir.AbsolutePath, "Chargers.json");
-                    previousResults = JsonConvert.DeserializeObject<Root>(response);
-
-                    Root doeResponse = previousResults;
-
-                    // Store chargers separately if from route call
+                    // If getting chargers for a route add to chargersAlongRoute list
                     if (callType == callNearestRoute)
                     {
-                        chargersAlongRoute = previousResults;
-                    }
-
-                    // If this is the devices first time using the app we need to create the Chargers.json file first
-                    if (!File.Exists(fileName))
-                    {
-                        File.Create(fileName);
-                    }
-
-                    // Use lock on file and then write to the file
-                    lock (_lock)
-                    {
-                        // Read current status, append new stations, and then append file
-                        string json = File.ReadAllText(fileName);
-                        Root curr = JsonConvert.DeserializeObject<Root>(json);
-
-                        // Check to make sure the file wasn't empty
-                        if (curr != null)
+                        if (chargersAlongRoute.fuel_stations == null)
                         {
-                            curr.fuel_stations.AddRange(doeResponse.fuel_stations);
-
-                            string updatedRoot = JsonConvert.SerializeObject(curr);
-                            // Serialize object and append file
-                            File.WriteAllText(fileName, updatedRoot);
+                            chargersAlongRoute.fuel_stations = new List<FuelStation>(result.fuel_stations);
                         }
                         else
                         {
-                            File.WriteAllText(fileName, response);
+                            chargersAlongRoute.fuel_stations.Clear();
+                            chargersAlongRoute.fuel_stations.AddRange(result.fuel_stations);
+                            SetStatus(chargersAlongRoute.fuel_stations);
                         }
                     }
+                    // If the app is initializing both will be null and both should be intialized with same values
+                    if (NEW_CHARGERS.fuel_stations == null && CHARGER_LIST.fuel_stations == null)
+                    {
+                        SetStatus(result.fuel_stations);
+                        CHARGER_LIST.fuel_stations = new List<FuelStation>(result.fuel_stations);
+                        NEW_CHARGERS.fuel_stations = new List<FuelStation>(result.fuel_stations);
+                    }
+                    else
+                    {
+                        // Clear NEW_CHARGRES before adding response
+                        NEW_CHARGERS.fuel_stations.Clear();
+                        // Reset NEW_CHARGERS for the new response and only add new chargers to the CHARGER_LIST
+                        var list = result.fuel_stations.Except(CHARGER_LIST.fuel_stations);
+
+                        NEW_CHARGERS.fuel_stations.AddRange(list);
+
+                        // Set the Green, Yellow, Red status of the new stations
+                        SetStatus(NEW_CHARGERS.fuel_stations);
+                        CHARGER_LIST.fuel_stations.AddRange(NEW_CHARGERS.fuel_stations);
+
+                    }
                 }
+               
             }
             catch (Exception ex)
             {
@@ -276,64 +232,17 @@ namespace EV_Charger_App.Services
                     {
                         charger.colorStatus = FuelStation.ColorStatus.Red;
                     }
-                }
-            }
-        }
-        public List<FuelStation> LoadChargers()
-        {
-            if (writeToFile == false)
-            {
-                if (CHARGER_LIST.fuel_stations != null)
-                {
-                    return CHARGER_LIST.fuel_stations;
-                }
-                else
-                {
-                    return null;
-                }
-            }
-            else
-            {
-                try
-                {
-                    // Grab directory path to the JSON file
-                    string fileName = Path.Combine(Application.Context.FilesDir.AbsolutePath, "Chargers.json");
 
-                    lock (_lock)
-                    {
-                        string jsonString = File.ReadAllText(fileName);
-                        // We only want to add the stations that are new
-                        if (previousResults != null && !string.IsNullOrEmpty(jsonString))
-                        {
-                            JsonSerializerSettings settings = new JsonSerializerSettings { CheckAdditionalContent = true };
-                            List<FuelStation> list = JsonConvert.DeserializeObject<Root>(jsonString).fuel_stations.Except(previousResults.fuel_stations).ToList();
-                            return list;
-                        }
-                        else
-                        {
-                            return null;
-                        }
-                    }
-                }
-                catch (JsonSerializationException ex)
-                {
-                    Console.WriteLine($"Error reading JSON file: {ex.Message}");
-                    Console.WriteLine($"Stack Trace: {ex.StackTrace}");
-                    return null;
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Exception loading chargers: " + ex.Message);
-                    return null;
+                    charger.position = new Position(charger.latitude, charger.longitude);
+                    charger.location = new Location(charger.latitude, charger.longitude);
                 }
             }
-
-        }
+        }       
         public void getAvailableChargersInZip(string zipCode)
         {
             // Parameter for this request
             string param = "&zip=" + zipCode + fuel_type + status_code + ev_connector_type + access + limit;
-            HTTPRequestAsync(param, callDefault);
+            _ = HTTPRequestAsync(param, callDefault);
         }
 
         public Root getChargersAlongRoute(List<Position> lineStringPOS, string distance)
@@ -364,25 +273,25 @@ namespace EV_Charger_App.Services
             string param = "&distance=2" + "&route=" + lineStringGET + fuel_type + status_code + ev_connector_type + access + limit;
             
             // Collect response
-            PostHTTPRequestAsync(callNearestRoute, lineStringPOST, param, "2.0");
+            _ = PostHTTPRequestAsync(callNearestRoute, lineStringPOST, param, "2.0");
             return chargersAlongRoute;
         }
 
-        public void getNearestCharger(string latitude, string longitude, string radius)
-        {
-            Location loc = new Location(double.Parse(latitude), double.Parse(longitude));
-                      
-            string param = "&latitude=" + latitude + "&longitude=" + longitude + "&radius=" + radius + fuel_type + status_code + ev_connector_type + access + limit;
-            // Collect response
-            HTTPRequestAsync(param, callNearest);            
-          
+        public async Task getNearestCharger(double latitude, double longitude, double radius)
+        {   
+            if(radius < requestThreshold)
+            {
+                string param = "&latitude=" + latitude + "&longitude=" + longitude + "&radius=" + radius + fuel_type + status_code + ev_connector_type + access + limit;
+                // Collect response
+                await HTTPRequestAsync(param, callNearest);
+            }                              
         }
 
         public void getStationByID(string id)
         {
             string param = "&id=" + id;
             // Collect response
-            HTTPRequestAsync(param, callId);
+            _ = HTTPRequestAsync(param, callId);
         }
 
         public FuelStation GetFuelStation(string stationName)
@@ -394,9 +303,7 @@ namespace EV_Charger_App.Services
                     return station;
                 }
             }
-
             Debug.WriteLine("Could not find station");
-
             return new FuelStation();
         }
     }

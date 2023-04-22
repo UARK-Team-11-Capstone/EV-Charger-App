@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using Xamarin.Forms.GoogleMaps;
 
 namespace EV_Charger_App.ViewModels
 {
@@ -79,11 +79,13 @@ namespace EV_Charger_App.ViewModels
         public object access_days_time_fr { get; set; }
         public object ev_pricing_fr { get; set; }
         public double distanceFromUser { get; set; }
+        public object BindingContext { get; set; }
         public ColorStatus colorStatus { get; set; }
-
+        public Position position { get; set; }
+        public Xamarin.Essentials.Location location { get; set; }
         public override string ToString()
         {
-            return $"{access_code}, {access_days_time}, {access_detail_code}, {cards_accepted}, {date_last_confirmed}, {expected_date}, {fuel_type_code}, {groups_with_access_code}, {id}, {open_date}, {owner_type_code}, {status_code}, {restricted_access}, {station_name}, {station_phone}, {updated_at}, {facility_type}, {geocode_status}, {latitude}, {longitude}, {city}, {state}, {street_address}, {zip}, {country}, {ev_network}, {ev_pricing}, {access_days_time_fr}, {ev_pricing_fr}";
+            return $" {station_name}, {id},  {updated_at}";
         }
 
         public override bool Equals(object obj)
@@ -96,17 +98,53 @@ namespace EV_Charger_App.ViewModels
             FuelStation other = (FuelStation)obj;
             // compare all properties
             return station_name == other.station_name                                    
-                   && id == other.id;
+                   && street_address == other.street_address
+                   && access_code == other.access_code;
         }
         public override int GetHashCode()
         {
             int hashCode = 17;
             hashCode = hashCode * 23 + station_name.GetHashCode();
-            hashCode = hashCode * 23 + id.GetHashCode();
-                      
+            hashCode = hashCode * 23 + street_address.GetHashCode();
+            hashCode = hashCode * 23 + access_code.GetHashCode();
             return hashCode;
         }
+        
     }
+    public class FuelStationEqualityComparer : IEqualityComparer<FuelStation>
+    {
+        public bool Equals(FuelStation x, FuelStation y)
+        {
+            // Check for nullity and reference equality
+            if (x == null || y == null || ReferenceEquals(x, y))
+            {
+                return x == y;
+            }
+
+            // Compare station name, latitude, and longitude
+            return x.station_name == y.station_name &&
+                   x.latitude == y.latitude &&
+                   x.longitude == y.longitude &&
+                   x.street_address == y.street_address;
+                   
+        }
+
+        public int GetHashCode(FuelStation obj)
+        {
+            // Compute hash code based on station name, latitude, and longitude
+            unchecked
+            {
+                int hash = 17;
+                hash = hash * 23 + obj.station_name.GetHashCode();
+                hash = hash * 23 + obj.latitude.GetHashCode();
+                hash = hash * 23 + obj.longitude.GetHashCode();
+                hash = hash * 23 + obj.street_address.GetHashCode();              
+                return hash;
+            }
+        }
+    }
+
+
 
     public class HY
     {

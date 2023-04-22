@@ -5,7 +5,6 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
-using static Android.Hardware.Camera;
 using Debug = System.Diagnostics.Debug;
 
 

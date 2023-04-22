@@ -1,4 +1,5 @@
-﻿using Android.Speech.Tts;
+﻿using Android.OS;
+using Android.Speech.Tts;
 using EV_Charger_App.Services;
 using EV_Charger_App.ViewModels;
 using EV_Charger_App.Views;
@@ -10,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Diagnostics;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 using Xamarin.Forms.GoogleMaps;
@@ -19,6 +21,13 @@ using Distance = Xamarin.Forms.GoogleMaps.Distance;
 using Location = Xamarin.Essentials.Location;
 using Math = System.Math;
 using Position = Xamarin.Forms.GoogleMaps.Position;
+using Trace = System.Diagnostics.Trace;
+using Java.Util;
+using Android.Telecom;
+using System.Text;
+using System.Collections;
+using Xamarin.Forms.Internals;
+using System.Net.NetworkInformation;
 
 namespace EV_Charger_App
 {
@@ -33,17 +42,16 @@ namespace EV_Charger_App
         GooglePlacesApi googlePlacesApi;
         List<Prediction> prediction;
         SearchBar lastChanged;
-        FunctionThrottler throttle;
-        List<Cluster> clusterList;
+        FunctionThrottler throttle;        
+        
         string lastAddress;
         bool chargerRouting;
-        private Location previousLocation;
-        private int chargePercentage;
-        private int maxRange;
-        private int rechargeMileage;
-        private int clusterDistance;
+        private Location previousLocation;      
         bool overrideLoading;
-        private double clusteringThreshold;
+        MapPinHandler mapPinHandler;
+        private int maxRange;
+        private double chargePercentage;
+        private int rechargeMileage;
 
         public MainPage(App app)
         {
@@ -53,7 +61,7 @@ namespace EV_Charger_App
             LoadMap(39.5, -98.35);
 
 #pragma warning disable CS0618 // Type or member is obsolete
-            map.CameraChanged += Map_CameraChanged;
+            map.CameraChanged += Map_CameraChangedAsync;
 #pragma warning restore CS0618 // Type or member is obsolete
 
             map.InfoWindowLongClicked += Map_InfoWindowLongClicked;
@@ -65,17 +73,17 @@ namespace EV_Charger_App
 
             this.app = app;
             doe = new DoEAPI(app, app.database.GetDOEAPIKey());
+            mapPinHandler = new MapPinHandler(doe, this);
             routeAPI = new RoutingAPI();
             googlePlacesApi = new GooglePlacesApi(app.database.GetGoogleAPIKey());
             prediction = new List<Prediction>();
-            throttle = new FunctionThrottler(new TimeSpan(0, 0, 3));     
+            throttle = new FunctionThrottler(new TimeSpan(0, 0, 2));           
             overrideLoading = false;
+
+            rechargeMileage = 50;
+            maxRange = 200;
             chargePercentage = 100;
-            maxRange = 1;
-            rechargeMileage = 5;
-            chargerRouting = false;
-            clusteringThreshold = 2;
-            clusterDistance = 50;
+            
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------
@@ -241,13 +249,15 @@ namespace EV_Charger_App
         //-----------------------------------------------------------------------------------------------------------------------------
         // Responds on a camera moved action
         //-----------------------------------------------------------------------------------------------------------------------------
-        private void Map_CameraChanged(object sender, CameraChangedEventArgs e)
+        private async void Map_CameraChangedAsync(object sender, CameraChangedEventArgs e)
         {
             CameraPosition pos = e.Position;
             // Check to see if the function is allowed to run
             if (!throttle.CanExecute() || overrideLoading == true)
             {
-                DynamicChargerLoadingAsync(pos);
+                Location loc = new Location(pos.Target.Latitude, pos.Target.Longitude);
+                double radius = GetVisibleRadius(pos.Zoom);
+                await mapPinHandler.LoadChargersAsync(loc, radius);
             }
         }
 
@@ -301,24 +311,7 @@ namespace EV_Charger_App
                 layoutContainer.IsVisible = false;
             }
         }
-
-        //-----------------------------------------------------------------------------------------------------------------------------
-        // To keep protection of user location call to get distance from a certain position to the user
-        //-----------------------------------------------------------------------------------------------------------------------------
-        public double GetDistanceFromUser(Location loc)
-        {
-            if(previousLocation != null && loc != null)
-            {
-                double distance = Location.CalculateDistance(previousLocation, loc, DistanceUnits.Miles);
-                return distance;
-            }
-            else
-            {
-                return double.NegativeInfinity;
-            }
-                 
-        }
-
+        
         //-----------------------------------------------------------------------------------------------------------------------------
         // Update the location of the users pin every 5 seconds
         //-----------------------------------------------------------------------------------------------------------------------------
@@ -330,16 +323,9 @@ namespace EV_Charger_App
                 previousLocation = await Geolocation.GetLocationAsync(new GeolocationRequest(GeolocationAccuracy.Default, TimeSpan.FromMinutes(1)));
                 map.MoveToRegion(MapSpan.FromCenterAndRadius(new Position(previousLocation.Latitude, previousLocation.Longitude), Xamarin.Forms.GoogleMaps.Distance.FromMiles(1)));
                 Debug.WriteLine("Current location found...");
-
-                var locationPin = new Pin()
-                {
-                    Type = PinType.Place,
-                    Label = "Current Location",
-                    //Icon = BitmapDescriptorFactory.FromView(new Image() { Source = "Location-Dot.png", Scale = .25}),
-                    Position = new Position(Convert.ToDouble(previousLocation.Latitude), Convert.ToDouble(previousLocation.Longitude)),
-                };
-                Debug.WriteLine("Adding location pin to the map...");
-                map.Pins.Add(locationPin);
+               
+                CreatePin("Current Location", new Position(Convert.ToDouble(previousLocation.Latitude), Convert.ToDouble(previousLocation.Longitude)), DateTime.MinValue, "", PinType.Generic, null);
+                Debug.WriteLine("Adding location pin to the map...");                
 
                 while (true)
                 {
@@ -366,147 +352,260 @@ namespace EV_Charger_App
                 Debug.WriteLine("Error tracking location: " + ex.Message);
             }
         }
+        
         //-----------------------------------------------------------------------------------------------------------------------------
-        // Load chargers based on the camera position asynchronously 
+        /// <summary>
+        /// Get distance from the current location of the user on the map
+        /// </summary>
+        /// <param name="loc"></param>
+        /// <returns></returns>
         //-----------------------------------------------------------------------------------------------------------------------------
-        public void DynamicChargerLoadingAsync(CameraPosition pos)
+        public double GetDistanceFromUser(Location loc)
         {
-            Debug.WriteLine("Dynamically loading chargers...");
-            
+            if (previousLocation != null && loc != null)
+            {
+                double distance = Location.CalculateDistance(previousLocation, loc, DistanceUnits.Miles);
+                return distance;
+            }
+            else
+            {
+                return double.NegativeInfinity;
+            }
+
+        }
+        //-----------------------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Remove pin based on cluster binding context
+        /// </summary>
+        /// <param name="pin"></param>
+         //-----------------------------------------------------------------------------------------------------------------------------
+        public bool RemovePin(Cluster cluster)
+        {
             try
             {
-                if (previousLocation != null && pos != null)
+                if (cluster != null)
                 {
-                    double lat = pos.Target.Latitude;
-                    double lng = pos.Target.Longitude;
-                    
-                    // Call DoE API to get nearest chargers in a radius relative to the camera zoom level
-                    double alt = pos.Zoom;
-                    double radius = GetVisibleRadius(alt);
-                    doe.getNearestCharger(lat.ToString(), lng.ToString(), radius.ToString());                                        
-
-                    // If the radius of our view is more than 150 miles, cluster our chargers
-                    if (radius > clusterDistance && doe.CHARGER_LIST.fuel_stations != null && doe.NEW_CHARGERS.fuel_stations != null)
+                    bool result = map.Pins.Remove((Pin)cluster.BindingContext);
+                    if (result == false)
                     {
-                        Debug.WriteLine("Radius larger than clusterDistance, proceeding to cluster...");
-                        // Clear the map of old pins to optimize for clusters
-                        map.Pins.Clear();
-
-                        // Call function to update global clusterList
-                        ClusterFuelStations(doe.CHARGER_LIST.fuel_stations);
-
-                        Debug.WriteLine("Cluster list size: " + clusterList.Count);
-                        if (clusterList != null)
-                        {
-                            // Iterate through clusters and create pins
-                            foreach (var cluster in clusterList)
-                            {
-                                if (cluster.fuel_stations != null)
-                                {
-                                    // If this is just a cluster of one, meaning one charger, then make a normal pin
-                                    if (cluster.fuel_stations.Count == 1)
-                                    {
-                                        map.Pins.Add(CreatePin(cluster.fuel_stations.FirstOrDefault()));
-                                    }
-                                    else // Otherwise treat this like a cluster and create an overall pin
-                                    {
-                                        var clusterPin = new Pin()
-                                        {
-                                            Tag = cluster.Id,
-                                            Type = PinType.SearchResult,
-                                            Label = "",
-                                            Icon = (Device.RuntimePlatform == Device.Android) ? BitmapDescriptorFactory.FromBundle("Charger-Icon.png") : BitmapDescriptorFactory.FromView(new Image() { Source = "Charger-Icon.png", WidthRequest = 10, HeightRequest = 10, Aspect = Aspect.AspectFit }),
-                                            Position = new Position(cluster.position.Latitude, cluster.position.Longitude),
-                                        };
-                                        map.Pins.Add(clusterPin);
-                                    }
-                                }
-                                else
-                                {
-                                    continue;
-                                }
-                            }
-                            Debug.WriteLine("Done adding clusters to map...");
-                        }
-                        else
-                        {
-                            Debug.WriteLine("ClusterList was null");
-                        }
-                    }
-                    else if(doe.CHARGER_LIST.fuel_stations != null && doe.NEW_CHARGERS.fuel_stations != null)
-                    {   // Normal situation where the visible radius is less than 150 miles, make pins for all chargers in the visible radius
-                                                                   
-                        Debug.WriteLine("Declustering clusters back to chargers...");
-                        // Clear clusters if they are present in the current view
-                        for (int i = 0; i < map.Pins.Count - 1; i++)
-                        {                                    
-                            // Calculate the distance between the cluster and the center of the visible area
-                            double distance = Location.CalculateDistance(new Location(lat, lng), new Location(map.Pins[i].Position.Latitude, map.Pins[i].Position.Longitude), DistanceUnits.Miles);
-                            if (map.Pins[i].Type == PinType.SearchResult && distance <= radius)
-                            {
-                                // Use lat and long as an identifier to find the cluster from the cluster list
-                                Cluster cluster = clusterList.Find(x => x.Id == (int)map.Pins[i].Tag);
-
-                                // Remove cluster icon and then add back the chargers from the cluster to the map
-                                map.Pins.Remove(map.Pins[i]);
-                                foreach (var charger in cluster.fuel_stations)
-                                {                                            
-                                    map.Pins.Add(CreatePin(charger));                                       
-                                }
-                                // Remove cluster that we just declustered
-                                clusterList.Remove(cluster);
-                            }
-                            else
-                            {
-                                continue;
-                            }                                    
-                        }
-
-                        Debug.WriteLine("Adding " + doe.NEW_CHARGERS.fuel_stations.Count + " new chargers to the map...");
-                        // Add any new chargers that we recieved from the DoE
-                        foreach(var charger in doe.NEW_CHARGERS.fuel_stations)
-                        {
-                            map.Pins.Add(CreatePin(charger));
-                        }
-                           
-                        // If for some reason the map is empty
-                        if(map.Pins.Count == 1)
-                        {
-                            foreach(var charger in doe.CHARGER_LIST.fuel_stations)
-                            {
-                                map.Pins.Add(CreatePin(charger));
-                            }
-                        }
-                    }
-                }
+                        var pin = (Pin)cluster.BindingContext;
+                        result = map.Pins.Remove(map.Pins.First(x => x.Tag == x.Tag));                        
+                    }                    
+                    return result;
+                }               
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Error loading chargers: {ex}");
+                Debug.WriteLine($"Unable to remove pin: " + ex.Message + ex.StackTrace);
+            }
+            return false;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Remove pin based on charger binding context
+        /// </summary>
+        /// <param name="pin"></param>
+         //-----------------------------------------------------------------------------------------------------------------------------
+        public bool RemovePin(FuelStation charger)
+        {
+            try
+            {                               
+                if (charger != null)
+                {                    
+                    bool result = map.Pins.Remove((Pin)charger.BindingContext);
+                    return result;
+                }                
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error removing pin: " + ex.Message + ex.StackTrace);
+            }
+            return false;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Remove given pin from map
+        /// </summary>
+        /// <param name="pin"></param>
+         //-----------------------------------------------------------------------------------------------------------------------------
+        public bool RemovePin(Pin pin, PinEqualityComparer pinEqualityComparer)
+        {
+            try
+            {                                       
+                var pinToRemove = map.Pins.FirstOrDefault(p => pinEqualityComparer.Equals(p, pin));
+                if (pinToRemove != null)
+                {                   
+                    bool result =  map.Pins.Remove(pinToRemove);
+                    return result;
+                }               
+            }
+            catch(Exception ex)
+            {
+                Debug.WriteLine($"Error removing pin: " + ex.Message + ex.StackTrace);
+            }
+            return false;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Remove list of pins from the map 
+        /// </summary>
+        /// <param name="pins"></param>
+        //-----------------------------------------------------------------------------------------------------------------------------
+        public void RemovePin(List<Pin> pins, PinEqualityComparer pinEqualityComparer)
+        {
+            if (pins != null)
+            {                
+                foreach (var pin in pins)
+                {
+                    RemovePin(pin, pinEqualityComparer);
+                }                
             }
         }
-        
+
         //-----------------------------------------------------------------------------------------------------------------------------
-        // Given a FuelStation create a map pin
+        /// <summary>
+        /// If pin exists on the map return reference to it, otherwise return null
+        /// </summary>
+        /// <param name="pin"></param>
+        /// <returns></returns>
         //-----------------------------------------------------------------------------------------------------------------------------
-        public Pin CreatePin(FuelStation fs)
+        public Pin ContainsPin(Pin pin)
+        {
+            if (map.Pins.Contains(pin))
+            {
+                return map.Pins.FirstOrDefault(p => Equals(p, pin));
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        ///  Given pin parameters create a pin on the map (pin object is already added to map but is returned for record keeping)
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="pos"></param>
+        /// <param name="time"></param>
+        /// <param name="id"></param>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        //-----------------------------------------------------------------------------------------------------------------------------
+        public Pin CreatePin(string name, Position pos, DateTime time, string id, PinType type, PinEqualityComparer pinEqualityComparer)
+        {
+            try
+            {                                
+                string iconName = "";               
+                if (type == PinType.Place)
+                {
+                    // Get the current DateTime object
+                    DateTime currentDate = DateTime.Now;
+                    // Get the difference in last updated for the charger and assign green, yellow, or red status based on this
+                    DateTime chargerDate = time;
+                    TimeSpan difference = currentDate - chargerDate;
+
+                    if (difference.TotalDays < 7)
+                    {
+                        iconName = "Charger-Icon-Green.png";
+                    }
+                    else if (difference.TotalDays < 31)
+                    {
+                        iconName = "Charger-Icon-Yellow.png";
+                    }
+                    else
+                    {
+                        iconName = "Charger-Icon-Red.png";
+                    }
+                }
+                else if (type == PinType.SearchResult)
+                {
+                    iconName = "Charger-Icon.png";
+                }
+                else if (type == PinType.SavedPin)
+                {
+                    var placePin = new Pin()
+                    {
+                        Tag = id,
+                        Type = type,
+                        Label = name,
+                        Position = pos
+                    };
+
+                    // Check to see if the pin already exists, if so return that pin, otherwise add new pin
+                    var result1 = ContainsPin(placePin);
+                    if (result1 == null)
+                    {
+                        map.Pins.Add(placePin); return placePin;
+                    }
+                    else
+                    {
+                        return result1;
+                    }
+                }
+                else
+                {
+                    iconName = "Location-Dot.png";
+                }
+
+                var pin = new Pin()
+                {
+                    Tag = id,
+                    Type = type,
+                    Label = name,
+                    Icon = (Device.RuntimePlatform == Device.Android) ? BitmapDescriptorFactory.FromBundle(iconName) : BitmapDescriptorFactory.FromView(new Image() { Source = iconName, WidthRequest = 10, HeightRequest = 10, Aspect = Aspect.AspectFit }),
+                    Position = pos
+                };
+
+                // Check to see if the pin already exists, if so return that pin, otherwise add new pin
+                var result = ContainsPin(pin);
+                if (result == null)
+                {
+                    map.Pins.Add(pin); return pin;
+                }
+                else
+                {
+                    return result;
+                }
+                                               
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Error creating pin: " + ex.Message);
+            }
+
+            return new Pin();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Create pin and add to map based on a FuelStation object, return pin for record keeping
+        /// </summary>
+        /// <param name="fs"></param>
+        /// <returns></returns>
+        //-----------------------------------------------------------------------------------------------------------------------------
+        public Pin CreatePin(FuelStation fs, PinEqualityComparer pinEqualityComparer)
         {
             try
             {
-                String chargerIconName = "";
+                string chargerIconName = "";
                 if (fs.colorStatus == FuelStation.ColorStatus.Green)
-                {                   
+                {
                     chargerIconName = "Charger-Icon-Green.png";
                 }
                 else if (fs.colorStatus == FuelStation.ColorStatus.Yellow)
-                {                   
+                {
                     chargerIconName = "Charger-Icon-Yellow.png";
                 }
                 else
-                {   chargerIconName = "Charger-Icon-Red.png";
+                {
+                    chargerIconName = "Charger-Icon-Red.png";
                 }
 
-                var chargerPin = new Pin()
+                var pin = new Pin()
                 {
                     Tag = fs.id,
                     Type = PinType.Place,
@@ -515,73 +614,22 @@ namespace EV_Charger_App
                     Position = new Position(Convert.ToDouble(fs.latitude), Convert.ToDouble(fs.longitude)),
                 };
 
-                return chargerPin;
+                // Check to see if the pin already exists, if so return that pin, otherwise add new pin
+                var result = ContainsPin(pin);
+                if (result == null)
+                {
+                    map.Pins.Add(pin); return pin;
+                }
+                else
+                {
+                    return result;
+                }
             }
             catch (Exception ex)
             {
                 Debug.WriteLine("Error creating pin: " + ex.Message);
             }
-
             return null;
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------
-        // Given a list of FuelStations cluster those that are within a quarter-mile radius and return
-        //-----------------------------------------------------------------------------------------------------------------------------
-        public void ClusterFuelStations(List<FuelStation> fuelStations)
-        {
-            try
-            {
-                Debug.WriteLine("Clustering chargers...");
-                
-                if (fuelStations != null)
-                {
-                    foreach (var fuelStation in fuelStations)
-                    {
-                        bool isClustered = false;
-
-                        if (clusterList != null)
-                        {
-                            // Iterate through existing clusters
-                            foreach (var cluster in clusterList)
-                            {
-                                double distance = Location.CalculateDistance(fuelStation.latitude, fuelStation.longitude, cluster.position.Latitude, cluster.position.Longitude, DistanceUnits.Miles);
-
-                                if (distance <= clusteringThreshold)
-                                {
-                                    // Add fuel station to existing cluster
-                                    cluster.AddFuelStation(fuelStation);
-                                    isClustered = true;
-                                    break; // No need to check other clusters
-                                }
-                            }
-
-                            if (!isClustered)
-                            {
-                                // Create a new cluster for the fuel station
-                                Cluster newCluster = new Cluster(fuelStation.latitude, fuelStation.longitude);
-                                newCluster.AddFuelStation(fuelStation);
-                                newCluster.Id = clusterList.Count;
-                                clusterList.Add(newCluster);                                
-                            }
-                        }
-                        else
-                        {
-                            // Create a new cluster for the fuel station
-                            Cluster newCluster = new Cluster(fuelStation.latitude, fuelStation.longitude);
-                            newCluster.AddFuelStation(fuelStation);
-                            newCluster.Id = 0;
-                            clusterList = new List<Cluster>{newCluster};
-                        }                        
-                    }
-
-                }                
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine("Error clustering: " + ex.Message);
-            }
-
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------

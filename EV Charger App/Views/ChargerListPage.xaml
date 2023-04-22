@@ -13,7 +13,8 @@
             <ListView x:Name="fuelStationsListView"                      
                       HasUnevenRows="True"
                       SeparatorVisibility="None"
-                      Margin="10">
+                      Margin="10"
+                      ItemSelected="OnFuelStationSelected">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <ViewCell >
