@@ -17,7 +17,6 @@ namespace EV_Charger_App.Services
         private readonly string databaseName = "Login1";
         private readonly string username = "admin";
         private readonly string password = "capstone11";
-        private readonly int port = 3306;
 
         private MySqlConnection connection;
 

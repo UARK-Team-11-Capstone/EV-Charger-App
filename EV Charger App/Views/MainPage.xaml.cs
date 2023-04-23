@@ -75,21 +75,21 @@ namespace EV_Charger_App
 
             ToolbarItem batteryItem = ToolbarItems.FirstOrDefault(item => item.ClassId == "batteryIcon");
 
-            int charge = app.session.getVehicleCharge();
+            int chargerPercentage = app.session.getVehicleCharge();
             
-            if(charge == 0)
+            if(chargerPercentage == 0)
             {
                 batteryItem.IconImageSource = "Battery_Icon_0";
             }
-            else if(charge > 0 && charge <= 25)
+            else if(chargerPercentage > 0 && chargerPercentage <= 25)
             {
                 batteryItem.IconImageSource = "Battery_Icon_25";
             }
-            else if(charge > 25 && charge <= 50)
+            else if(chargerPercentage > 25 && chargerPercentage <= 50)
             {
                 batteryItem.IconImageSource = "Battery_Icon_50";
             }
-            else if(charge > 50 && charge <= 75)
+            else if(chargerPercentage > 50 && chargerPercentage <= 75)
             {
                 batteryItem.IconImageSource = "Battery_Icon_75";
             }
@@ -395,9 +395,16 @@ namespace EV_Charger_App
                     if (loc != previousLocation)
                     {
                         // Find the current location pin and adjust the location
-                        Pin currLoc = map.Pins.First(Pin => Pin.Label == "Current Location");
-                        currLoc.Position = new Position(Convert.ToDouble(loc.Latitude), Convert.ToDouble(loc.Longitude));
-
+                        var currLoc = map.Pins.FirstOrDefault(Pin => Pin.Label == "Current Location");
+                        if(currLoc.Label == "Current Location")
+                        {
+                            currLoc.Position = new Position(Convert.ToDouble(loc.Latitude), Convert.ToDouble(loc.Longitude));
+                            Debug.WriteLine(currLoc.Icon.AbsolutePath);
+                        }
+                        else
+                        {
+                            CreatePin("Current Location", new Position(Convert.ToDouble(previousLocation.Latitude), Convert.ToDouble(previousLocation.Longitude)), DateTime.MinValue, "", PinType.Generic, null);
+                        }                       
                     }
                     // Set previousLocation to the current location
                     previousLocation = loc;
@@ -607,10 +614,11 @@ namespace EV_Charger_App
                     }
                 }
                 else
-                {
+                {                    
                     iconName = "Location-Dot.png";
                 }
 
+                Debug.WriteLine("Icon for pin: " + iconName);
                 var pin = new Pin()
                 {
                     Tag = id,
