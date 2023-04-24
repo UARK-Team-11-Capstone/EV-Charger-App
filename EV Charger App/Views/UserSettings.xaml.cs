@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+using static Android.Media.Session.MediaSession;
 
 namespace EV_Charger_App.Views
 {
@@ -32,7 +33,16 @@ namespace EV_Charger_App.Views
         //This is the function called when the save button is clicked
         async private void SaveSettings(object sender, EventArgs e)
         {
-            app.session.setVehicleCharge((int)ChargeSlider.Value);
+            string fullName = NameTypeCell.Text;
+            string vehicleType = VehicleTypeCell.Text;
+            string token = app.session.getToken();
+
+            if (!string.IsNullOrWhiteSpace(fullName) && !string.IsNullOrWhiteSpace(vehicleType))
+            {
+                app.database.UpdateRecord("Users", new string[2] { "name", "vehicle" }, new string[2] { fullName, vehicleType }, "sessionToken", token);
+            }
+
+                app.session.setVehicleCharge((int)ChargeSlider.Value);
             await Navigation.PushAsync(new MainPage(app));
         }
 
