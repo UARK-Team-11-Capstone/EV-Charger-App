@@ -9,7 +9,7 @@
             <TableRoot>
                 <TableSection>
                     <EntryCell x:Name="NameTypeCell" Label="Name"  LabelColor="#3D3935" Placeholder="{Binding NameTypePlaceholder}"/>
-                    <EntryCell x:Name="EmailTypeCell" Label="Email" LabelColor="#3D3935" Placeholder="{Binding EmailTypePlaceholder}"/>
+                    <EntryCell x:Name="EmailTypeCell" Label="Email" LabelColor="#3D3935" Placeholder="{Binding EmailTypePlaceholder}" IsEnabled="False"/>
                     <EntryCell x:Name="VehicleTypeCell" Label="Vehicle Type" LabelColor="#3D3935" Placeholder="{Binding VehicleTypePlaceholder}" />
                     <ViewCell>
                         <StackLayout Orientation="Horizontal">
