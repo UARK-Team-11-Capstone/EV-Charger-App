@@ -34,25 +34,22 @@ namespace EV_Charger_App.Views
         /// <param name="e"></param>
         async private void SubmitCreate(object sender, EventArgs e)
         {
-            //TODO: Add code to add inputted user credentials to the database
-
             string email = emailInputCreate.Text;
             string password = passwordInputCreate.Text;
 
             if (!string.IsNullOrWhiteSpace(email) && !string.IsNullOrWhiteSpace(password))
             {
                 //Check if email already exists in database
-                if (UserExists(email))
+                if (UserExists(email) || passwordInputCreate.Text != confirmPasswordInputCreate.Text || !app.database.IsValidEmail(email))
                 {
+                    await DisplayAlert("", "There was an error creating your account.", "OK");
                     return;
                 }
 
                 RegisterUser(email, password);
+                await DisplayAlert("", "Your account has been created.", "OK");
+                await Navigation.PushAsync(new LoginPage(app));
             }
-
-            await DisplayAlert("", "Your account has been created.", "OK");
-
-            await Navigation.PushAsync(new LoginPage(app));
         }
 
         /// <summary>
