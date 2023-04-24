@@ -4,11 +4,6 @@
              xmlns:maps="clr-namespace:Xamarin.Forms.GoogleMaps;assembly=Xamarin.Forms.GoogleMaps"
              x:Class="EV_Charger_App.MainPage">
     <ContentPage.ToolbarItems>
-        <ToolbarItem IconImageSource="Battery_Icon_100" ClassId="batteryIcon"/>
-        <ToolbarItem IconImageSource=""/>
-        <ToolbarItem IconImageSource=""/>
-        <ToolbarItem IconImageSource=""/>
-        <ToolbarItem IconImageSource=""/>
         <ToolbarItem IconImageSource="icon_about.png" Clicked="ChargerRoutingClicked"/>
         <ToolbarItem IconImageSource="Map.png" Clicked="OnButtonClicked" />
         <ToolbarItem IconImageSource="menubar1.png" Clicked="ListClicked"/>
@@ -41,6 +36,12 @@
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
+            <Image Source="Battery_Icon_100" x:Name="BatteryIcon"
+                           RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToView, ElementName=ContentMap, Property=Width, Factor=0.15}" 
+                           RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToView, ElementName=ContentMap, Property=Width, Factor=0.02}" 
+                           RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToView, ElementName=ContentMap, Property=Width, Factor=0.15}" 
+                           RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToView, ElementName=ContentMap, Property=Width, Factor=1.7}" 
+                   ></Image>
             <Label x:Name="lblInfo" Margin="5" RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width}" RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToView, ElementName=searchResultsListView, Property=Height, Factor=1, Constant=5}" />
         </RelativeLayout>
     </ContentPage.Content>
