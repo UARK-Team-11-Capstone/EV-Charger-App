@@ -18,19 +18,19 @@
             <ContentView x:Name="ContentMap" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand" 
                          RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width}" RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent, Property=Height}"/>
             <SearchBar x:Name="searchBar" Placeholder="Search" BackgroundColor="White" 
-                           RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width, Factor=0.95}" 
-                           RelativeLayout.HeightConstraint="{ConstraintExpression Type=Constant, Constant=50}"
-                           RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width, Factor=0.5, Constant=-171}"
-                           RelativeLayout.YConstraint="{ConstraintExpression Type=Constant, Constant=10}"
+                           RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToView, ElementName=ContentMap, Property=Width, Factor=0.9}" 
+                           RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToView, ElementName=ContentMap, Property=Width, Factor=0.05}" 
+                           RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToView, ElementName=ContentMap, Property=Width, Factor=0.12}" 
+                           RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToView, ElementName=ContentMap, Property=Width, Factor=0.05}" 
                            />
             <SearchBar x:Name="secondSearchBar" Placeholder="Destination" BackgroundColor="White" IsVisible="False"
-                               RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width, Factor=0.95}" 
-                               RelativeLayout.HeightConstraint="{ConstraintExpression Type=Constant, Constant=50}"
-                               RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width, Factor=0.5, Constant=-171}"
-                               RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToView, ElementName=searchBar, Property=Y, Factor=1,Constant=50}"
-                               />
-                <ListView x:Name="searchResultsListView" ItemsSource="{Binding searchResults}" BackgroundColor="White" IsVisible="False" 
-                                RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width, Factor=0.5, Constant=-171}"
+                               RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width, Factor=0.9}" 
+                               RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToView, ElementName=ContentMap, Property=Width, Factor=0.05}"                        
+                               RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToView, ElementName=ContentMap, Property=Width, Factor=0.12}" 
+                               RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToView, ElementName=ContentMap, Property=Width, Factor=0.17}"                                />
+                <ListView x:Name="searchResultsListView" ItemsSource="{Binding searchResults}" BackgroundColor="White" IsVisible="False"
+                                RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToView, ElementName=searchBar, Property=Width}" 
+                                RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToView, ElementName=searchBar, Property=X}" 
                                 RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToView, ElementName=searchBar, Property=Y, Factor=1, Constant=50}"
                                 RelativeLayout.HeightConstraint="{ConstraintExpression Type=Constant, Constant=150}">
                 <ListView.ItemTemplate>
