@@ -38,7 +38,7 @@ namespace EV_Charger_App.Views
             String email = emailInput.Text;
             String password = passwordInput.Text;
 
-            if (!string.IsNullOrWhiteSpace(email) && !string.IsNullOrWhiteSpace(password))
+            if (!string.IsNullOrWhiteSpace(email) && !string.IsNullOrWhiteSpace(password) && app.database.IsValidEmail(email))
             {
                 //Check if credentials are valid
                 if (CredentialsValid(email, password))

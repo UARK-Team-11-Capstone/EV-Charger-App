@@ -73,25 +73,23 @@ namespace EV_Charger_App
             rechargeMileage = 50;
             maxRange = 200;
 
-            ToolbarItem batteryItem = ToolbarItems.FirstOrDefault(item => item.ClassId == "batteryIcon");
-
             int chargerPercentage = app.session.getVehicleCharge();
             
             if(chargerPercentage == 0)
             {
-                batteryItem.IconImageSource = "Battery_Icon_0";
+                BatteryIcon.Source = "Battery_Icon_0";
             }
             else if(chargerPercentage > 0 && chargerPercentage <= 25)
             {
-                batteryItem.IconImageSource = "Battery_Icon_25";
+                BatteryIcon.Source = "Battery_Icon_25";
             }
             else if(chargerPercentage > 25 && chargerPercentage <= 50)
             {
-                batteryItem.IconImageSource = "Battery_Icon_50";
+                BatteryIcon.Source = "Battery_Icon_50";
             }
             else if(chargerPercentage > 50 && chargerPercentage <= 75)
             {
-                batteryItem.IconImageSource = "Battery_Icon_75";
+                BatteryIcon.Source = "Battery_Icon_75";
             }
         }
 
