@@ -4,7 +4,7 @@
              xmlns:maps="clr-namespace:Xamarin.Forms.GoogleMaps;assembly=Xamarin.Forms.GoogleMaps"
              x:Class="EV_Charger_App.MainPage">
     <ContentPage.ToolbarItems>
-        <ToolbarItem IconImageSource="icon_about.png" Clicked="ChargerRoutingClicked"/>
+        <ToolbarItem IconImageSource="Charger_Icon.png" Clicked="ChargerRoutingClicked"/>
         <ToolbarItem IconImageSource="Map.png" Clicked="OnButtonClicked" />
         <ToolbarItem IconImageSource="menubar1.png" Clicked="ListClicked"/>
     </ContentPage.ToolbarItems>
