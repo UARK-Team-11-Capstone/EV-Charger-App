@@ -5,7 +5,7 @@ namespace EV_Charger_App.Services
 {
     internal class FunctionThrottler
     {
-        private Stopwatch stopwatch = new Stopwatch(); // Stopwatch to track time
+        private Stopwatch stopwatch; // Stopwatch to track time
         private TimeSpan throttleTime; // Throttle time interval
         private DateTime lastExecutionTime; // Last execution time
 
@@ -14,6 +14,7 @@ namespace EV_Charger_App.Services
             this.throttleTime = new TimeSpan(0, 0, 0, throttleTime.Seconds);
             this.lastExecutionTime = new DateTime();
             this.lastExecutionTime = DateTime.Now;
+            this.stopwatch = new Stopwatch();
             this.stopwatch.Start();
         }
 

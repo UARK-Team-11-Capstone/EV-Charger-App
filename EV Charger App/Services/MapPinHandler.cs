@@ -19,10 +19,8 @@ namespace EV_Charger_App.Services
 
         FuelStationEqualityComparer fuelStationEqualityComparer;
         PinEqualityComparer pinEqualityComparer;
-        List<Cluster> CLUSTER_LIST;
-        List<Cluster> NEW_CLUSTERS;
-        Dictionary<FuelStation, (Pin, Cluster)> CHARGER_PIN_CLUSTER_DICTIONARY;
-        FunctionThrottler throttler;
+        List<Cluster> CLUSTER_LIST;        
+        Dictionary<FuelStation, (Pin, Cluster)> CHARGER_PIN_CLUSTER_DICTIONARY;        
 
         public MapPinHandler(DoEAPI doe, MainPage main)
         {
@@ -32,11 +30,9 @@ namespace EV_Charger_App.Services
             clusteringThreshold = 2;
             clusterDistance = 50;
             CHARGER_PIN_CLUSTER_DICTIONARY = new Dictionary<FuelStation, (Pin, Cluster)>();
-            CLUSTER_LIST = new List<Cluster>();
-            NEW_CLUSTERS = new List<Cluster>();
+            CLUSTER_LIST = new List<Cluster>();          
             pinEqualityComparer = new PinEqualityComparer();
-            fuelStationEqualityComparer = new FuelStationEqualityComparer();
-            throttler = new FunctionThrottler(new TimeSpan(0, 0, 0, 1));
+            fuelStationEqualityComparer = new FuelStationEqualityComparer();            
         }
 
         /// <summary>
