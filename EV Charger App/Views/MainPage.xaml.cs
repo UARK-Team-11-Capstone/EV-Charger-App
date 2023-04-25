@@ -247,14 +247,8 @@ namespace EV_Charger_App
 
                 // Move the map to the selected place
                 Position position = new Position(selectedPlace.Latitude, selectedPlace.Longitude);
-
-                Pin pin = new Pin()
-                {
-                    Label = locationName,
-                    Position = position
-                };
-
-                map.Pins.Add(pin);
+                
+                CreatePin(locationName, position, DateTime.MinValue, "", PinType.Place, null);
                 map.MoveToRegion(MapSpan.FromCenterAndRadius(position, Distance.FromMiles(1)));
 
                 // Set the value in the search bar to the item being tapped and set whichever list is being used to invisible
@@ -618,7 +612,7 @@ namespace EV_Charger_App
                     iconName = "Location-Dot.png";
                 }
 
-                Debug.WriteLine("Icon for pin: " + iconName);
+  
                 var pin = new Pin()
                 {
                     Tag = id,
