@@ -10,8 +10,10 @@
     </ContentPage.ToolbarItems>
     <ContentPage.Content>
         <RelativeLayout x:Name="layoutContainer">
-            <ContentView x:Name="ContentMap" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand" 
-                         RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width}" RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent, Property=Height}"/>
+            <ContentView x:Name="ContentMap"
+                           RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width, Factor=1.0}"
+                           RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent, Property=Height, Factor=1.0}"                            
+                           />
             <SearchBar x:Name="searchBar" Placeholder="Search" BackgroundColor="White" 
                            RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToView, ElementName=ContentMap, Property=Width, Factor=0.9}" 
                            RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToView, ElementName=ContentMap, Property=Width, Factor=0.05}" 

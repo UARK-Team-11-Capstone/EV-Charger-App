@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EV_Charger_App.Services;
+using System;
 using System.Collections.Generic;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -11,11 +12,15 @@ namespace EV_Charger_App.Views
     {
 
         App app;
-
-        public UserSettings(App app)
+        DoEAPI doe;
+        MainPage mp;
+       
+        public UserSettings(App app, MainPage mp, DoEAPI doe)
         {
             InitializeComponent();
             this.app = app;
+            this.mp = mp;
+            this.doe = doe;
 
             string token = app.session.getToken();
 
@@ -56,7 +61,16 @@ namespace EV_Charger_App.Views
             await Navigation.PushAsync(new LoginPage(app));
         }
 
+        async private void ChargerListTapped(object sender, EventArgs e)
+        {
+            try
+            {
+                await Navigation.PushAsync(new ChargerListPage(app, doe, mp));
+            }
+            catch (Exception ex)
+            {
 
-
+            }
+        }
     }
 }

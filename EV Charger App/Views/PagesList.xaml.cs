@@ -30,10 +30,12 @@ namespace EV_Charger_App.Views
             await Navigation.PushAsync(new LoginPage(app));
         }
 
+        /*
         async private void UserSettings(object sender, EventArgs e)
         {
             await Navigation.PushAsync(new UserSettings(app));
         }
+        */
 
         async private void ChargerList(object sender, EventArgs e)
         {
