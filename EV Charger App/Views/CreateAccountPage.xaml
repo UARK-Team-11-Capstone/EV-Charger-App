@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Class="EV_Charger_App.Views.CreateAccountPage"
+             BackgroundColor="#F0F3F5"
+             Shell.NavBarIsVisible="False">
+
+    <ContentPage.Content>
+        <StackLayout Padding="10,0,10,0" Margin="0,90">
+            <Label x:Name="CreateAccountLabel" Text="Create Account" HorizontalOptions="Center" TextColor="Black" FontAttributes="Bold" FontSize="Large" Margin="0, 40"/>
+            <Entry x:Name="emailInputCreate" Placeholder="Email" HorizontalOptions="Center" WidthRequest="300"/>
+            <Entry x:Name="passwordInputCreate" Placeholder ="Password" IsPassword="True" HorizontalOptions="Center" WidthRequest="300"/>
+            <Entry x:Name="confirmPasswordInputCreate" Placeholder="Confirm Password" IsPassword="True" HorizontalOptions="Center" WidthRequest="300"/>
+            <Button Clicked="SubmitCreate" Text="Create" CornerRadius="10" HorizontalOptions="CenterAndExpand" HeightRequest="50" WidthRequest="300" Margin="0,20"/>
+            <Label Text="Already have an account? Sign in" HorizontalOptions="Center" TextColor="#0072CE" FontSize="Small">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer
+                        Tapped="CreateToLogin"/>
+                </Label.GestureRecognizers>
+            </Label>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>

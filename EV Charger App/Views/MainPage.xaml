@@ -1,0 +1,50 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
+             xmlns:maps="clr-namespace:Xamarin.Forms.GoogleMaps;assembly=Xamarin.Forms.GoogleMaps"
+             x:Class="EV_Charger_App.MainPage">
+    <ContentPage.ToolbarItems>
+        <ToolbarItem IconImageSource="Charger_Icon.png" Clicked="ChargerRoutingClicked"/>
+        <ToolbarItem IconImageSource="Map.png" Clicked="OnButtonClicked" />
+        <ToolbarItem IconImageSource="menubar1.png" Clicked="ListClicked"/>
+    </ContentPage.ToolbarItems>
+    <ContentPage.Content>
+        <RelativeLayout x:Name="layoutContainer">
+            <ContentView x:Name="ContentMap"
+                           RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width, Factor=1.0}"
+                           RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent, Property=Height, Factor=1.0}"                            
+                           />
+            <SearchBar x:Name="searchBar" Placeholder="Search" BackgroundColor="White" 
+                           RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToView, ElementName=ContentMap, Property=Width, Factor=0.9}" 
+                           RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToView, ElementName=ContentMap, Property=Width, Factor=0.05}" 
+                           RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToView, ElementName=ContentMap, Property=Width, Factor=0.12}" 
+                           RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToView, ElementName=ContentMap, Property=Width, Factor=0.05}" 
+                           />
+            <SearchBar x:Name="secondSearchBar" Placeholder="Destination" BackgroundColor="White" IsVisible="False"
+                               RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width, Factor=0.9}" 
+                               RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToView, ElementName=ContentMap, Property=Width, Factor=0.05}"                        
+                               RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToView, ElementName=ContentMap, Property=Width, Factor=0.12}" 
+                               RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToView, ElementName=ContentMap, Property=Width, Factor=0.17}"                                />
+                <ListView x:Name="searchResultsListView" ItemsSource="{Binding searchResults}" BackgroundColor="White" IsVisible="False"
+                                RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToView, ElementName=searchBar, Property=Width}" 
+                                RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToView, ElementName=searchBar, Property=X}" 
+                                RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToView, ElementName=searchBar, Property=Y, Factor=1, Constant=50}"
+                                RelativeLayout.HeightConstraint="{ConstraintExpression Type=Constant, Constant=150}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <ViewCell>
+                            <Label Text="{Binding}" />
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            <Image Source="Battery_Icon_100" x:Name="BatteryIcon"
+                           RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToView, ElementName=ContentMap, Property=Width, Factor=0.15}" 
+                           RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToView, ElementName=ContentMap, Property=Width, Factor=0.02}" 
+                           RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToView, ElementName=ContentMap, Property=Width, Factor=0.15}" 
+                           RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToView, ElementName=ContentMap, Property=Width, Factor=1.7}" 
+                   ></Image>
+            <Label x:Name="lblInfo" Margin="5" RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width}" RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToView, ElementName=searchResultsListView, Property=Height, Factor=1, Constant=5}" />
+        </RelativeLayout>
+    </ContentPage.Content>
+</ContentPage>

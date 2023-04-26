@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-using Foundation;
+﻿using Foundation;
 using UIKit;
 
 namespace EV_Charger_App.iOS
@@ -22,7 +18,9 @@ namespace EV_Charger_App.iOS
         //
         public override bool FinishedLaunching(UIApplication app, NSDictionary options)
         {
+
             global::Xamarin.Forms.Forms.Init();
+            Xamarin.FormsGoogleMaps.Init("AIzaSyAg3OyUuTc-u3Q28HD3D3PGErkVDv0fTkc");
             LoadApplication(new App());
 
             return base.FinishedLaunching(app, options);

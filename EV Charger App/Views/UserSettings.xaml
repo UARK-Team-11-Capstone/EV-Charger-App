@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="EV_Charger_App.Views.UserSettings"
+             BackgroundColor="#F0F3F5"
+             Title="Settings">
+    <StackLayout>
+        <TableView Intent="Settings" >
+            <TableRoot>
+                <TableSection>
+                    <EntryCell x:Name="NameTypeCell" Label="Name"  LabelColor="#3D3935" Placeholder="{Binding NameTypePlaceholder}"/>
+                    <EntryCell x:Name="EmailTypeCell" Label="Email" LabelColor="#3D3935" Placeholder="{Binding EmailTypePlaceholder}" IsEnabled="False"/>
+                    <EntryCell x:Name="VehicleTypeCell" Label="Vehicle Type" LabelColor="#3D3935" Placeholder="{Binding VehicleTypePlaceholder}" />
+                    <ViewCell>
+                        <StackLayout Orientation="Horizontal">
+                            <Label Text="    Vehicle Charge:"  TextColor="#3D3935" Margin="5,10,5,0"></Label>
+                            <Slider x:Name="ChargeSlider" Minimum="0" Maximum="100" Value="0" MinimumTrackColor="#0072CE" MaximumTrackColor="Black" HorizontalOptions="FillAndExpand"/>
+                        </StackLayout>
+                    </ViewCell>
+                    <ViewCell x:Name="ChargersList" Tapped="ChargerListTapped">
+                        <StackLayout >
+                            <Label Text="    Charger List" VerticalOptions="CenterAndExpand" FontSize="Body" TextColor="#3D3935"/>
+                        </StackLayout>
+                    </ViewCell>
+                    <ViewCell x:Name="Password" Tapped="ChangePasswordTapped">
+                        <StackLayout >
+                            <Label Text="    Change Password" VerticalOptions="CenterAndExpand" FontSize="Body" TextColor="#3D3935"/>
+                        </StackLayout>
+                    </ViewCell>
+                    <ViewCell x:Name="Logout" Tapped="LogoutTapped">
+                        <StackLayout >
+                            <Label Text="    Logout" VerticalOptions="CenterAndExpand" FontSize="Body" TextColor="#3D3935"/>
+                        </StackLayout>
+                    </ViewCell>
+                </TableSection>
+            </TableRoot>
+        </TableView>
+        <Button Clicked="SaveSettings" Text="Save" BackgroundColor="#0072CE" HorizontalOptions="CenterAndExpand" CornerRadius="10" HeightRequest="50" WidthRequest="300"/>
+        <BoxView HeightRequest="30" />
+    </StackLayout>
+    
+</ContentPage>

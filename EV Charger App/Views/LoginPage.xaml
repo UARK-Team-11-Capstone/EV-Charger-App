@@ -5,10 +5,24 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
              x:Class="EV_Charger_App.Views.LoginPage"
-             Shell.NavBarIsVisible="False">
-    <ContentPage.Content>
-        <StackLayout Padding="10,0,10,0" VerticalOptions="Center">
-            <Button VerticalOptions="Center" Text="Login" Command="{Binding LoginCommand}"/>
+             BackgroundColor="#F0F3F5"
+             Shell.NavBarIsVisible="True">
+
+    <ContentPage.Content >
+        <StackLayout Padding="10,0,10,0" Margin="0,90">
+            <Image Source="gmlogo.png" Aspect="Fill" HeightRequest="200" WidthRequest="200" HorizontalOptions="Center" Margin="0,20"/>
+            <Label Text="SIGN IN" HorizontalOptions="Center" TextColor="Black" FontAttributes="Bold" FontSize="Large"/>
+            <Entry x:Name="emailInput" Placeholder="Email" HorizontalOptions="Center" WidthRequest="300"/>
+            <Entry x:Name="passwordInput" Placeholder="Password" IsPassword="True" HorizontalOptions="Center" WidthRequest="300"/>
+            <Label x:Name="LoginErrorText" Text="Email or password incorrect" HorizontalOptions="Center" TextColor="Red" FontSize="Small" Opacity="0.0"/>
+            <Button Clicked="SubmitLogin" Text="Login" CornerRadius="10" BackgroundColor="#0072CE" HorizontalOptions="CenterAndExpand" HeightRequest="50" WidthRequest="300" />
+            <BoxView HeightRequest="1" />
+            <Label Text="Don't have an account? Register here" HorizontalOptions="Center" TextColor="#0072CE" FontSize="Small">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer
+                        Tapped="LoginToCreate"/>
+                </Label.GestureRecognizers>
+            </Label>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>
