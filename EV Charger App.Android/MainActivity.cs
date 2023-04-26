@@ -1,8 +1,9 @@
 ﻿using Android.App;
+using Android.Content;
 using Android.Content.PM;
-using Android.Gms.Common.Api.Internal;
 using Android.OS;
 using Android.Runtime;
+using System.Diagnostics;
 
 namespace EV_Charger_App.Droid
 {
@@ -17,18 +18,7 @@ namespace EV_Charger_App.Droid
             Xamarin.FormsGoogleMaps.Init(this, savedInstanceState);
             global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
 
-            App app = new App();
-            string apiKey = app.database.GetGoogleAPIKey();
-
-            // Modify the AndroidManifest.xml file to set the API key value dynamically
-            var context = Android.App.Application.Context;
-            var packageManager = context.PackageManager;
-            var packageName = context.PackageName;
-            var applicationInfo = packageManager.GetApplicationInfo(packageName, PackageInfoFlags.MetaData);
-            var metaData = applicationInfo.MetaData;
-            metaData.PutString("com.google.android.maps.v2.API_KEY", apiKey);
-
-            LoadApplication(app);
+            LoadApplication(new App());
         }
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
         {

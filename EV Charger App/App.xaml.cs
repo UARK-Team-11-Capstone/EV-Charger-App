@@ -13,8 +13,7 @@ namespace EV_Charger_App
 
         public App()
         {
-            InitializeComponent();
-            Debug.WriteLine("App Initialized");
+            InitializeComponent();            
 
             database = new Database();
             MainPage = new NavigationPage(new LoginPage(this));

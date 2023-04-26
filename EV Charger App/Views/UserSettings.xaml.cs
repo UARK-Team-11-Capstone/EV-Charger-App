@@ -67,7 +67,7 @@ namespace EV_Charger_App.Views
             {
                 await Navigation.PushAsync(new ChargerListPage(app, doe, mp));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
 
             }

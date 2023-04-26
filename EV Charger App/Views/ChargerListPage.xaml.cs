@@ -49,7 +49,7 @@ namespace EV_Charger_App.Views
                     fuelStationsListView.ItemsSource = listOfChargers;
                 }
             }
-            catch(Exception ex)
+            catch(Exception)
             {
                 
             }

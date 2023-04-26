@@ -246,7 +246,7 @@ namespace EV_Charger_App
                 // Move the map to the selected place
                 Position position = new Position(selectedPlace.Latitude, selectedPlace.Longitude);
                 
-                CreatePin(locationName, position, DateTime.MinValue, "", PinType.Place, null);
+                CreatePin(locationName, position, DateTime.MinValue, "", PinType.SavedPin, null);
                 map.MoveToRegion(MapSpan.FromCenterAndRadius(position, Distance.FromMiles(1)));
 
                 // Set the value in the search bar to the item being tapped and set whichever list is being used to invisible
