@@ -17,12 +17,6 @@
                         Tapped="LoginScreen"/>
                 </Label.GestureRecognizers>
             </Label>
-            <Label Text="Settings" HorizontalOptions="Center" TextColor="Blue" FontSize="Large">
-                <Label.GestureRecognizers>
-                    <TapGestureRecognizer
-                        Tapped="UserSettings"/>
-                </Label.GestureRecognizers>
-            </Label>
             <Label Text="Review a Charger" HorizontalOptions="Center" TextColor="Blue" FontSize="Large">
                 <Label.GestureRecognizers>
                     <TapGestureRecognizer

@@ -51,7 +51,7 @@ namespace EV_Charger_App.Views
                     await DisplayAlert("", "Your password has been updated.", "OK");
 
                     Debug.WriteLine("UPDATED DATABASE PASSWORD");
-                    await Navigation.PushAsync(new UserSettings(app));
+                    await Navigation.PushAsync(new LoginPage(app));
 
                 }
                 //new passwords don't match

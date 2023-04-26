@@ -1,4 +1,5 @@
-﻿using EV_Charger_App.Services;
+﻿using Android.OS;
+using EV_Charger_App.Services;
 using EV_Charger_App.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -17,6 +18,7 @@ namespace EV_Charger_App.Views
         DoEAPI doe;
         App app;
         MainPage main;
+        
         public ChargerListPage(App app, DoEAPI doe, MainPage main)
         {
             InitializeComponent();
@@ -24,26 +26,34 @@ namespace EV_Charger_App.Views
             this.app = app;
             this.main = main;
             listOfChargers = new List<FuelStation>(doe.CHARGER_LIST.fuel_stations);
-
-            // Get distance of each charger from the user
-            foreach (var fuelStation in listOfChargers)
+            
+            try
             {
-                fuelStation.distanceFromUser = main.GetDistanceFromUser(new Xamarin.Essentials.Location(fuelStation.latitude, fuelStation.longitude));
-            }
+                // Get distance of each charger from the user
+                foreach (var fuelStation in listOfChargers)
+                {
+                    fuelStation.distanceFromUser = main.GetDistanceFromUser(new Xamarin.Essentials.Location(fuelStation.latitude, fuelStation.longitude));
+                }
 
-            // Sort the fuel stations by distance from the user
-            listOfChargers.Sort((x, y) => x.distanceFromUser.CompareTo(y.distanceFromUser));
+                // Sort the fuel stations by distance from the user
+                listOfChargers.Sort((x, y) => x.distanceFromUser.CompareTo(y.distanceFromUser));
 
-            if(listOfChargers.Count > 100)
-            {               
-                // Set the binding context for the frontend
-                fuelStationsListView.ItemsSource = listOfChargers.Take(100);
+                if (listOfChargers.Count > 100)
+                {
+                    // Set the binding context for the frontend
+                    fuelStationsListView.ItemsSource = listOfChargers.Take(100);
+                }
+                else
+                {
+                    // Set the binding context for the frontend
+                    fuelStationsListView.ItemsSource = listOfChargers;
+                }
             }
-            else
+            catch(Exception ex)
             {
-                // Set the binding context for the frontend
-                fuelStationsListView.ItemsSource = listOfChargers;
-            }          
+                
+            }
+         
         }
 
         /// <summary>
