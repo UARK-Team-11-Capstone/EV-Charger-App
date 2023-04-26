@@ -5,7 +5,6 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
-using Debug = System.Diagnostics.Debug;
 
 
 namespace EV_Charger_App.Services
@@ -126,7 +125,6 @@ namespace EV_Charger_App.Services
                 using (MySqlCommand command = new MySqlCommand(query, connection))
                 {
                     command.Parameters.AddRange(parameters.ToArray());
-                    Debug.WriteLine("Inserting Record: " + command.CommandText);
                     command.ExecuteNonQuery();
                 }
 
@@ -236,7 +234,6 @@ namespace EV_Charger_App.Services
 
             }
 
-            Debug.WriteLine("[GetQueryRecords] Num of Records Found: " + results.Count);
             return results;
         }
 
@@ -313,8 +310,6 @@ namespace EV_Charger_App.Services
 
             }
 
-            Debug.WriteLine("Google API Key: " + key);
-
             return key;
         }
 
@@ -340,8 +335,6 @@ namespace EV_Charger_App.Services
                 Disconnect();
 
             }
-
-            Debug.WriteLine("DOE API Key: " + key);
 
             return key;
         }
@@ -389,7 +382,6 @@ namespace EV_Charger_App.Services
             }
 
             float avg = (float)sum / count;
-            Debug.WriteLine("[GetAccessibilityInfo] Average: " + avg);
 
             if (avg >= .75)
             {

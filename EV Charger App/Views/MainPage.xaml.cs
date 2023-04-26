@@ -27,7 +27,7 @@ namespace EV_Charger_App
 
         Xamarin.Forms.GoogleMaps.Map map;
 
-        DoEAPI doe;        
+        DoEAPI doe;
         GooglePlacesApi googlePlacesApi;
         List<Prediction> prediction;
         SearchBar lastChanged;
@@ -49,11 +49,11 @@ namespace EV_Charger_App
 
             NavigationPage.SetHasNavigationBar(this, true);
             NavigationPage.SetHasBackButton(this, false);
-            LoadMapAsync(39.5, -98.35);
+            _ = LoadMapAsync(39.5, -98.35);
 
-            #pragma warning disable CS0618 // Type or member is obsolete
+#pragma warning disable CS0618 // Type or member is obsolete
             map.CameraChanged += Map_CameraChangedAsync;
-            #pragma warning restore CS0618 // Type or member is obsolete
+#pragma warning restore CS0618 // Type or member is obsolete
 
             map.InfoWindowLongClicked += MapInfoWindowLongClicked;
             map.InfoWindowClicked += MapInfoWindowClicked;
@@ -65,7 +65,7 @@ namespace EV_Charger_App
 
             this.app = app;
             doe = new DoEAPI(app, app.database.GetDOEAPIKey());
-            mapPinHandler = new MapPinHandler(doe, this);           
+            mapPinHandler = new MapPinHandler(doe, this);
             googlePlacesApi = new GooglePlacesApi(app.database.GetGoogleAPIKey());
             prediction = new List<Prediction>();
             throttle = new FunctionThrottler(new TimeSpan(0, 0, 2));
@@ -75,21 +75,21 @@ namespace EV_Charger_App
             rechargeMileage = 50;
             maxRange = 200;
 
-            int chargerPercentage = app.session.getVehicleCharge();
-            
-            if(chargerPercentage == 0)
+            chargePercentage = app.session.getVehicleCharge();
+
+            if (chargePercentage == 0)
             {
                 BatteryIcon.Source = "Battery_Icon_0";
             }
-            else if(chargerPercentage > 0 && chargerPercentage <= 25)
+            else if (chargePercentage > 0 && chargePercentage <= 25)
             {
                 BatteryIcon.Source = "Battery_Icon_25";
             }
-            else if(chargerPercentage > 25 && chargerPercentage <= 50)
+            else if (chargePercentage > 25 && chargePercentage <= 50)
             {
                 BatteryIcon.Source = "Battery_Icon_50";
             }
-            else if(chargerPercentage > 50 && chargerPercentage <= 75)
+            else if (chargePercentage > 50 && chargePercentage <= 75)
             {
                 BatteryIcon.Source = "Battery_Icon_75";
             }
@@ -146,7 +146,8 @@ namespace EV_Charger_App
             else
             {
                 map.Polylines.Clear();
-                foreach(var pin in map.Pins.Where(x => x.Type == PinType.SavedPin).ToList()){
+                foreach (var pin in map.Pins.Where(x => x.Type == PinType.SavedPin).ToList())
+                {
                     RemovePin(pin, null);
                 }
             }
@@ -257,7 +258,7 @@ namespace EV_Charger_App
 
                 // Move the map to the selected place
                 Position position = new Position(selectedPlace.Latitude, selectedPlace.Longitude);
-                
+
                 CreatePin(locationName, position, DateTime.MinValue, "", PinType.SavedPin, null);
                 map.MoveToRegion(MapSpan.FromCenterAndRadius(position, Distance.FromMiles(1)));
 
@@ -285,7 +286,6 @@ namespace EV_Charger_App
         //-----------------------------------------------------------------------------------------------------------------------------
         private async void MapInfoWindowLongClicked(object sender, InfoWindowLongClickedEventArgs e)
         {
-            Debug.WriteLine(e.Pin.Label);
             await Navigation.PushAsync(new ChargerInfo(app, doe.GetChargerInfo(e.Pin.Label)));
         }
 
@@ -400,15 +400,14 @@ namespace EV_Charger_App
                     {
                         // Find the current location pin and adjust the location
                         var currLoc = map.Pins.FirstOrDefault(Pin => Pin.Label == "Current Location");
-                        if(currLoc.Label == "Current Location")
+                        if (currLoc.Label == "Current Location")
                         {
                             currLoc.Position = new Position(Convert.ToDouble(loc.Latitude), Convert.ToDouble(loc.Longitude));
-                            Debug.WriteLine(currLoc.Icon.AbsolutePath);
                         }
                         else
                         {
                             CreatePin("Current Location", new Position(Convert.ToDouble(previousLocation.Latitude), Convert.ToDouble(previousLocation.Longitude)), DateTime.MinValue, "", PinType.Generic, null);
-                        }                       
+                        }
                     }
                     // Set previousLocation to the current location
                     previousLocation = loc;
@@ -630,11 +629,11 @@ namespace EV_Charger_App
                     }
                 }
                 else
-                {                    
+                {
                     iconName = "Location-Dot.png";
                 }
 
-  
+
                 var pin = new Pin()
                 {
                     Tag = id,
@@ -791,8 +790,6 @@ namespace EV_Charger_App
                 List<FuelStation> finalRouteChargers = await GetChargingStationsAlongRouteAsync(positions, originAdd, destinationAdd);
                 List<Position> finalRoute = new List<Position>();
                 FuelStation prev = new FuelStation();
-
-                Debug.WriteLine("Chargers found along route, creating route...");
                 // Ensure that we have a valid list of chargers
                 if (finalRouteChargers != null)
                 {
@@ -823,7 +820,6 @@ namespace EV_Charger_App
                         // If we get a valid reponse add it to the list
                         if (response != null)
                         {
-                            Debug.WriteLine("Adding points to final route line ");
                             // Add the points to the finalRoute list
                             finalRoute.AddRange(DecodePolyline(response.Routes.First().OverviewPath.Points));
                         }
@@ -835,7 +831,6 @@ namespace EV_Charger_App
 
                             if (response != null)
                             {
-                                Debug.WriteLine("Adding adding final route");
                                 // Add the points to the finalRoute list
                                 finalRoute.AddRange(DecodePolyline(response.Routes.First().OverviewPath.Points));
                             }
@@ -947,7 +942,6 @@ namespace EV_Charger_App
                     pos.Add(positions.Last());
                 }
 
-                Debug.WriteLine("Calling to get chargers along route with position points: (" + pos.First().Latitude + ", " + pos.First().Longitude + ") " + "(" + pos.Last().Latitude + ", " + pos.Last().Longitude + ")");
                 // Using the position data get list of chargers along the route from DoE
                 Root chargersAlongRoute = await doe.getChargersAlongRouteAsync(pos, "2");
                 int numChargers = (int)distance / rechargeMileage;
@@ -961,7 +955,6 @@ namespace EV_Charger_App
                         // If we have enough chargers, break
                         if (finalRouteChargers.Count >= numChargers)
                         {
-                            Debug.WriteLine("Reached number of chargers needed");
                             break;
                         }
 
@@ -973,7 +966,6 @@ namespace EV_Charger_App
                             double dist = Location.CalculateDistance(originLocationLoc, new Location(charger.latitude, charger.longitude), DistanceUnits.Miles);
                             if (dist >= rechargeMileage)
                             {
-                                Debug.WriteLine("Added first charger to final route charging");
                                 finalRouteChargers.Add(charger);
                             }
                             // If the distance from the last charger added to the destination is greater than recharge distance, find the next charger
@@ -984,12 +976,10 @@ namespace EV_Charger_App
                             double dist = Location.CalculateDistance(new Location(finalRouteChargers.Last().latitude, finalRouteChargers.Last().longitude), new Location(charger.latitude, charger.longitude), DistanceUnits.Miles);
                             if (dist >= rechargeMileage)
                             {
-                                Debug.WriteLine("Added middle charger to final route charging");
                                 finalRouteChargers.Add(charger);
                             }
                         }
                     }
-                    Debug.WriteLine("Num chargers on Route: " + finalRouteChargers.Count);
                     return finalRouteChargers;
                 }
                 else

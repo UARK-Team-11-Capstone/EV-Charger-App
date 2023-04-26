@@ -6,7 +6,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Xamarin.Forms;
 using Xamarin.Forms.GoogleMaps;
 using Location = Xamarin.Essentials.Location;
 
@@ -68,8 +67,6 @@ namespace EV_Charger_App.Services
             string rating = app.database.GetChargerRating(chargerName) + "";
             string accessible = app.database.GetAccessibilityInfo(chargerName);
 
-            Debug.WriteLine("[GetChargerInfo] Accessible? : " + accessible);
-
             return new string[6] { chargerName, address, updatedAt, available, rating, accessible };
         }
 
@@ -85,10 +82,6 @@ namespace EV_Charger_App.Services
                 {
                     string jsonContent = await response.Content.ReadAsStringAsync();
                     ProcessResponse(jsonContent, callDefault);
-                }
-                else
-                {
-                    Debug.WriteLine("Error from DoE: " + response.StatusCode);
                 }
             }
             catch (HttpRequestException ex)
@@ -167,7 +160,6 @@ namespace EV_Charger_App.Services
                     // If getting chargers for a route add to chargersAlongRoute list
                     if (callType == callNearestRoute)
                     {
-                        Debug.WriteLine("Chargers along route being processed...");
                         if (chargersAlongRoute.fuel_stations == null)
                         {
                             chargersAlongRoute.fuel_stations = new List<FuelStation>(result.fuel_stations);
@@ -336,7 +328,6 @@ namespace EV_Charger_App.Services
                     return station;
                 }
             }
-            Debug.WriteLine("Could not find station");
             return new FuelStation();
         }
     }

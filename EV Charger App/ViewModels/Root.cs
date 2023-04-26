@@ -83,7 +83,7 @@ namespace EV_Charger_App.ViewModels
         public ColorStatus colorStatus { get; set; }
         public Position position { get; set; }
         public Xamarin.Essentials.Location location { get; set; }
-        
+
         /// <summary>
         /// ToString for FuelStation
         /// </summary>

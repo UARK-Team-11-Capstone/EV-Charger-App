@@ -19,8 +19,8 @@ namespace EV_Charger_App.Services
 
         FuelStationEqualityComparer fuelStationEqualityComparer;
         PinEqualityComparer pinEqualityComparer;
-        List<Cluster> CLUSTER_LIST;        
-        Dictionary<FuelStation, (Pin, Cluster)> CHARGER_PIN_CLUSTER_DICTIONARY;        
+        List<Cluster> CLUSTER_LIST;
+        Dictionary<FuelStation, (Pin, Cluster)> CHARGER_PIN_CLUSTER_DICTIONARY;
 
         public MapPinHandler(DoEAPI doe, MainPage main)
         {
@@ -30,9 +30,9 @@ namespace EV_Charger_App.Services
             clusteringThreshold = 2;
             clusterDistance = 50;
             CHARGER_PIN_CLUSTER_DICTIONARY = new Dictionary<FuelStation, (Pin, Cluster)>();
-            CLUSTER_LIST = new List<Cluster>();          
+            CLUSTER_LIST = new List<Cluster>();
             pinEqualityComparer = new PinEqualityComparer();
-            fuelStationEqualityComparer = new FuelStationEqualityComparer();            
+            fuelStationEqualityComparer = new FuelStationEqualityComparer();
         }
 
         /// <summary>
@@ -45,7 +45,7 @@ namespace EV_Charger_App.Services
         {
             try
             {
-                if (radius > 500) { return; }
+                if (radius > 1000) { return; }
                 // Call the DoE to get chargers at the current location and given radius                
                 await doe.getNearestCharger(loc.Latitude, loc.Longitude, radius);
 
@@ -59,13 +59,11 @@ namespace EV_Charger_App.Services
                 // Cluster
                 if (radius > clusterDistance)
                 {
-                    //Debug.WriteLine("Determining which chargers to cluster...");
                     // Grab all the chargers that are not clustered
                     var chargersToCluster = CHARGER_PIN_CLUSTER_DICTIONARY.Where(x => x.Value.Item2 == null).Select(x => x.Key).ToList();
                     var chargersToRemove = CHARGER_PIN_CLUSTER_DICTIONARY.Where(x => x.Value.Item1 != null && x.Value.Item2 == null).Select(x => x.Key).ToList();
                     await ClusterChargers(chargersToCluster);
 
-                    // Debug.WriteLine("Attempting to remove charger pins from map");
                     if (chargersToRemove != null)
                     {
                         // Attempt to remove charger pins based on BindingContext
@@ -75,7 +73,6 @@ namespace EV_Charger_App.Services
                         }
                     }
 
-                    //Debug.WriteLine("Attempting to add cluster pins to map | " + CLUSTER_LIST.Count + " clusters");
                     foreach (var cluster in CLUSTER_LIST)
                     {
                         // If there is no pin associated with the cluster
@@ -226,8 +223,6 @@ namespace EV_Charger_App.Services
             {
                 return false;
             }
-
-            Debug.WriteLine($"Pin Comparison: {x.Label} == {y.Label} | {x.Position.Latitude} == {y.Position.Latitude} | {x.Position.Longitude} == {y.Position.Longitude} | {x.Tag} == {y.Tag}");
 
             return x.Label == y.Label
                 && x.Position.Latitude == y.Position.Latitude

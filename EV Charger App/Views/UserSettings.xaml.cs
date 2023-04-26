@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
-using static Android.Media.Session.MediaSession;
 
 namespace EV_Charger_App.Views
 {
@@ -14,7 +13,7 @@ namespace EV_Charger_App.Views
         App app;
         DoEAPI doe;
         MainPage mp;
-       
+
         public UserSettings(App app, MainPage mp, DoEAPI doe)
         {
             InitializeComponent();
@@ -47,7 +46,7 @@ namespace EV_Charger_App.Views
                 app.database.UpdateRecord("Users", new string[2] { "name", "vehicle" }, new string[2] { fullName, vehicleType }, "sessionToken", token);
             }
 
-                app.session.setVehicleCharge((int)ChargeSlider.Value);
+            app.session.setVehicleCharge((int)ChargeSlider.Value);
             await Navigation.PushAsync(new MainPage(app));
         }
 

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
-using Debug = System.Diagnostics.Debug;
 
 namespace EV_Charger_App.Views
 {
@@ -34,16 +33,13 @@ namespace EV_Charger_App.Views
         public ChargerInfo(App app, string[] chargerInfo)
         {
             InitializeComponent();
-            Debug.WriteLine("[ChargerInfo] Creating charger info page");
             this.app = app;
 
             chargerName = chargerInfo[0];
             address = chargerInfo[1];
             updated = chargerInfo[2];
             availability = chargerInfo[3];
-            Debug.WriteLine("[ChargerInfo] chargerInfo[4] : " + chargerInfo[4]);
             rating = (int)Math.Round(float.Parse(chargerInfo[4]));
-            Debug.WriteLine("[ChargerInfo] chargerInfo[5] : " + chargerInfo[5]);
 
             accessible = chargerInfo[5];
 
@@ -258,7 +254,6 @@ namespace EV_Charger_App.Views
 
         void PopulateReviews()
         {
-            Debug.WriteLine("Populating Reviews");
             List<object[]> reviews = app.database.GetQueryRecords("SELECT * FROM Reviews WHERE chargerName = '" + chargerName + "'");
 
             foreach (object[] review in reviews)
@@ -273,10 +268,6 @@ namespace EV_Charger_App.Views
                 int ratingValue = Int32.Parse(rating);
 
                 individualstarImage = setStarImage(smallStars, ratingValue);
-
-
-                Debug.WriteLine(email + " " + rating + comment);
-
 
                 //Review Labels
                 var emailLabel = new Label
