@@ -41,6 +41,7 @@ namespace EV_Charger_App
         private int maxRange;
         private double chargePercentage;
         private int rechargeMileage;
+        private bool routeVisible;
 
         public MainPage(App app)
         {
@@ -69,6 +70,7 @@ namespace EV_Charger_App
             prediction = new List<Prediction>();
             throttle = new FunctionThrottler(new TimeSpan(0, 0, 2));
             overrideLoading = false;
+            routeVisible = false;
 
             rechargeMileage = 50;
             maxRange = 200;
@@ -126,17 +128,27 @@ namespace EV_Charger_App
         //-----------------------------------------------------------------------------------------------------------------------------
         private async void OnButtonClicked(object sender, EventArgs e)
         {
-            secondSearchBar.IsVisible = true;
-            searchBar.Placeholder = "Starting Point";
-
-            // Make sure addresses are valid
-            var search1 = await Task.Run(() => googlePlacesApi.GetLocationAsync(searchBar.Text).Result);
-            var search2 = await Task.Run(() => googlePlacesApi.GetLocationAsync(secondSearchBar.Text).Result);
-
-            // If the return address is valid then get a route
-            if (search1 != null && search2 != null)
+            if (routeVisible == false)
             {
-                GetRoute(searchBar.Text, secondSearchBar.Text);
+                secondSearchBar.IsVisible = true;
+                searchBar.Placeholder = "Starting Point";
+
+                // Make sure addresses are valid
+                var search1 = await Task.Run(() => googlePlacesApi.GetLocationAsync(searchBar.Text).Result);
+                var search2 = await Task.Run(() => googlePlacesApi.GetLocationAsync(secondSearchBar.Text).Result);
+
+                // If the return address is valid then get a route
+                if (search1 != null && search2 != null)
+                {
+                    GetRoute(searchBar.Text, secondSearchBar.Text);
+                }
+            }
+            else
+            {
+                map.Polylines.Clear();
+                foreach(var pin in map.Pins.Where(x => x.Type == PinType.SavedPin).ToList()){
+                    RemovePin(pin, null);
+                }
             }
         }
 
@@ -493,11 +505,23 @@ namespace EV_Charger_App
         {
             try
             {
-                var pinToRemove = map.Pins.FirstOrDefault(p => pinEqualityComparer.Equals(p, pin));
-                if (pinToRemove != null)
+                if (pinEqualityComparer != null)
                 {
-                    bool result = map.Pins.Remove(pinToRemove);
-                    return result;
+                    var pinToRemove = map.Pins.FirstOrDefault(p => pinEqualityComparer.Equals(p, pin));
+                    if (pinToRemove != null)
+                    {
+                        bool result = map.Pins.Remove(pinToRemove);
+                        return result;
+                    }
+                }
+                else
+                {
+                    var pinToRemove = map.Pins.FirstOrDefault(p => p == pin);
+                    if (pinToRemove != null)
+                    {
+                        bool result = map.Pins.Remove(pinToRemove);
+                        return result;
+                    }
                 }
             }
             catch (Exception ex)
@@ -775,6 +799,7 @@ namespace EV_Charger_App
                     // We need to make API calls between the origin, chargers, and destination and combine the point data
                     foreach (var charger in finalRouteChargers)
                     {
+                        CreatePin(charger, null);
                         string chargerStringAdd = charger.street_address + ", " + charger.city + ", " + charger.state + "," + charger.zip;
                         Address chargerAddress = new Address(chargerStringAdd);
                         LocationEx chargerLocationEx = new LocationEx(chargerAddress);
@@ -840,6 +865,8 @@ namespace EV_Charger_App
                     map.Polylines.Add(polyline);
 
                     map.MoveToRegion(MapSpan.FromPositions(finalRoute));
+
+                    routeVisible = true;
                 }
             }
             else
@@ -862,6 +889,7 @@ namespace EV_Charger_App
                 map.Polylines.Add(polyline);
 
                 map.MoveToRegion(MapSpan.FromPositions(positions));
+                routeVisible = true;
             }
         }
 
@@ -921,7 +949,7 @@ namespace EV_Charger_App
 
                 Debug.WriteLine("Calling to get chargers along route with position points: (" + pos.First().Latitude + ", " + pos.First().Longitude + ") " + "(" + pos.Last().Latitude + ", " + pos.Last().Longitude + ")");
                 // Using the position data get list of chargers along the route from DoE
-                Root chargersAlongRoute = doe.getChargersAlongRoute(pos, "2");
+                Root chargersAlongRoute = await doe.getChargersAlongRouteAsync(pos, "2");
                 int numChargers = (int)distance / rechargeMileage;
 
                 List<FuelStation> finalRouteChargers = new List<FuelStation>();

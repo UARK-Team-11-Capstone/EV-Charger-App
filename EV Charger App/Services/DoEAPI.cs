@@ -262,7 +262,7 @@ namespace EV_Charger_App.Services
         /// <param name="lineStringPOS"></param>
         /// <param name="distance"></param>
         /// <returns></returns>
-        public Root getChargersAlongRoute(List<Position> lineStringPOS, string distance)
+        public async Task<Root> getChargersAlongRouteAsync(List<Position> lineStringPOS, string distance)
         {
             // Given a list of locations create a request for the DOE
             int count = 0;
@@ -290,7 +290,7 @@ namespace EV_Charger_App.Services
             string param = "&distance=2" + "&route=" + lineStringGET + fuel_type + status_code + ev_connector_type + access + limit;
 
             // Collect response
-            _ = PostHTTPRequestAsync(callNearestRoute, lineStringPOST, param, "2.0");
+            await PostHTTPRequestAsync(callNearestRoute, lineStringPOST, param, "2.0");
             return chargersAlongRoute;
         }
 
