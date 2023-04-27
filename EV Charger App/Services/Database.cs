@@ -1,4 +1,4 @@
-﻿using MySqlConnector;
+using MySqlConnector;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
