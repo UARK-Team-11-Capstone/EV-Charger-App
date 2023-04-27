@@ -141,6 +141,7 @@ namespace EV_Charger_App
                 if (search1 != null && search2 != null)
                 {
                     GetRoute(searchBar.Text, secondSearchBar.Text);
+                    searchResultsListView.IsVisible = false;
                 }
             }
             else
@@ -150,6 +151,9 @@ namespace EV_Charger_App
                 {
                     RemovePin(pin, null);
                 }
+                secondSearchBar.Text = string.Empty;
+                searchBar.Text = string.Empty;
+                routeVisible = false;
             }
         }
 
@@ -286,7 +290,14 @@ namespace EV_Charger_App
         //-----------------------------------------------------------------------------------------------------------------------------
         private async void MapInfoWindowLongClicked(object sender, InfoWindowLongClickedEventArgs e)
         {
-            await Navigation.PushAsync(new ChargerInfo(app, doe.GetChargerInfo(e.Pin.Label)));
+            if (e.Pin.Type == PinType.Place)
+            {
+                await Navigation.PushAsync(new ChargerInfo(app, doe.GetChargerInfo(e.Pin.Label)));
+            }
+            else
+            {
+                return;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------
@@ -298,7 +309,14 @@ namespace EV_Charger_App
         //-----------------------------------------------------------------------------------------------------------------------------
         private async void MapInfoWindowClicked(object sender, InfoWindowClickedEventArgs e)
         {
-            await Navigation.PushAsync(new ChargerInfo(app, doe.GetChargerInfo(e.Pin.Label)));
+            if (e.Pin.Type == PinType.Place)
+            {
+                await Navigation.PushAsync(new ChargerInfo(app, doe.GetChargerInfo(e.Pin.Label)));
+            }
+            else
+            {
+                return;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------
