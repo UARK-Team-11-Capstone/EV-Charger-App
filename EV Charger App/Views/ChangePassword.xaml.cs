@@ -3,7 +3,6 @@ using System;
 
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
-using Debug = System.Diagnostics.Debug;
 
 
 namespace EV_Charger_App.Views
@@ -29,19 +28,13 @@ namespace EV_Charger_App.Views
             //Check if current password is correct
             if (VerifyCurrentPassword(currentPass, token))
             {
-                Debug.WriteLine("PASSWORD VERIFIED");
-
-                //Removing error message if one exist
                 ErrorText.Opacity = 0.0;
 
                 //Check is new passwords match
                 if (newPassword1.Text == newPassword2.Text)
                 {
-                    Debug.WriteLine("NEW PASSWORDS MATCH");
-
                     //Update database with new password
                     string hashedPassword = app.database.HashPassword(newPassword1.Text);
-
 
                     app.database.UpdateRecord("Users", new string[1] { "password" }, new string[1] { hashedPassword }, "sessionToken", token);
 
@@ -50,7 +43,6 @@ namespace EV_Charger_App.Views
 
                     await DisplayAlert("", "Your password has been updated.", "OK");
 
-                    Debug.WriteLine("UPDATED DATABASE PASSWORD");
                     await Navigation.PushAsync(new LoginPage(app));
 
                 }
@@ -74,9 +66,6 @@ namespace EV_Charger_App.Views
         public bool VerifyCurrentPassword(string currentPassword, string token)
         {
             string hashedPassword = app.database.HashPassword(currentPassword);
-
-            Debug.WriteLine("Token: " + token);
-            Debug.WriteLine("Hashed Password: " + hashedPassword);
 
             string query = "SELECT * FROM Users WHERE password = @password AND sessionToken = @token";
 

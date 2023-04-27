@@ -4,7 +4,6 @@ using System.Collections.Generic;
 
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
-using Debug = System.Diagnostics.Debug;
 
 
 namespace EV_Charger_App.Views
@@ -67,7 +66,6 @@ namespace EV_Charger_App.Views
             }
             catch (NullReferenceException exception)
             {
-                Debug.WriteLine(exception.Message);
                 await DisplayAlert("Error", "Your review could not be processed. Try again later.", "OK");
 
                 await Navigation.PushAsync(new MainPage(app));
@@ -96,15 +94,11 @@ namespace EV_Charger_App.Views
 
             string token = app.session.getToken();
 
-            Debug.WriteLine("Client Side User Token: " + token);
-
             string query = "SELECT * FROM Users WHERE sessionToken = '" + token + "'";
 
             List<Object[]> data = app.database.GetQueryRecords(query);
 
             email = data[0][0].ToString();
-
-            Debug.WriteLine("Returning Email: " + email);
 
             return email;
         }

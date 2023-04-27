@@ -1,5 +1,4 @@
-﻿using Android.OS;
-using EV_Charger_App.Services;
+﻿using EV_Charger_App.Services;
 using EV_Charger_App.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -18,7 +17,7 @@ namespace EV_Charger_App.Views
         DoEAPI doe;
         App app;
         MainPage main;
-        
+
         public ChargerListPage(App app, DoEAPI doe, MainPage main)
         {
             InitializeComponent();
@@ -26,7 +25,7 @@ namespace EV_Charger_App.Views
             this.app = app;
             this.main = main;
             listOfChargers = new List<FuelStation>(doe.CHARGER_LIST.fuel_stations);
-            
+
             try
             {
                 // Get distance of each charger from the user
@@ -49,11 +48,11 @@ namespace EV_Charger_App.Views
                     fuelStationsListView.ItemsSource = listOfChargers;
                 }
             }
-            catch(Exception)
+            catch (Exception)
             {
-                
+
             }
-         
+
         }
 
         /// <summary>
