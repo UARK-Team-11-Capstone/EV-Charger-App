@@ -64,7 +64,7 @@ namespace EV_Charger_App.Views
                     app.database.InsertRecord("Reviews", new string[6] { chargerName, email, rating.ToString(), comment, currentDate, a.ToString() });
                 }
             }
-            catch (NullReferenceException exception)
+            catch (NullReferenceException)
             {
                 await DisplayAlert("Error", "Your review could not be processed. Try again later.", "OK");
 
