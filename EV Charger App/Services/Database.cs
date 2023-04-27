@@ -5,20 +5,34 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.IO;
+using Newtonsoft.Json.Linq;
 using Debug = System.Diagnostics.Debug;
-
 
 namespace EV_Charger_App.Services
 {
     public class Database
     {
+        private JObject dbCredentials;
+
         // Login information
-        private readonly string endpoint = "database-1.c2crdg7hfqi3.us-east-1.rds.amazonaws.com";
-        private readonly string databaseName = "Login1";
-        private readonly string username = "admin";
-        private readonly string password = "capstone11";
+        private string endpoint => (string)dbCredentials["endpoint"];
+        private string databaseName => (string)dbCredentials["databaseName"];
+        private string username => (string)dbCredentials["username"];
+        private string password => (string)dbCredentials["password"];
 
         private MySqlConnection connection;
+
+        public Database()
+        {
+            // Use the asset manager to open the file
+            using (var stream = Android.App.Application.Context.Assets.Open("db_credentials.json"))
+            using (var reader = new StreamReader(stream))
+            {
+                var jsonContent = reader.ReadToEnd();
+                dbCredentials = JObject.Parse(jsonContent);
+            }
+        }
 
         public bool Connect()
         {
